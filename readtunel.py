@@ -38,7 +38,7 @@ def null_space(A, eps=1e-15):
     return null_space[0]
 
 # projection distance of two discs
-def proj_dist(d1, d2):
+def disk_dist(d1, d2):
     if (d1.normal == d2.normal).all():
         return np.linalg.norm(d1.center - d2.center)
     else:
@@ -85,16 +85,6 @@ def proj_dist(d1, d2):
 
 
 
-
-
-d1 = Disk(np.array([0,0,0]), np.array([1,0,0]), 1)
-d2 = Disk(np.array([1,0,0]), np.array([1,1,0]), 1)
-
-print proj_dist(d1, d2)
-
-
-vectors = []
-
 # draw tunnel
 for i, s in enumerate(tunnel):
   sVis = vs.sphere(pos = (s[0], s[1], s[2]), radius = s[3], opacity=0.3)
@@ -105,6 +95,7 @@ for i, s in enumerate(tunnel):
                     axis=(s2[0]-s[0], s2[1]-s[1], s2[2]-s[2]), 
                     color=(1,0,0), shaftwidth=1)
 delta = 0.1
+eps   = delta / 10
 disks = []
 centers = [np.array([s[0], s[1], s[2]]) for s in tunnel]
 normals = [normalize(centers[i + 1] - centers[i]) for i in xrange(len(centers) - 1)]
@@ -120,9 +111,9 @@ for i, s in enumerate(tunnel):
     normal = normals[i]   
     centers_dist = np.linalg.norm(next_center - center)
 
-    step = 0;
-    while step * delta < centers_dist:
-        size = step * delta
+    size = 0;
+    while size < centers_dist:
+        print "size: {}".format(size)
         disk_center = normal * size + center
 
         w1 = 1 - size / centers_dist 
@@ -131,14 +122,18 @@ for i, s in enumerate(tunnel):
         r = r1 * w1 + r2 * w2
         # print "w1 = {}, w2 = {}".format(w1, w2)
         # print "r1 = {}, r2 = {}, r = {}".format(r1, r2, r)
-        disks.append(Disk(disk_center, normal * w1 + normals[i + 1] * w2, r))
+        new_disk = Disk(disk_center, normal * w1 + normals[i + 1] * w2, r)
 
-        step += 1
+        if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < delta):
+            disks[-1] = new_disk
+        else:
+            disks.append(new_disk)
+        size += eps
 
 # draw disks
 for i, disk in enumerate(disks):
     if (i != 0):
-        print "Disk distance: {}".format(proj_dist(disks[i-1], disk))
+        print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
     vs.ring(pos=disk.center, 
             axis=disk.normal, 
             radius=disk.radius, 
