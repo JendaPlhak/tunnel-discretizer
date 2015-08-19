@@ -147,5 +147,6 @@ for i, s in enumerate(tunnel):
 # infile.close()
 
 disks_structured = [disk.to_dict() for disk in disks]
-print json.dumps(disks_structured)
+print json.dumps(disks_structured, sort_keys=True,
+                    indent=4, separators=(',', ': '))
 
