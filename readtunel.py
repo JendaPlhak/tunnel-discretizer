@@ -2,6 +2,7 @@
 
 import visual as vs
 import numpy as np
+import json
 
 infile = file("tunnel.pdb")
 
@@ -25,6 +26,11 @@ class Disk:
         self.center = center
         self.normal = normal
         self.radius = radius
+    def to_dict(self):
+        packer  = lambda c : tuple([c[0], c[1], c[2]])
+        return {"center" : packer(self.center), 
+                "normal" : packer(self.normal), 
+                "radius" : self.radius}
 
 def normalize(v):
     norm = np.linalg.norm(v)
@@ -86,14 +92,14 @@ def disk_dist(d1, d2):
 
 
 # draw tunnel
-for i, s in enumerate(tunnel):
-  sVis = vs.sphere(pos = (s[0], s[1], s[2]), radius = s[3], opacity=0.3)
-  # central line
-  if (i < len(tunnel)-1):
-    s2 = tunnel[i+1]
-    vVis = vs.arrow(pos=(s[0], s[1], s[2]), 
-                    axis=(s2[0]-s[0], s2[1]-s[1], s2[2]-s[2]), 
-                    color=(1,0,0), shaftwidth=1)
+# for i, s in enumerate(tunnel):
+#   sVis = vs.sphere(pos = (s[0], s[1], s[2]), radius = s[3], opacity=0.3)
+#   # central line
+#   if (i < len(tunnel)-1):
+#     s2 = tunnel[i+1]
+#     vVis = vs.arrow(pos=(s[0], s[1], s[2]), 
+#                     axis=(s2[0]-s[0], s2[1]-s[1], s2[2]-s[2]), 
+#                     color=(1,0,0), shaftwidth=1)
 delta = 0.1
 eps   = delta / 10
 disks = []
@@ -113,7 +119,7 @@ for i, s in enumerate(tunnel):
 
     size = 0;
     while size < centers_dist:
-        print "size: {}".format(size)
+        # print "size: {}".format(size)
         disk_center = normal * size + center
 
         w1 = 1 - size / centers_dist 
@@ -131,17 +137,15 @@ for i, s in enumerate(tunnel):
         size += eps
 
 # draw disks
-for i, disk in enumerate(disks):
-    if (i != 0):
-        print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
-    vs.ring(pos=disk.center, 
-            axis=disk.normal, 
-            radius=disk.radius, 
-            thickness=0.1)
+# for i, disk in enumerate(disks):
+#     if (i != 0):
+#         print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
+#     vs.ring(pos=disk.center, 
+#             axis=disk.normal, 
+#             radius=disk.radius, 
+#             thickness=0.1)
+# infile.close()
 
-
-
-
-infile.close()
-
+disks_structured = [disk.to_dict() for disk in disks]
+print json.dumps(disks_structured)
 
