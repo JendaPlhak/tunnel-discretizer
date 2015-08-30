@@ -221,11 +221,9 @@ def shift_new_disk(new_disk, prev_disk):
     # print prev_dir, v1
     # print prev_dir, v2
     # Determine whether both segment vertices lie in the same half-plane.
-    # TODO this is probably wrong
-    if np.dot(prev_dir, v1) * np.dot(prev_dir, v2) > 0.:
+    if np.dot(prev_disk.normal, v1) >= 0 and np.dot(prev_disk.normal, v2) >= 0.:
         # if so, return since no shifting is necessary.
         return new_disk
-
 
     # print prev_dir, v1, prev_dir, prev_disk.normal
     # print np.dot(prev_dir, v1) * np.dot(prev_dir, prev_disk.normal)
