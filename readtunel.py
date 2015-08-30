@@ -16,6 +16,11 @@ class Disk:
         return {"center" : packer(self.center), 
                 "normal" : packer(self.normal), 
                 "radius" : self.radius}
+    def plot(self):
+        vs.ring(pos=self.center, 
+                axis=self.normal, 
+                radius=self.radius, 
+                thickness=0.01)
 
 class Sphere:
     def __init__(self, center, radius):
@@ -62,20 +67,29 @@ def null_space(A, eps=1e-15):
     null_space = np.compress(s <= eps, vh, axis=0)
     return null_space[0]
 
+# For two disks calculate vector that realizes radius of segment that emerges by 
+# projecting disk into the plain determined by normals of disks d1 and d2.
+def get_radius_vectors(d1, d2):
+    # Get normal vector of plain given by normal vectors of disks.
+    normal = null_space(np.array([d1.normal, d2.normal, null_vec]))
+    # print "Normal:\n{}".format(normal)
+    # Calculate directions of segments created by projection to the plain.
+    seg_dir1 = null_space(np.array([d1.normal, normal, null_vec]))
+    seg_dir2 = null_space(np.array([d2.normal, normal, null_vec]))
+    # Get radius vector
+    seg_dir1 = normalize(seg_dir1) * d1.radius
+    seg_dir2 = normalize(seg_dir2) * d2.radius
+
+    return seg_dir1, seg_dir2
+
+
 # projection distance of two discs
 def disk_dist(d1, d2):
     if (d1.normal == d2.normal).all():
         return np.linalg.norm(d1.center - d2.center)
     else:
-        # Get normal vector of plain given by normal vectors of disks.
-        normal = null_space(np.array([d1.normal, d2.normal, null_vec]))
-        # print "Normal:\n{}".format(normal)
-        # Calculate directions of segments created by projection to the plain.
-        seg_dir1 = null_space(np.array([d1.normal, normal, null_vec]))
-        seg_dir2 = null_space(np.array([d2.normal, normal, null_vec]))
-        # Get radius vector
-        seg_dir1 = normalize(seg_dir1) * d1.radius
-        seg_dir2 = normalize(seg_dir2) * d2.radius
+        # get radius vectors
+        seg_dir1, seg_dir2 = get_radius_vectors(d1, d2)
         # print "Radius vector 1:\n{}".format(seg_dir1)
         # print "Radius vector 2:\n{}".format(seg_dir2)
 
@@ -159,9 +173,103 @@ def get_radius(normal, center, tunnel):
         raise ValueError("Disk not contained in any of the spheres")
     return r
 
+# return true if point1 and point2 are in the same half-plane based on plane
+# normal and line_point 
+def in_same_half_plane(normal, line_point, point1, point2):
+    v1 = point1 - line_point
+    v2 = point2 - line_point
+    return np.dot(normal, v1) * np.dot(normal, v2) >= 0
+
+# Calculate vector u, that lies in plane given by v and n, is perpendicular to
+# vector v and u, n have the same orientation. Also we require that u is 
+# normalized.
+def normal_in_plane(n, v):
+    # print "n: {} v: {}".format(n, v)
+    assert np.dot(v, v) != 0
+    k = 1
+    l = - np.dot(n, v) / np.dot(v, v)
+    u = normalize(k * n + l * v)
+    assert np.dot(u, v) < 0.00001
+    return u
+
+# For two given points and vector determining plain, calculate disk, that is 
+# perpendicular to that plain, and its vertices are point1 and point2
+def get_new_disk_points(point1, point2, n, radius):
+    center = (point1 + point2) / 2.
+    # print "Point 1: {}, Point 2: {}".format(point1, point2)
+    # print "New center: {}".format(center)
+    normal = normal_in_plane(n, point2 - point1)
+    # print "New normal: {}".format(normal)
+    return Disk(center, normal, radius)
+
+def shift_new_disk(new_disk, prev_disk):
+    new_dir, prev_dir = get_radius_vectors(new_disk, prev_disk)
+    # Get proj. disk vertices
+    new_vert_1 = new_disk.center + new_dir
+    new_vert_2 = new_disk.center - new_dir
+    # print new_vert_1, new_vert_2
+
+    prev_vert_1 = prev_disk.center + prev_dir
+    prev_vert_2 = prev_disk.center - prev_dir
+
+    v1 = new_vert_1 - prev_disk.center 
+    v2 = new_vert_2 - prev_disk.center 
+
+    # print prev_dir, v1
+    # print prev_dir, v2
+    # Determine whether both segment vertices lie in the same half-plane.
+    if np.dot(prev_dir, v1) * np.dot(prev_dir, v2) > 0.:
+        # if so, return since no shifting is necessary.
+        # print "Its ok!"
+        return new_disk
+
+
+    # print prev_dir, v1, prev_dir, prev_disk.normal
+    # print np.dot(prev_dir, v1) * np.dot(prev_dir, prev_disk.normal)
+
+    # print prev_dir, v2, prev_dir, prev_disk.normal
+    # print np.dot(prev_dir, v2) * np.dot(prev_dir, prev_disk.normal)
+
+
+    # Which vertex is in the wrong half plane
+    if np.dot(prev_disk.normal, v1) < 0.:
+        # print "First one!"
+        if in_same_half_plane(prev_dir, prev_disk.center, \
+                                new_vert_1, prev_vert_1):
+            return get_new_disk_points(prev_vert_1, new_vert_2, new_disk.normal, new_disk.radius)
+        else:
+            return get_new_disk_points(prev_vert_2, new_vert_2, new_disk.normal, new_disk.radius)
+
+    elif np.dot(prev_disk.normal, v2) < 0.:
+        # print "Second one!"
+        # print new_vert_2, prev_vert_1
+        if in_same_half_plane(prev_dir, prev_disk.center, \
+                                new_vert_2, prev_vert_1):
+            # print "New_vert 2 and prev_vert 1 are in the same half-plane"
+            return get_new_disk_points(prev_vert_1, new_vert_1, new_disk.normal, new_disk.radius)
+        else:
+            # print "New_vert 2 and prev_vert 2 are in the same half-plane"
+            return get_new_disk_points(prev_vert_2, new_vert_1, new_disk.normal, new_disk.radius)
+
+    assert np.dot(prev_disk.normal, v1) > 0. and np.dot(prev_disk.normal, v2) > 0.
+    return new_disk
+
+d1 = Disk(np.array([0,0,0]), np.array([1,0,0]), 1)
+d2 = Disk(np.array([0,0,0]), normalize(np.array([1,1,0])), 1)
+
+
+# new_d = shift_new_disk(d2, d1)
+# for disk in [d1, d2]:
+#     disk.plot()
+# vs.ring(pos=new_d.center, 
+#             axis=new_d.normal, 
+#             radius=new_d.radius, 
+#             color=vs.color.red,
+#             thickness=0.01)
 
 
 
+# sys.exit()
 # draw tunnel
 for i, s in enumerate(tunnel):
   sVis = vs.sphere(pos = (s.center[0], s.center[1], s.center[2]), radius = s.radius, opacity=0.3)
@@ -203,6 +311,8 @@ for i, s in enumerate(tunnel):
         # print "r1 = {}, r2 = {}, r = {}".format(r1, r2, r)
         new_disk = Disk(disk_center, new_normal, r)
 
+        if (len(disks) > 0):
+            new_disk = shift_new_disk(new_disk, disks[-1])
         if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < delta):
             disks[-1] = new_disk
         else:
@@ -210,7 +320,7 @@ for i, s in enumerate(tunnel):
         size += eps
 
 # draw disks
-for i, disk in enumerate(disks):
+for i, disk in enumerate(disks[20:40]):
     if (i != 0):
         print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
     vs.ring(pos=disk.center, 
