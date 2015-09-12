@@ -1,60 +1,25 @@
 #!/usr/bin/env python
 
+"""Tunnel generator.
+
+Usage:
+  naval_fate.py (-f | --file) <filename>
+
+Options:
+  -h --help     Show this screen.
+  -f --file     File containing information about tunnel in molecule.
+
+"""
+
 import visual as vs
 import numpy as np
 import sys
 import math
 import json
+from docopt import docopt
+from geometrical_objects import Disk, Sphere, Line 
 
 f_error = 0.000001
-
-class Disk:
-    def __init__(self, center, normal, radius):
-        self.center = center
-        self.normal = normal
-        self.radius = radius
-    def to_dict(self):
-        packer  = lambda c : tuple([c[0], c[1], c[2]])
-        return {"center" : packer(self.center), 
-                "normal" : packer(self.normal), 
-                "radius" : self.radius}
-    def plot(self):
-        vs.ring(pos=self.center, 
-                axis=self.normal, 
-                radius=self.radius, 
-                thickness=0.01)
-
-class Sphere:
-    def __init__(self, center, radius):
-        self.center = center
-        self.radius = radius
-    def to_dict(self):
-        packer  = lambda c : tuple([c[0], c[1], c[2]])
-        return {"center" : packer(self.center), 
-                "normal" : packer(self.normal)}
-
-class Line:
-    def __init__(self, dir_, point):
-        self.dir   = dir_
-        self.point = point
-    def get_line_point(self, t):
-        return self.point + t * self.dir
-
-infile = file("tunnel.pdb")
-
-tunnel = []
-
-for line in infile.readlines():
-    words = line.split()
-    #print words
-    if words[0] == "ATOM":
-        center = np.array([float(words[6]), float(words[7]), float(words[8])])
-        radius = float(words[9])
-        tunnel.append(Sphere(center, radius));
-    else:
-        print "Unexpected data: " + line
-
-print "Tunnel readed (" + str(len(tunnel)) + " spheres)."
 
 null_vec = np.array([0,0,0])
 
@@ -276,34 +241,6 @@ def shift_new_disk(new_disk, prev_disk):
     assert np.dot(prev_disk.normal, v1) > -0.001 and np.dot(prev_disk.normal, v2) > -0.0001
     return new_disk
 
-
-d1 = Disk(np.array([0,0,0]), np.array([1,0,0]), 1)
-d2 = Disk(np.array([-1,0,0]), normalize(np.array([1,1,0])), 1)
-
-
-# new_d = shift_new_disk(d2, d1)
-# for disk in [d1, d2]:
-#     disk.plot()
-# vs.ring(pos=new_d.center, 
-#             axis=new_d.normal, 
-#             radius=new_d.radius, 
-#             color=vs.color.red,
-#             thickness=0.01)
-
-
-# sys.exit()
-# tunnel = tunnel[0:4]
-
-# draw tunnel
-for i, s in enumerate(tunnel):
-  sVis = vs.sphere(pos = (s.center[0], s.center[1], s.center[2]), radius = s.radius, opacity=0.3)
-  # central line
-  if (i < len(tunnel)-1):
-    s2 = tunnel[i+1]
-    vVis = vs.arrow(pos=(s.center[0], s.center[1], s.center[2]), 
-                    axis=(s2.center[0]-s.center[0], s2.center[1]-s.center[1], s2.center[2]-s.center[2]), 
-                    color=(1,0,0), shaftwidth=1)
-
 def is_follower(prev_disk, new_disk):
     prev_dir, new_dir = get_radius_vectors(prev_disk, new_disk)
 
@@ -316,61 +253,89 @@ def is_follower(prev_disk, new_disk):
 
     return np.dot(prev_disk.normal, v1) > -f_error or np.dot(prev_disk.normal, v2) > -f_error
 
+def load_tunnel_from_file(filename):
+    infile = file(filename)
+    tunnel = []
 
-
-
-delta = 0.1
-eps   = delta / 10
-disks = []
-centers = [s.center for s in tunnel]
-normals = [normalize(centers[i + 1] - centers[i]) for i in xrange(len(centers) - 1)]
-# Calculate disks position
-for i, s in enumerate(tunnel):
-    if i == len(tunnel) - 2:
-        break
-
-    center      = centers[i]
-    next_center = centers[i + 1]
-    r1     = s.radius
-    r2     = tunnel[i + 1].radius
-    normal = normals[i]   
-    centers_dist = np.linalg.norm(next_center - center)
-
-    size = 0;
-    while size < centers_dist:
-        # print "size: {}".format(size)
-        disk_center = normal * size + center
-
-        w1 = 1 - size / centers_dist 
-        w2 = size / centers_dist
-
-        new_normal = normal * w1 + normals[i + 1] * w2
-        r          = get_radius(new_normal, disk_center, tunnel)
-        new_disk   = Disk(disk_center, new_normal, r)
-
-        if (len(disks) > 0):
-            if not is_follower(disks[-1], new_disk):
-                size += eps
-                continue
-            new_disk = shift_new_disk(new_disk, disks[-1])
-
-        if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < delta):
-            disks[-1] = new_disk
+    for line in infile.readlines():
+        words = line.split()
+        #print words
+        if words[0] == "ATOM":
+            center = np.array([float(words[6]), float(words[7]), float(words[8])])
+            radius = float(words[9])
+            tunnel.append(Sphere(center, radius));
         else:
-            disks.append(new_disk)
-        size += eps
+            print "Unexpected data: " + line
 
-# draw disks
-for i, disk in enumerate(disks[:]):
-    if (i != 0):
-        print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
-    vs.ring(pos=disk.center, 
-            axis=disk.normal, 
-            radius=disk.radius, 
-            thickness=0.01)
-infile.close()
+    infile.close()
+    print "Tunnel readed (" + str(len(tunnel)) + " spheres)."
+    return tunnel
 
-disks_structured = [disk.to_dict() for disk in disks]
-# print json.dumps(disks_structured, sort_keys=True,
-#                     indent=4, separators=(',', ': '))
+if __name__ == '__main__':
+    arguments = docopt(__doc__)
+    tunnel = load_tunnel_from_file(arguments['<filename>'])
+
+    # draw tunnel
+    for i, s in enumerate(tunnel):
+      sVis = vs.sphere(pos = (s.center[0], s.center[1], s.center[2]), radius = s.radius, opacity=0.3)
+      # central line
+      if (i < len(tunnel)-1):
+        s2 = tunnel[i+1]
+        vVis = vs.arrow(pos=(s.center[0], s.center[1], s.center[2]), 
+                        axis=(s2.center[0]-s.center[0], s2.center[1]-s.center[1], s2.center[2]-s.center[2]), 
+                        color=(1,0,0), shaftwidth=1)
+
+    delta = 0.1
+    eps   = delta / 10
+    disks = []
+    centers = [s.center for s in tunnel]
+    normals = [normalize(centers[i + 1] - centers[i]) for i in xrange(len(centers) - 1)]
+    # Calculate disks position
+    for i, s in enumerate(tunnel):
+        if i == len(tunnel) - 2:
+            break
+
+        center      = centers[i]
+        next_center = centers[i + 1]
+        r1     = s.radius
+        r2     = tunnel[i + 1].radius
+        normal = normals[i]   
+        centers_dist = np.linalg.norm(next_center - center)
+
+        size = 0;
+        while size < centers_dist:
+            # print "size: {}".format(size)
+            disk_center = normal * size + center
+
+            w1 = 1 - size / centers_dist 
+            w2 = size / centers_dist
+
+            new_normal = normal * w1 + normals[i + 1] * w2
+            r          = get_radius(new_normal, disk_center, tunnel)
+            new_disk   = Disk(disk_center, new_normal, r)
+
+            if (len(disks) > 0):
+                if not is_follower(disks[-1], new_disk):
+                    size += eps
+                    continue
+                new_disk = shift_new_disk(new_disk, disks[-1])
+
+            if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < delta):
+                disks[-1] = new_disk
+            else:
+                disks.append(new_disk)
+            size += eps
+
+    # draw disks
+    for i, disk in enumerate(disks[:]):
+        if (i != 0):
+            print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
+        vs.ring(pos=disk.center, 
+                axis=disk.normal, 
+                radius=disk.radius, 
+                thickness=0.01)
+
+    disks_structured = [disk.to_dict() for disk in disks]
+    # print json.dumps(disks_structured, sort_keys=True,
+    #                     indent=4, separators=(',', ': '))
 
