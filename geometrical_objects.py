@@ -17,14 +17,50 @@ class Disk:
                 thickness=0.01)
 
 class Plane:
+   
     def __init__(self, point, normal):
         self.point  = point
-        self.normal = normal
+        self.normal = normalize(normal)
+        self._basis  = None
+        self._projector = None
+   
     def contains(self, point):
         diff = np.dot(self.normal, self.point) - np.dot(self.normal, point)
         return abs(diff) < f_error
+   
     def intersection_line(self, line):
         return line.intersection_plane(self)
+
+    def get_base_vectors(self):
+        if self._basis == None:
+            v1 = normalize(null_space(np.array([self.normal, null_vec, null_vec])))
+            v2 = normalize(null_space(np.array([self.normal, v1, null_vec])))
+            assert abs(np.dot(v1, v2)) < f_error
+            self._basis = (v1, v2)
+        return self._basis
+
+    def get_orthogonal_projector(self):
+        if self._projector == None:
+            v1, v2      = self.get_base_vectors()
+            base_matrix = np.transpose(np.array([v1, v2]))
+            self._projector = np.linalg.pinv(base_matrix)
+        return self._projector
+
+    def orthogonal_projection(self, point):
+        point_proj = point - np.dot(point - self.point, self.normal) * self.normal
+        assert self.contains(point_proj) 
+        return point_proj
+
+    def get_point_for_param(self, t, u):
+        v1, v2 = self.get_base_vectors()
+        assert self.contains(self.point + t * v1 + u * v2)
+        return self.point + t * v1 + u * v2
+
+    def orthogonal_proj_param(self, point):
+        v1, v2 = self.get_base_vectors()
+        projector  = self.get_orthogonal_projector()
+        parameters = np.dot(projector, np.transpose(point - self.point))
+        return parameters
 
 class Sphere:
     def __init__(self, center, radius):
@@ -37,6 +73,13 @@ class Sphere:
     def intersection_line(self, line):
         return line.intersection_sphere(self)
 
+    # Does ball defined by sphere contains given point (< operator used)
+    def inner_ball_contains(self, point):
+        return np.linalg.norm(self.center - point) < self.radius
+
+    def ball_contains(self, point):
+        return np.linalg.norm(self.center - point) - self.radius < f_error
+
 class Line:
     def __init__(self, point, dir_):
         self.dir   = dir_
@@ -47,10 +90,7 @@ class Line:
         return get_intersection_line_sphere(sphere, self)
     def intersection_plane(self, plane):
         # First get vectors for plane parametric form
-        # print "plane", plane.point, plane.normal
-        # print "line", self.point, self.dir
-        v1 = normalize(null_space(np.array([plane.normal, null_vec, null_vec])))
-        v2 = normalize(null_space(np.array([plane.normal, v1, null_vec])))
+        v1, v2 = plane.get_base_vectors()
         assert is_3D_basis(plane.normal, v1, v2)
 
         r_side = np.transpose(np.array([plane.point - self.point]))
@@ -69,6 +109,22 @@ class Line:
         assert plane.contains(intersection)
         return intersection
 
+class Circle:
+
+    def __init__(self, center, radius):
+        self.center = center
+        self.radius = radius
+
+    # For parameter in float in [0, 1] return proportional point on circle.
+    def get_point(self, c_percetage):
+        assert 0 <= c_percetage and c_percetage <= 1
+        x = self.radius * math.cos(c_percetage * 2 * math.pi)
+        y = self.radius * math.sin(c_percetage * 2 * math.pi)
+        return self.center + np.array([x, y])
+
+    # Calculates equidistant approximation of circle
+    def get_approximation(self, n_samples):
+        return [self.get_point(float(x) / n_samples) for x in xrange(n_samples)]
 
 
 

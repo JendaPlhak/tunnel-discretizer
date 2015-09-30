@@ -21,44 +21,52 @@ from decimal import *
 import math
 import json
 from docopt import docopt
-from geometrical_objects import Disk, Sphere, Plane, Line 
+from geometrical_objects import *
 from linalg import *
+from minimal_enclosing import make_circle
+import random
 
         
-def get_radius(normal, center, tunnel):
-    r = sys.float_info.min
+def fit_disk_tunnel(normal, center, tunnel):
+    disk_plane  = Plane(center, normal)
+    circle_cuts = []
+    n_samples   = 30
+
     for sphere in tunnel:
-        perpendicular_line = Line(sphere.center, normal)
-        disk_plane = Plane(center, normal)
-        cap_center = perpendicular_line.intersection_plane(disk_plane)
+        # calculate center of cap that we get by intersection disk_plane 
+        # and sphere 
+        cap_center = disk_plane.orthogonal_projection(sphere.center)
+        # if center is out of the ball, the intersection is empty or one point.
+        if not sphere.inner_ball_contains(cap_center):
+            continue
 
-        if (cap_center == center).all():
-            line_dir = normalize(null_space(np.array([normal, null_vec, null_vec])))
-            assert abs(np.dot(line_dir, normal)) < f_error
-        else:
-            line_dir = cap_center - center
-        line = Line(center, line_dir)
+        line_dir = disk_plane.get_base_vectors()[0]
+        line     = Line(cap_center, line_dir)
         inter_points = sphere.intersection_line(line)
-        if len(inter_points) == 2:
-            v1 = inter_points[0] - line.point
-            v2 = inter_points[1] - line.point
-            if np.dot(v1, v2) > 0: # Same direction, disc center lies outside of sphere
-                # for now, just ignore this case. It is probably right thing to do.
-                pass
-            elif np.dot(v1, v2) < 0:
-                r1 = np.linalg.norm(v1)
-                r2 = np.linalg.norm(v2)
-                r = max(r, max(r1, r2))
-            else:
-                raise ValueError("One of vectors is null")
-        else:
-            pass # We don't wanna mess with this shit. Ok, seriously, this 
-            # cases are not relevant since the intersection is either empty or
-            # only one point -> r1 == r2 == 0
+        assert len(inter_points) == 2
 
-    if r == sys.float_info.min:
-        raise ValueError("Disk not contained in any of the spheres")
-    return r
+        # Result should be symmetrical, therefore half of calculation can
+        # be removed.
+        v = inter_points[0] - line.point
+        r = np.linalg.norm(v)
+
+        cut_circle = Circle(disk_plane.orthogonal_proj_param(cap_center), r)
+        circle_cuts.append(cut_circle)
+
+    discrete_approx = []
+    for c in circle_cuts:
+        approx = c.get_approximation(n_samples)
+        discrete_approx.extend([tuple(x) for x in approx])
+    t, u, radius = make_circle(discrete_approx)
+
+    new_center = disk_plane.get_point_for_param(t, u)
+    # control that calculation went as it was supposed to go.
+    control_s = Sphere(new_center, radius)
+    for point in discrete_approx:
+        control_point = disk_plane.get_point_for_param(point[0], point[1])
+        assert control_s.ball_contains(control_point)
+
+    return Disk(new_center, normal, radius)
 
 # return true if point1 and point2 are in the same half-plane based on plane
 # normal and line_point 
@@ -153,14 +161,16 @@ def shift_new_disk(new_disk, prev_disk, tunnel):
     # print prev_disk.normal, v1
     # print np.dot(prev_disk.normal, v1)
 
+    # perform re-fitting
+    new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, tunnel)
+
     # print prev_disk.normal, v2
     # print np.dot(prev_disk.normal, v2)
-    if abs(get_radius(new_disk.normal, new_disk.center, tunnel) - new_disk.radius) > 0.1:
-        new_disk.radius = get_radius(new_disk.normal, new_disk.center, tunnel)
-        return shift_new_disk(new_disk, prev_disk, tunnel)
+    # if abs(get_radius(new_disk.normal, new_disk.center, tunnel) - new_disk.radius) > 0.1:
+    #     new_disk.radius = get_radius(new_disk.normal, new_disk.center, tunnel)
+    #     return shift_new_disk(new_disk, prev_disk, tunnel)
 
-
-    print abs(get_radius(new_disk.normal, new_disk.center, tunnel) - new_disk.radius)
+        # print abs(get_radius(new_disk.normal, new_disk.center, tunnel) - new_disk.radius)
     # assert np.dot(prev_disk.normal, v1) > -0.0001 and np.dot(prev_disk.normal, v2) > -0.0001
     return new_disk
 
@@ -197,20 +207,12 @@ def load_tunnel_from_file(filename):
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     tunnel = load_tunnel_from_file(arguments['<filename>'])
-    # tunnel = tunnel[3:7]
+    # tunnel = tunnel[0:10]
     draw_ARG = arguments["--draw"]
 
+    # print make_circle([(random.random() * 10, random.random() * 10) for _ in xrange(100000)])
+    # sys.exit()
     # draw tunnel
-    if draw_ARG:
-        for i, s in enumerate(tunnel):
-            sVis = vs.sphere(pos = (s.center[0], s.center[1], s.center[2]), 
-                                radius = s.radius, opacity=0.9)
-            # central line
-            if (i < len(tunnel)-1):
-                s2 = tunnel[i+1]
-                vVis = vs.arrow(pos=(s.center[0], s.center[1], s.center[2]), 
-                                axis=(s2.center[0]-s.center[0], s2.center[1]-s.center[1], s2.center[2]-s.center[2]), 
-                                color=(1,0,0), shaftwidth=1)
 
     delta = 0.1
     eps   = delta / 10.
@@ -232,20 +234,19 @@ if __name__ == '__main__':
         size = 0;
         while size < centers_dist:
             # print "size: {}".format(size)
+            # Form initial disk center
             disk_center = normal * size + center
 
             w1 = 1 - size / centers_dist 
             w2 = size / centers_dist
 
             new_normal = normal * w1 + normals[i + 1] * w2
-            r          = get_radius(new_normal, disk_center, tunnel)
-            new_disk   = Disk(disk_center, new_normal, r)
+            new_disk   = fit_disk_tunnel(new_normal, disk_center, tunnel)
 
             if (len(disks) > 0):
                 if not is_follower(disks[-1], new_disk):
                     size += eps
                     continue
-                print "Shift!--------------------------"
                 new_disk = shift_new_disk(new_disk, disks[-1], tunnel)
 
             if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < delta):
@@ -256,6 +257,15 @@ if __name__ == '__main__':
 
     # draw disks
     if draw_ARG:
+        for i, s in enumerate(tunnel):
+            sVis = vs.sphere(pos = (s.center[0], s.center[1], s.center[2]), 
+                                radius = s.radius, opacity=0.9)
+            # central line
+            if (i < len(tunnel)-1):
+                s2 = tunnel[i+1]
+                vVis = vs.arrow(pos=(s.center[0], s.center[1], s.center[2]), 
+                                axis=(s2.center[0]-s.center[0], s2.center[1]-s.center[1], s2.center[2]-s.center[2]), 
+                                color=(1,0,0), shaftwidth=1)
         for i, disk in enumerate(disks[:]):
             if (i != 0):
                 print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
@@ -265,15 +275,6 @@ if __name__ == '__main__':
                     thickness=0.01,
                     color=(1,0,0))
 
-        old = vector(scene.forward) # keep a copy of the old forward
-        while 1:
-            rate(50)
-            if scene.forward != old:
-                new = scene.forward
-                axis = cross(old,new)
-                angle = new.diff_angle(old)
-                lframe.rotate(axis=axis, angle=angle)
-                old = vector(new)
 
     disks_structured = [disk.to_dict() for disk in disks]
     # print json.dumps(disks_structured, sort_keys=True,
