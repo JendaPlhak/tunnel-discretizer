@@ -219,6 +219,19 @@ if __name__ == '__main__':
     disks = []
     centers = [s.center for s in tunnel]
     normals = [normalize(centers[i + 1] - centers[i]) for i in xrange(len(centers) - 1)]
+
+    # set first sphere as a center of scene
+    cMin = tunnel[0].center.copy()
+    cMax = tunnel[0].center.copy()
+    for i, t in enumerate(tunnel):
+        #import pdb;pdb.set_trace()
+        for j in range(0, 3):
+            if cMin[j] > t.center[j]-t.radius: 
+                cMin[j] = t.center[j]-t.radius
+            if cMax[j] < t.center[j]+t.radius: 
+                cMax[j] = t.center[j]+t.radius
+    centScene = cMin + (cMax-cMin)/2
+
     # Calculate disks position
     for i, s in enumerate(tunnel):
         if i == len(tunnel) - 2:
@@ -258,18 +271,18 @@ if __name__ == '__main__':
     # draw disks
     if draw_ARG:
         for i, s in enumerate(tunnel):
-            sVis = vs.sphere(pos = (s.center[0], s.center[1], s.center[2]), 
+            sVis = vs.sphere(pos = (s.center[0]-centScene[0], s.center[1]-centScene[1], s.center[2]-centScene[2]), 
                                 radius = s.radius, opacity=0.9)
             # central line
             if (i < len(tunnel)-1):
                 s2 = tunnel[i+1]
-                vVis = vs.arrow(pos=(s.center[0], s.center[1], s.center[2]), 
+                vVis = vs.arrow(pos=(s.center[0]-centScene[0], s.center[1]-centScene[1], s.center[2]-centScene[2]), 
                                 axis=(s2.center[0]-s.center[0], s2.center[1]-s.center[1], s2.center[2]-s.center[2]), 
                                 color=(1,0,0), shaftwidth=1)
         for i, disk in enumerate(disks[:]):
             if (i != 0):
                 print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
-            vs.ring(pos=disk.center, 
+            vs.ring(pos=disk.center-centScene, 
                     axis=disk.normal, 
                     radius=disk.radius, 
                     thickness=0.01,
