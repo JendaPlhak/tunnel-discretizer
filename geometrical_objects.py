@@ -1,20 +1,47 @@
 from linalg import *
 
 class Disk:
+
     def __init__(self, center, normal, radius):
         self.center = center
-        self.normal = normal
+        self.normal = normalize(normal)
         self.radius = radius
+
     def to_dict(self):
         packer  = lambda c : tuple([c[0], c[1], c[2]])
         return {"center" : packer(self.center), 
                 "normal" : packer(self.normal), 
                 "radius" : self.radius}
+
+    def to_geogebra(self):
+        tup_pack = lambda t : "({}, {}, {})".format(t[0], t[1], t[2])
+        return "Circle[{0}, {1}, Vector[(0, 0, 0), {2}]]"\
+            .format(tup_pack(self.center), self.radius, tup_pack(self.normal))
+        return {"center" : packer(self.center), 
+                "normal" : packer(self.normal), 
+                "radius" : self.radius}
+    # Calculate plane that is determined by disk
+    def get_plane(self):
+        return Plane(self.center, self.normal)
+
     def plot(self):
         vs.ring(pos=self.center, 
                 axis=self.normal, 
                 radius=self.radius, 
                 thickness=0.01)
+
+    def contains(self, point):
+        vec = point - self.center
+        if not abs(np.dot(vec, self.normal)) < f_error:
+            return False
+        return np.linalg.norm(vec) <= self.radius + f_error
+
+    def circle_contains(self, point):
+        vec = point - self.center
+        if not abs(np.dot(vec, self.normal)) < f_error:
+            return False
+        return abs(np.linalg.norm(vec) - self.radius) < f_error
+
 
 class Plane:
    
@@ -73,6 +100,10 @@ class Sphere:
     def intersection_line(self, line):
         return line.intersection_sphere(self)
 
+    def intersect_ball(self, ball):
+        return np.linalg.norm(self.center - ball.center) \
+            <= self.radius + ball.radius
+
     # Does ball defined by sphere contains given point (< operator used)
     def inner_ball_contains(self, point):
         return np.linalg.norm(self.center - point) < self.radius
@@ -81,13 +112,31 @@ class Sphere:
         return np.linalg.norm(self.center - point) - self.radius < f_error
 
 class Line:
+
     def __init__(self, point, dir_):
         self.dir   = dir_
         self.point = point
+        self._norm_dir = normalize(dir_)
+
+    def contains(self, point):
+        if (point == self.point).all():
+            return True
+        v = normalize(point - self.point)
+        return np.linalg.norm(v - self._norm_dir) < f_error
+
     def get_line_point(self, t):
         return self.point + t * self.dir
+
+    def orthogonal_proj(self, point):
+        p = self.point \
+            + np.dot(point - self.point, self._norm_dir) * self._norm_dir
+        assert self.contains(p)
+        return p
+            
+
     def intersection_sphere(self, sphere):
         return get_intersection_line_sphere(sphere, self)
+
     def intersection_plane(self, plane):
         # First get vectors for plane parametric form
         v1, v2 = plane.get_base_vectors()

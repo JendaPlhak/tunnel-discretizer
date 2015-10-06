@@ -23,16 +23,19 @@ import json
 from docopt import docopt
 from geometrical_objects import *
 from linalg import *
+from tunnel import Tunnel
 from minimal_enclosing import make_circle
 import random
 
         
-def fit_disk_tunnel(normal, center, tunnel):
+def fit_disk_tunnel(normal, center, ball_idx, tunnel):
     disk_plane  = Plane(center, normal)
     circle_cuts = []
-    n_samples   = 30
+    n_samples   = 5
 
-    for sphere in tunnel:
+    range_ = tunnel.get_neighbors(ball_idx)
+    # print range_
+    for sphere in tunnel.t:
         # calculate center of cap that we get by intersection disk_plane 
         # and sphere 
         cap_center = disk_plane.orthogonal_projection(sphere.center)
@@ -61,10 +64,10 @@ def fit_disk_tunnel(normal, center, tunnel):
 
     new_center = disk_plane.get_point_for_param(t, u)
     # control that calculation went as it was supposed to go.
-    control_s = Sphere(new_center, radius)
-    for point in discrete_approx:
-        control_point = disk_plane.get_point_for_param(point[0], point[1])
-        assert control_s.ball_contains(control_point)
+    # control_s = Sphere(new_center, radius)
+    # for point in discrete_approx:
+    #     control_point = disk_plane.get_point_for_param(point[0], point[1])
+    #     assert control_s.ball_contains(control_point)
 
     return Disk(new_center, normal, radius)
 
@@ -87,91 +90,17 @@ def normal_in_plane(n, v):
     assert np.dot(u, v) < 0.00001
     return u
 
-# For two given points and vector determining plan, calculate disk, that is 
-# perpendicular to that plan, and its vertices are point1 and point2
+# For two given points and vector determining plane, calculate disk, that is 
+# perpendicular to that plane, and its vertices are point1 and point2
 def get_new_disk_points(point1, point2, n):
     center = (point1 + point2) / 2.
     # print "Point 1: {}, Point 2: {}".format(point1, point2)
     # print "New center: {}".format(center)
     normal = normal_in_plane(n, point2 - point1)
     # print "New normal: {}".format(normal)
-    return Disk(center, normal, point_dist(point1, point2) / 2.)
-
-def shift_new_disk(new_disk, prev_disk, tunnel):
-    new_dir, prev_dir = get_radius_vectors(new_disk, prev_disk)
-    # Get proj. disk vertices
-    new_vert_1 = new_disk.center + new_dir
-    new_vert_2 = new_disk.center - new_dir
-
-    prev_vert_1 = prev_disk.center + prev_dir
-    prev_vert_2 = prev_disk.center - prev_dir
-
-    v1 = new_vert_1 - prev_disk.center 
-    v2 = new_vert_2 - prev_disk.center 
-
-    # Determine whether both segment vertices lie in the same half-plane.
-    if np.dot(prev_disk.normal, v1) >= 0 and np.dot(prev_disk.normal, v2) >= 0.:
-        # if so, return since no shifting is necessary.
-        return new_disk
-
-    # print prev_dir, v1, prev_dir, prev_disk.normal
-    # print np.dot(prev_dir, v1) * np.dot(prev_dir, prev_disk.normal)
-
-    # print prev_dir, v2, prev_dir, prev_disk.normal
-    # print np.dot(prev_dir, v2) * np.dot(prev_dir, prev_disk.normal)
-
-
-    # At least one of the vertices must be on the right side
-    assert np.dot(prev_disk.normal, v1) >= 0. or np.dot(prev_disk.normal, v2) >= 0.
-    # Which vertex is in the wrong half plane
-    if np.dot(prev_disk.normal, v1) < 0.:
-        # print "First one!"
-        if in_same_half_plane(prev_dir, prev_disk.center, \
-                                new_vert_1, prev_vert_1):
-            # print "New_vert 1 and prev_vert 1 are in the same half-plane"
-            new_disk = get_new_disk_points(prev_vert_1, new_vert_2, new_disk.normal)
-        else:
-            # print "New_vert 1 and prev_vert 2 are in the same half-plane"
-            new_disk = get_new_disk_points(prev_vert_2, new_vert_2, new_disk.normal)
-
-    elif np.dot(prev_disk.normal, v2) < 0.:
-        # print "Second one!"
-        # print new_vert_2, prev_vert_1
-        if in_same_half_plane(prev_dir, prev_disk.center, \
-                                new_vert_2, prev_vert_1):
-            # print "New_vert 2 and prev_vert 1 are in the same half-plane"
-            new_disk = get_new_disk_points(prev_vert_1, new_vert_1, new_disk.normal)
-        else:
-            # print "New_vert 2 and prev_vert 2 are in the same half-plane"
-            new_disk = get_new_disk_points(prev_vert_2, new_vert_1, new_disk.normal)
-
-
-    # Check whether our function does what it is supposed to do.
-    new_dir, prev_dir = get_radius_vectors(new_disk, prev_disk)
-
-    new_vert_1 = new_disk.center + new_dir
-    new_vert_2 = new_disk.center - new_dir
-
-    # print new_vert_1
-    # print new_vert_2
-
-    v1 = new_vert_1 - prev_disk.center 
-    v2 = new_vert_2 - prev_disk.center 
-
-    # print prev_disk.normal, v1
-    # print np.dot(prev_disk.normal, v1)
-
-    # perform re-fitting
-    new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, tunnel)
-
-    # print prev_disk.normal, v2
-    # print np.dot(prev_disk.normal, v2)
-    # if abs(get_radius(new_disk.normal, new_disk.center, tunnel) - new_disk.radius) > 0.1:
-    #     new_disk.radius = get_radius(new_disk.normal, new_disk.center, tunnel)
-    #     return shift_new_disk(new_disk, prev_disk, tunnel)
-
-        # print abs(get_radius(new_disk.normal, new_disk.center, tunnel) - new_disk.radius)
-    # assert np.dot(prev_disk.normal, v1) > -0.0001 and np.dot(prev_disk.normal, v2) > -0.0001
+    new_disk = Disk(center, normal, point_dist(point1, point2) / 2.)
+    assert new_disk.contains(point1) and new_disk.circle_contains(point1)
+    assert new_disk.contains(point2) and new_disk.circle_contains(point2)
     return new_disk
 
 def is_follower(prev_disk, new_disk):
@@ -184,30 +113,105 @@ def is_follower(prev_disk, new_disk):
     v1 = new_vert_1 - prev_disk.center 
     v2 = new_vert_2 - prev_disk.center
 
-    return np.dot(prev_disk.normal, v1) > -f_error or np.dot(prev_disk.normal, v2) > -f_error
+    return np.dot(prev_disk.normal, v1) > -f_error \
+        or np.dot(prev_disk.normal, v2) > -f_error
 
-def load_tunnel_from_file(filename):
-    infile = file(filename)
-    tunnel = []
+# get vertices of segments determined by disks in orthogonal projection.
+def get_vertices(disk1, disk2):
+    dir1, dir2 = get_radius_vectors(disk1, disk2)
+    # Get proj. disk vertices
+    disk1_vert_1 = disk1.center + dir1
+    disk1_vert_2 = disk1.center - dir1
+    disk2_vert_1 = disk2.center + dir2
+    disk2_vert_2 = disk2.center - dir2
 
-    for line in infile.readlines():
-        words = line.split()
-        #print words
-        if len(words) > 0 and words[0] == "ATOM":
-            center = np.array([float(words[6]), float(words[7]), float(words[8])])
-            radius = float(words[9])
-            tunnel.append(Sphere(center, radius));
-        else:
-            print "Unexpected data: " + line
+    # Ensure that vertices corresponds to each other in given order.
+    if not in_same_half_plane(dir2, disk2.center, \
+                                disk1_vert_1, disk2_vert_1):
+        disk2_vert_1, disk2_vert_2 = disk2_vert_2, disk2_vert_1
 
-    infile.close()
-    print "Tunnel readed (" + str(len(tunnel)) + " spheres)."
-    return tunnel
+    return disk1_vert_1, disk1_vert_2, disk2_vert_1, disk2_vert_2
+
+def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
+    # print "\n\n"
+    # print "Previous Disk:"
+    # print prev_disk.to_geogebra()
+    # print "New Disk: "
+    # print new_disk.to_geogebra()
+    new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
+
+    v1 = new_vert_1 - prev_disk.center 
+    v2 = new_vert_2 - prev_disk.center 
+
+    # Determine whether both segment vertices lie in the same half-plane. If not
+    # fix it.
+    if not (np.dot(prev_disk.normal, v1) >= 0 and np.dot(prev_disk.normal, v2) >= 0.):
+        # print prev_dir, v1, prev_dir, prev_disk.normal
+        # print np.dot(prev_dir, v1) * np.dot(prev_dir, prev_disk.normal)
+
+        # print prev_dir, v2, prev_dir, prev_disk.normal
+        # print np.dot(prev_dir, v2) * np.dot(prev_dir, prev_disk.normal)
+
+
+        # At least one of the vertices must be on the right side
+        assert np.dot(prev_disk.normal, v1) >= 0. or np.dot(prev_disk.normal, v2) >= 0.
+        
+        # Which vertex is in the wrong half plane
+        if np.dot(prev_disk.normal, v1) < 0.:
+            # print "First one!"
+            new_disk = get_new_disk_points(prev_vert_1, new_vert_2, new_disk.normal)
+        elif np.dot(prev_disk.normal, v2) < 0.:
+            # print "Second one!"
+            new_disk = get_new_disk_points(prev_vert_2, new_vert_1, new_disk.normal)
+
+    
+    # Ensure that disks are not too far from each other.
+    new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
+    if (not np.linalg.norm(new_vert_1 - prev_vert_1) < delta):
+        shifted_vert = prev_vert_1 + prev_disk.normal * delta
+        new_disk = get_new_disk_points(shifted_vert, new_vert_2, new_disk.normal)
+
+    new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
+    if (not np.linalg.norm(new_vert_2 - prev_vert_2) < delta):
+        shifted_vert = prev_vert_2 + prev_disk.normal * delta
+        new_disk = get_new_disk_points(new_vert_1, shifted_vert, new_disk.normal)
+
+    
+    # perform re-fitting
+    new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, ball_idx, tunnel)
+    # print "Revised disk : {}".format(new_disk.to_geogebra())
+
+    # Check whether our function does what it is supposed to do.
+    new_dir, prev_dir = get_radius_vectors(new_disk, prev_disk)
+
+    new_vert_1 = new_disk.center + new_dir
+    new_vert_2 = new_disk.center - new_dir
+    # print "New vertex 1: '{}', New vertex 2: '{}'".format(new_vert_1, new_vert_2)
+
+    v1 = new_vert_1 - prev_disk.center 
+    v2 = new_vert_2 - prev_disk.center 
+
+    # print prev_disk.normal, v1
+    # print np.dot(prev_disk.normal, v1)
+
+    # print prev_disk.normal, v2
+    # print np.dot(prev_disk.normal, v2)
+    
+    # if not is_follower(prev_disk, new_disk):
+    #     print "Recursive shift!"
+    #     new_disk = shift_new_disk(new_disk, prev_disk, tunnel)
+    #     print "Complete!"
+
+        # print abs(get_radius(new_disk.normal, new_disk.center, tunnel) - new_disk.radius)
+    # assert np.dot(prev_disk.normal, v1) > -0.0001
+    # assert np.dot(prev_disk.normal, v2) > -0.0001
+    return new_disk
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
-    tunnel = load_tunnel_from_file(arguments['<filename>'])
-    # tunnel = tunnel[0:10]
+    tunnel = Tunnel()
+    tunnel.load_from_file(arguments['<filename>'])
+    tunnel.t = tunnel.t[0:]
     draw_ARG = arguments["--draw"]
 
     # print make_circle([(random.random() * 10, random.random() * 10) for _ in xrange(100000)])
@@ -217,37 +221,50 @@ if __name__ == '__main__':
     delta = 0.1
     eps   = delta / 10.
     disks = []
-    centers = [s.center for s in tunnel]
+    centers = [s.center for s in tunnel.t]
     normals = [normalize(centers[i + 1] - centers[i]) for i in xrange(len(centers) - 1)]
     # Calculate disks position
-    for i, s in enumerate(tunnel):
-        if i == len(tunnel) - 2:
+    for i, s in enumerate(tunnel.t):
+        if i == len(tunnel.t) - 2:
             break
 
         center      = centers[i]
         next_center = centers[i + 1]
-        r1     = s.radius
-        r2     = tunnel[i + 1].radius
         normal = normals[i]   
         centers_dist = np.linalg.norm(next_center - center)
+
+        # range_ = tunnel.get_neighbors(i)
+        # normal = normals[range_[0]]
+        # for n in normals[range_[0] + 1:range_[1]]:
+        #     normal += n
+        # normal = normal / (range_[1] - range_[0])
+        # print (range_[1] - range_[0])   
+
+        # line between centers 
+        line = Line(center, next_center - center)
 
         size = 0;
         while size < centers_dist:
             # print "size: {}".format(size)
             # Form initial disk center
-            disk_center = normal * size + center
+            if (len(disks) > 1 and size != 0):
+                disk_plane = disks[-1].get_plane()
+                inter = line.intersection_plane(disk_plane)
+                size  = np.linalg.norm(inter - center) + eps
+
+            disk_center = center + normal * size
 
             w1 = 1 - size / centers_dist 
             w2 = size / centers_dist
 
             new_normal = normal * w1 + normals[i + 1] * w2
-            new_disk   = fit_disk_tunnel(new_normal, disk_center, tunnel)
+            new_disk   = fit_disk_tunnel(new_normal, disk_center, i, tunnel)
 
             if (len(disks) > 0):
                 if not is_follower(disks[-1], new_disk):
                     size += eps
                     continue
-                new_disk = shift_new_disk(new_disk, disks[-1], tunnel)
+                new_disk = shift_new_disk(new_disk, disks[-1], i, tunnel, delta)
 
             if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < delta):
                 disks[-1] = new_disk
@@ -257,23 +274,27 @@ if __name__ == '__main__':
 
     # draw disks
     if draw_ARG:
-        for i, s in enumerate(tunnel):
+        for i, s in enumerate(tunnel.t):
             sVis = vs.sphere(pos = (s.center[0], s.center[1], s.center[2]), 
-                                radius = s.radius, opacity=0.9)
+                                radius = s.radius, opacity=0.2)
             # central line
-            if (i < len(tunnel)-1):
-                s2 = tunnel[i+1]
+            if (i < len(tunnel.t)-1):
+                s2 = tunnel.t[i+1]
                 vVis = vs.arrow(pos=(s.center[0], s.center[1], s.center[2]), 
                                 axis=(s2.center[0]-s.center[0], s2.center[1]-s.center[1], s2.center[2]-s.center[2]), 
                                 color=(1,0,0), shaftwidth=1)
         for i, disk in enumerate(disks[:]):
-            if (i != 0):
-                print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
+            # if (i != 0):
+            #     print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
             vs.ring(pos=disk.center, 
                     axis=disk.normal, 
                     radius=disk.radius, 
                     thickness=0.01,
                     color=(1,0,0))
+            if i % 2 == 1:
+                vVis = vs.arrow(pos=tuple(disk.center), 
+                                axis=tuple(disk.normal * 0.25) , 
+                                color=(0,1,0), shaftwidth=0.5)
 
 
     disks_structured = [disk.to_dict() for disk in disks]
