@@ -31,11 +31,10 @@ import random
 def fit_disk_tunnel(normal, center, ball_idx, tunnel):
     disk_plane  = Plane(center, normal)
     circle_cuts = []
-    n_samples   = 25
+    n_samples   = 15
 
     range_ = tunnel.get_neighbors(ball_idx)
-    # print range_
-    for sphere in tunnel.t:
+    for sphere in tunnel.t[range_[0]:range_[1] + 1]:
         # calculate center of cap that we get by intersection disk_plane 
         # and sphere 
         cap_center = disk_plane.orthogonal_projection(sphere.center)
@@ -138,7 +137,8 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
     # print prev_disk.to_geogebra()
     # print "New Disk: "
     # print new_disk.to_geogebra()
-    new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
+    new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 \
+        = get_vertices(new_disk, prev_disk)
 
     v1 = new_vert_1 - prev_disk.center 
     v2 = new_vert_2 - prev_disk.center 
@@ -156,24 +156,30 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
         # At least one of the vertices must be on the right side
         assert np.dot(prev_disk.normal, v1) >= 0. or np.dot(prev_disk.normal, v2) >= 0.
         
-        # Which vertex is in the wrong half plane
+        # Find which vertex is in the wrong half plane.
+        # Then shift appropriate vertex so that prev_disk is followed by 
+        # new disk.
         if np.dot(prev_disk.normal, v1) < 0.:
             # print "First one!"
-            new_disk = get_new_disk_points(prev_vert_1, new_vert_2, new_disk.normal)
+            shift_vert = prev_vert_1 + prev_disk.normal * (delta / 5)
+            new_disk   = get_new_disk_points(shift_vert, new_vert_2, new_disk.normal)
         elif np.dot(prev_disk.normal, v2) < 0.:
             # print "Second one!"
-            new_disk = get_new_disk_points(prev_vert_2, new_vert_1, new_disk.normal)
+            shift_vert = prev_vert_2 + prev_disk.normal * (delta / 5)
+            new_disk   = get_new_disk_points(prev_vert_2, new_vert_1, new_disk.normal)
 
     
     # Ensure that disks are not too far from each other.
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
-    if (not np.linalg.norm(new_vert_1 - prev_vert_1) < delta):
-        shifted_vert = prev_vert_1 + prev_disk.normal * delta
+    v = new_vert_1 - prev_vert_1
+    if (not np.linalg.norm(v) < delta):
+        shifted_vert = prev_vert_1 + normalize(v) * delta
         new_disk = get_new_disk_points(shifted_vert, new_vert_2, new_disk.normal)
 
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
-    if (not np.linalg.norm(new_vert_2 - prev_vert_2) < delta):
-        shifted_vert = prev_vert_2 + prev_disk.normal * delta
+    v = new_vert_2 - prev_vert_2
+    if (not np.linalg.norm(v) < delta):
+        shifted_vert = prev_vert_2 + normalize(v) * delta
         new_disk = get_new_disk_points(new_vert_1, shifted_vert, new_disk.normal)
 
     
@@ -211,7 +217,7 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
     tunnel = Tunnel()
     tunnel.load_from_file(arguments['<filename>'])
-    tunnel.t = tunnel.t[0:]
+    tunnel.t = tunnel.t
     draw_ARG = arguments["--draw"]
 
     # print make_circle([(random.random() * 10, random.random() * 10) for _ in xrange(100000)])
