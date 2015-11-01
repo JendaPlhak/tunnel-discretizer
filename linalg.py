@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-f_error = 0.000001
+f_error = 0.0000001
 null_vec = np.array([0,0,0])
 
 def point_dist(point1, point2):
@@ -22,6 +22,25 @@ def is_3D_basis(v1, v2, v3):
     return abs(np.dot(v1, v2)) < f_error  \
         and abs(np.dot(v1, v3)) < f_error \
         and abs(np.dot(v1, v2)) < f_error
+
+# return true if point1 and point2 are in the same half-plane based on plane
+# normal and line_point 
+def in_same_half_plane(normal, line_point, point1, point2):
+    v1 = point1 - line_point
+    v2 = point2 - line_point
+    return np.dot(normal, v1) * np.dot(normal, v2) >= 0
+
+# Calculate vector u, that lies in plane given by v and n, is perpendicular to
+# vector v and u, n have the same orientation. Also we require that u is 
+# normalized.
+def get_normal_in_plane(n, v):
+    # print "n: {} v: {}".format(n, v)
+    assert np.dot(v, v) != 0
+    k = 1
+    l = - np.dot(n, v) / np.dot(v, v)
+    u = normalize(k * n + l * v)
+    assert np.dot(u, v) < 0.00001
+    return u
 
 # For two disks calculate vector that realizes radius of segment that emerges by 
 # projecting disk into the plan determined by normals of disks d1 and d2.

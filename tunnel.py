@@ -34,3 +34,11 @@ class Tunnel:
 
         return first, last
 
+    # Return all spheres containing given point
+    def get_all_containing_point(self, point):
+        spheres = []
+        for s in self.t:
+            if s.ball_contains(point):
+                spheres.append(s)
+        return spheres;
+
