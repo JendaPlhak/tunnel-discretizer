@@ -20,7 +20,6 @@ import visual as vs
 
 from visual import *
 from docopt import docopt
-
 from digger import *
 
 
@@ -58,7 +57,9 @@ if __name__ == '__main__':
             if (i < len(tunnel.t)-1):
                 s2 = tunnel.t[i+1]
                 vVis = vs.arrow(pos=s.center - centScene, 
-                                axis=(s2.center[0]-s.center[0], s2.center[1]-s.center[1], s2.center[2]-s.center[2]), 
+                                axis=(s2.center[0]-s.center[0], 
+                                        s2.center[1]-s.center[1], 
+                                        s2.center[2]-s.center[2]), 
                                 color=(1,0,0), shaftwidth=1)
         for i, disk in enumerate(disks[:]):
             # if (i != 0):

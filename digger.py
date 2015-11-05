@@ -7,6 +7,7 @@ from linalg import *
 from tunnel import Tunnel
 from minimal_enclosing import make_circle
 from digger import *
+from tunnel_curve import TunnelCurve
 
 
 class DigOpts: 
@@ -21,14 +22,16 @@ def dig_tunnel(tunnel, opts):
     normals = [normalize(centers[i + 1] - centers[i]) \
                for i in xrange(len(centers) - 1)]
 
+    curve = TunnelCurve(centers, 10.)
+
     # Calculate disks position
     for i, s in enumerate(tunnel.t):
         if i == len(tunnel.t) - 2:
             break
 
-        center      = centers[i]
-        next_center = centers[i + 1]
-        normal = normals[i]   
+        normal       = normals[i]   
+        center       = centers[i]
+        next_center  = centers[i + 1]
         centers_dist = np.linalg.norm(next_center - center)
 
         # range_ = tunnel.get_neighbors(i)
@@ -51,11 +54,8 @@ def dig_tunnel(tunnel, opts):
                 size  = np.linalg.norm(inter - center) + opts.eps
 
             disk_center = center + normal * size
+            new_normal  = curve.get_weighted_dir(i, size) 
 
-            w1 = 1 - size / centers_dist 
-            w2 = size / centers_dist
-
-            new_normal = normal * w1 + normals[i + 1] * w2
             new_disk   = fit_disk_tunnel(new_normal, disk_center, i, tunnel)
 
             if (len(disks) > 0):
@@ -69,7 +69,9 @@ def dig_tunnel(tunnel, opts):
             else:
                 disks.append(new_disk)
             size += opts.eps
+
     return disks
+
 
 def fit_disk_tunnel(normal, center, ball_idx, tunnel):
     disk_plane  = Plane(center, normal)
