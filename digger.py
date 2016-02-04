@@ -10,7 +10,7 @@ from digger import *
 from tunnel_curve import TunnelCurve
 
 
-class DigOpts: 
+class DigOpts:
 
     def __init__(self, delta):
         self.delta = delta
@@ -22,14 +22,14 @@ def dig_tunnel(tunnel, opts):
     normals = [normalize(centers[i + 1] - centers[i]) \
                for i in xrange(len(centers) - 1)]
 
-    curve = TunnelCurve(centers, 10.)
+    curve = TunnelCurve(centers, 8.)
 
     # Calculate disks position
     for i, s in enumerate(tunnel.t):
         if i == len(tunnel.t) - 2:
             break
 
-        normal       = normals[i]   
+        normal       = normals[i]
         center       = centers[i]
         next_center  = centers[i + 1]
         centers_dist = np.linalg.norm(next_center - center)
@@ -39,9 +39,9 @@ def dig_tunnel(tunnel, opts):
         # for n in normals[range_[0] + 1:range_[1]]:
         #     normal += n
         # normal = normal / (range_[1] - range_[0])
-        # print (range_[1] - range_[0])   
+        # print (range_[1] - range_[0])
 
-        # line between centers 
+        # line between centers
         line = Line(center, next_center - center)
 
         size = 0;
@@ -54,7 +54,7 @@ def dig_tunnel(tunnel, opts):
                 size  = np.linalg.norm(inter - center) + opts.eps
 
             disk_center = center + normal * size
-            new_normal  = curve.get_weighted_dir(i, size) 
+            new_normal  = curve.get_weighted_dir(i, size)
 
             new_disk   = fit_disk_tunnel(new_normal, disk_center, i, tunnel)
 
@@ -79,8 +79,8 @@ def fit_disk_tunnel(normal, center, ball_idx, tunnel):
     n_samples   = 15
 
     for sphere in tunnel.get_all_containing_point(center):
-        # calculate center of cap that we get by intersection disk_plane 
-        # and sphere 
+        # calculate center of cap that we get by intersection disk_plane
+        # and sphere
         cap_center = disk_plane.orthogonal_projection(sphere.center)
         # if center is out of the ball, the intersection is empty or one point.
         if not sphere.inner_ball_contains(cap_center):
@@ -114,7 +114,7 @@ def fit_disk_tunnel(normal, center, ball_idx, tunnel):
 
     return Disk(new_center, normal, radius)
 
-# For two given points and vector determining plane, calculate disk, that is 
+# For two given points and vector determining plane, calculate disk, that is
 # perpendicular to that plane, and its vertices are point1 and point2
 def get_new_disk_points(point1, point2, n):
     center = (point1 + point2) / 2.
@@ -134,7 +134,7 @@ def is_follower(prev_disk, new_disk):
     new_vert_1 = new_disk.center + new_dir
     new_vert_2 = new_disk.center - new_dir
 
-    v1 = new_vert_1 - prev_disk.center 
+    v1 = new_vert_1 - prev_disk.center
     v2 = new_vert_2 - prev_disk.center
 
     return np.dot(prev_disk.normal, v1) > -f_error \
@@ -165,8 +165,8 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 \
         = get_vertices(new_disk, prev_disk)
 
-    v1 = new_vert_1 - prev_disk.center 
-    v2 = new_vert_2 - prev_disk.center 
+    v1 = new_vert_1 - prev_disk.center
+    v2 = new_vert_2 - prev_disk.center
 
     # Determine whether both segment vertices lie in the same half-plane. If not
     # fix it.
@@ -180,9 +180,9 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
 
         # At least one of the vertices must be on the right side
         assert np.dot(prev_disk.normal, v1) >= 0. or np.dot(prev_disk.normal, v2) >= 0.
-        
+
         # Find which vertex is in the wrong half plane.
-        # Then shift appropriate vertex so that prev_disk is followed by 
+        # Then shift appropriate vertex so that prev_disk is followed by
         # new disk.
         if np.dot(prev_disk.normal, v1) < 0.:
             # print "First one!"
@@ -193,7 +193,7 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
             shift_vert = prev_vert_2 + prev_disk.normal * (delta / 5)
             new_disk   = get_new_disk_points(prev_vert_2, new_vert_1, new_disk.normal)
 
-    
+
     # Ensure that disks are not too far from each other.
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
     v = new_vert_1 - prev_vert_1
@@ -207,7 +207,7 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
         shifted_vert = prev_vert_2 + normalize(v) * delta
         new_disk = get_new_disk_points(new_vert_1, shifted_vert, new_disk.normal)
 
-    
+
     # perform re-fitting
     new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, ball_idx, tunnel)
     # print "Revised disk : {}".format(new_disk.to_geogebra())
@@ -219,15 +219,15 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
     new_vert_2 = new_disk.center - new_dir
     # print "New vertex 1: '{}', New vertex 2: '{}'".format(new_vert_1, new_vert_2)
 
-    v1 = new_vert_1 - prev_disk.center 
-    v2 = new_vert_2 - prev_disk.center 
+    v1 = new_vert_1 - prev_disk.center
+    v2 = new_vert_2 - prev_disk.center
 
     # print prev_disk.normal, v1
     # print np.dot(prev_disk.normal, v1)
 
     # print prev_disk.normal, v2
     # print np.dot(prev_disk.normal, v2)
-    
+
     # if not is_follower(prev_disk, new_disk):
     #     print "Recursive shift!"
     #     new_disk = shift_new_disk(new_disk, prev_disk, tunnel)

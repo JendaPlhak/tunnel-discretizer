@@ -9,25 +9,25 @@ class Disk:
 
     def to_dict(self):
         packer  = lambda c : tuple([c[0], c[1], c[2]])
-        return {"center" : packer(self.center), 
-                "normal" : packer(self.normal), 
+        return {"center" : packer(self.center),
+                "normal" : packer(self.normal),
                 "radius" : self.radius}
 
     def to_geogebra(self):
         tup_pack = lambda t : "({}, {}, {})".format(t[0], t[1], t[2])
         return "Circle[{0}, {1}, Vector[(0, 0, 0), {2}]]"\
             .format(tup_pack(self.center), self.radius, tup_pack(self.normal))
-        return {"center" : packer(self.center), 
-                "normal" : packer(self.normal), 
+        return {"center" : packer(self.center),
+                "normal" : packer(self.normal),
                 "radius" : self.radius}
     # Calculate plane that is determined by disk
     def get_plane(self):
         return Plane(self.center, self.normal)
 
     def plot(self):
-        vs.ring(pos=self.center, 
-                axis=self.normal, 
-                radius=self.radius, 
+        vs.ring(pos=self.center,
+                axis=self.normal,
+                radius=self.radius,
                 thickness=0.01)
 
     def contains(self, point):
@@ -44,17 +44,17 @@ class Disk:
 
 
 class Plane:
-   
+
     def __init__(self, point, normal):
-        self.point  = point
-        self.normal = normalize(normal)
-        self._basis  = None
+        self.point      = point
+        self.normal     = normalize(normal)
+        self._basis     = None
         self._projector = None
-   
+
     def contains(self, point):
         diff = np.dot(self.normal, self.point) - np.dot(self.normal, point)
         return abs(diff) < f_error
-   
+
     def intersection_line(self, line):
         return line.intersection_plane(self)
 
@@ -63,6 +63,8 @@ class Plane:
             v1 = normalize(null_space(np.array([self.normal, null_vec, null_vec])))
             v2 = normalize(null_space(np.array([self.normal, v1, null_vec])))
             assert abs(np.dot(v1, v2)) < f_error
+            assert abs(np.dot(v1, self.normal)) < f_error
+            assert abs(np.dot(v2, self.normal)) < f_error
             self._basis = (v1, v2)
         return self._basis
 
@@ -75,7 +77,7 @@ class Plane:
 
     def orthogonal_projection(self, point):
         point_proj = point - np.dot(point - self.point, self.normal) * self.normal
-        assert self.contains(point_proj) 
+        assert self.contains(point_proj)
         return point_proj
 
     def get_point_for_param(self, t, u):
@@ -95,7 +97,7 @@ class Sphere:
         self.radius = radius
     def to_dict(self):
         packer  = lambda c : tuple([c[0], c[1], c[2]])
-        return {"center" : packer(self.center), 
+        return {"center" : packer(self.center),
                 "normal" : packer(self.normal)}
     def intersection_line(self, line):
         return line.intersection_sphere(self)
@@ -132,7 +134,7 @@ class Line:
             + np.dot(point - self.point, self._norm_dir) * self._norm_dir
         assert self.contains(p)
         return p
-            
+
 
     def intersection_sphere(self, sphere):
         return get_intersection_line_sphere(sphere, self)

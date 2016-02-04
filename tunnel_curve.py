@@ -21,7 +21,7 @@ class TunnelCurve:
 
     #     return normalize(self.dirs[i]) * w1 + normalize(self.dirs[i + 1]) * w2
     def get_weighted_dir(self, active_segment_idx, d):
-        max_dist = 10.
+        max_dist = self.delta
         i = active_segment_idx
         cent_dist = []
         w_dir = np.array([0,0,0])
