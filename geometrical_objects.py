@@ -58,6 +58,24 @@ class Plane:
     def intersection_line(self, line):
         return line.intersection_plane(self)
 
+    def intersection_sphere(self, sphere):
+        cap_center = self.orthogonal_projection(sphere.center)
+
+        if not sphere.inner_ball_contains(cap_center):
+            return None
+
+        line_dir = self.get_base_vectors()[0]
+        line     = Line(cap_center, line_dir)
+        inter_points = sphere.intersection_line(line)
+        assert len(inter_points) == 2
+
+        # Result should be symmetrical, therefore half of calculation can
+        # be removed.
+        v = inter_points[0] - line.point
+        r = np.linalg.norm(v)
+
+        return Circle(self.orthogonal_proj_param(cap_center), r)
+
     def get_base_vectors(self):
         if self._basis == None:
             v1 = normalize(null_space(np.array([self.normal, null_vec, null_vec])))

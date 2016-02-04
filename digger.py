@@ -78,25 +78,13 @@ def fit_disk_tunnel(normal, center, ball_idx, tunnel):
     circle_cuts = []
     n_samples   = 15
 
-    for sphere in tunnel.get_all_containing_point(center):
+    for sphere in tunnel.get_all_intersecting_disk(disk_plane, center):
         # calculate center of cap that we get by intersection disk_plane
         # and sphere
-        cap_center = disk_plane.orthogonal_projection(sphere.center)
-        # if center is out of the ball, the intersection is empty or one point.
-        if not sphere.inner_ball_contains(cap_center):
+        cut_circle = disk_plane.intersection_sphere(sphere)
+        if cut_circle == None:
             continue
 
-        line_dir = disk_plane.get_base_vectors()[0]
-        line     = Line(cap_center, line_dir)
-        inter_points = sphere.intersection_line(line)
-        assert len(inter_points) == 2
-
-        # Result should be symmetrical, therefore half of calculation can
-        # be removed.
-        v = inter_points[0] - line.point
-        r = np.linalg.norm(v)
-
-        cut_circle = Circle(disk_plane.orthogonal_proj_param(cap_center), r)
         circle_cuts.append(cut_circle)
 
     discrete_approx = []

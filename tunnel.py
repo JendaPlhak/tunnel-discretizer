@@ -42,3 +42,12 @@ class Tunnel:
                 spheres.append(s)
         return spheres;
 
+    def get_all_intersecting_disk(self, plane, center):
+        cont_spheres = self.get_all_containing_point(center)
+        inters       = []
+
+        for s1 in self.t:
+            for s2 in cont_spheres:
+                if s2.intersect_ball(s1) and plane.intersection_sphere(s1) != None:
+                    inters.append(s1)
+        return inters
