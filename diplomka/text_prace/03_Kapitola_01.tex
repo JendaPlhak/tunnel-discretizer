@@ -8,12 +8,21 @@ Pro představu jak takový tunel může vypadat uvádíme obrázek \ref{fig:basi
   \label{fig:basic_tunnel}
 \end{figure}
 
+
 Abychom mohli provádět docking ligandu, musíme nejprve takto definovaný tunel nařezat na jemné plátky - kruhy, na které pak v průběhu výpočtu budeme dokovat průběžné konformace ligandu. Popišme si nyní, jak by takové řezy měly vypadat.
 
 \begin{defi}
 Řezem tunelu $ \Tau $ rozumíme kruh v prostoru, který je určen uspořádanou trojicí $\theta = (A, u, r)$, kde $ A $ je střed, $ u \in \mathbb{R}^3 $ je normálnový vektor a $ r > 0 $ je poloměr.
 Pro tento kruh $ \theta $ navíc musí platit, že $ \Tau \cap \theta $ je souvislá množina a navíc
-$ r $ je nejmenší takové, že $ \theta \supseteq \Tau \cap \rho(\theta) $, kde $ \rho(\theta) $ značí rovinu určenou normálovým vektorem kruhu $ \theta $.
+$ r $ je takové, že $ \theta \supseteq \Tau \cap \rho(\theta) $, kde $ \rho(\theta) $ značí rovinu určenou normálovým vektorem kruhu $ \theta $.
 \end{defi}
+Pro ilustraci, jak takové řezy mohou vypadat, přikládáme k nahlédnutí obrázek \ref{fig:tunnel_cuts}.
+\begin{figure}
+    \centering
+    \includegraphics[width=100mm]{img/simple_cuts.png}
+    \caption{Sample of molecule tunnel}
+  \centering
+  \label{fig:tunnel_cuts}
+\end{figure}
 
 \end{document}
