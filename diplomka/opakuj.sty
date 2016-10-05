@@ -1,0 +1,58 @@
+%Podle Tesaříkova czech.ldf
+\makeatletter
+\def\Deleni{%
+ \ifx\protect\@typeset@protect
+   \ifhmode
+     \ifinner
+       \bbl@afterelse\bbl@afterelse\bbl@afterelse\cs@hyphen
+     \else
+       \bbl@afterfi\bbl@afterelse\bbl@afterelse\cs@firsthyphen
+     \fi
+   \else
+     \bbl@afterfi\bbl@afterelse\cs@hyphen
+   \fi
+ \else
+   \bbl@afterfi\cs@hyphen
+ \fi }
+\makeatother
+
+%Opakování symbolů binárních operací a relací při zalomení řádku
+%Autor: Josef Tkadlec tkadlec@fel.cvut.cz
+
+\relpenalty     =10000      % aby se nelámalo v jiných než ošetřených
+\binoppenalty   =10000
+\exhyphenpenalty=1000       % aby spíše nouzově (implicitně je 50)
+                           % "lokálně" lze zakázat {...}
+
+\def\neq {\mathrel{\not=}}  % aby nedocházelo k lámání \not=/=
+\let\ne=\neq
+
+\def\OpakujPrikaz #1#2{\let #2=#1
+ \def #1{#2\nobreak\discretionary{}{\hbox{$#2$}}{}}}
+\def\OpakujZnak #1#2{\mathchardef #2=\mathcode`#1
+ \activedef #1{#2\nobreak\discretionary{}{\hbox{$#2$}}{}}
+ \uccode`\~=0 \mathcode`#1="8000 }
+%Doplnil Kuben pro nový czech.ldf \expandafter možná nemusí být
+\def\OpakujZnakMinus #1#2{\mathchardef #2=\mathcode`#1
+ \activedef #1{\ifmmode#2\nobreak\discretionary{}{\hbox{$#2$}}{}\else\expandafter\Deleni\fi }
+ \uccode`\~=0 \mathcode`#1="8000 }
+\def\activedef #1{\uccode`\~=`#1 \uppercase{\def~}}
+
+\OpakujPrikaz {\neq }{\neqORI}  \let \ne=\neq
+\OpakujPrikaz {\leq }{\leqORI}  \let \le=\leq
+\OpakujPrikaz {\geq }{\geqORI}  \let \ge=\geq
+\OpakujPrikaz {\cup }{\cupORI}
+\OpakujPrikaz {\cap }{\capORI}
+\OpakujPrikaz {\times }{\timesORI}
+\OpakujPrikaz {\subset }{\subsetORI}
+\OpakujPrikaz {\subseteq }{\subseteqORI}
+\OpakujPrikaz {\supset }{\supsetORI}
+\OpakujPrikaz {\supseteq }{\supseteqORI}
+
+\OpakujPrikaz {\cdot }{\cdotORI}
+\OpakujPrikaz {\setminus }{\setminusORI}
+
+\OpakujZnak <{\lessORI}
+\OpakujZnak >{\greaterORI}
+\OpakujZnak +{\plusORI}
+\AtBeginDocument {\OpakujZnak ={\eqORI} \OpakujZnakMinus -{\minusORI}}

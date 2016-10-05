@@ -63,18 +63,18 @@ if __name__ == '__main__':
                                         s2.center[1]-s.center[1],
                                         s2.center[2]-s.center[2]),
                                 color=(1,0,0), shaftwidth=1)
-        for i, disk in enumerate(disks[:]):
-            # if (i != 0):
-            #     print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
-            vs.ring(pos=disk.center - centScene,
-                    axis=disk.normal,
-                    radius=disk.radius,
-                    thickness=0.01,
-                    color=(1,0,0))
-            if i % 2 == 1:
-                vVis = vs.arrow(pos=tuple(disk.center - centScene),
-                                axis=tuple(disk.normal * 0.25) ,
-                                color=(0,1,0), shaftwidth=0.5)
+        # for i, disk in enumerate(disks[:]):
+        #     # if (i != 0):
+        #     #     print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
+        #     vs.ring(pos=disk.center - centScene,
+        #             axis=disk.normal,
+        #             radius=disk.radius,
+        #             thickness=0.01,
+        #             color=(1,0,0))
+        #     if i % 2 == 1:
+        #         vVis = vs.arrow(pos=tuple(disk.center - centScene),
+        #                         axis=tuple(disk.normal * 0.25) ,
+        #                         color=(0,1,0), shaftwidth=0.5)
 
 
     disks_structured = [disk.to_dict() for disk in disks]

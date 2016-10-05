@@ -1,0 +1,49 @@
+\chapter{Druhá kapitola s matematikou \texorpdfstring{$\int\! f(x)\,\mathrm{d}x$}{int f(x) dx} v~názvu}
+%% matematicke symboly nelze do zalozek v PDF vlozit - proto slouzi prikaz \texorpdfstring{toto se vysazi}{toto se
+%% vlozi do zalozek v PDF} - nektere symboly vlozit lze, viz kapitolu 50 v dokumentaci
+%% http://mirrors.ctan.org/macros/latex/contrib/hyperref/hyperref.pdf
+%% viz take http://orgmode.org/worg/org-symbols.html
+%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%% UKAZKA OPAKOVANI MATEMATICKYCH SYMBOLU %%%%%%%%%%%%%
+% 
+% ukázka opakování na řádkovém zlomu ukázka opakování na řádkovém zlomu zlom $c+ a+ b$
+% 
+% ukázka opakování na řádkovém zlomu ukázka opakování na řádkovém zlomu zl $c- a- b$
+% 
+% ukázka opakování na řádkovém zlomu ukázka opakování na řádkovém zlomu zlo $c\cdot a\cdot b$
+% 
+% ukázka opakování na řádkovém zlomu ukázka opakování na řádkovém zlomu zl $c\setminus a\setminus b$
+% 
+
+Text text  text  text  text  text  text  text  text  text  text  text  text  text  text  text  text  text  text  text 
+text  text  text  text  text  text  text  text  text  text  text  text  text  text  text  text  text  text  text  text 
+text  text  text  text  text  text  text  text  text  text.
+
+\begin{equation*}\label{E}\tag{rovnice}
+ \int\! f(x)\,\mathrm{d}x
+\end{equation*}
+odkaz na rovnici s \uv{tagem} \eqref{E} -- pokud nechcete vzorci přidělit číslo, ale nějaký vlastní symbol, používejte
+\uv{hvězdičkovaná} prostředí, tj. např. \verb+equation*+
+\begin{equation}\label{EE}
+ \iint\! f(x)\,\mathrm{d}x
+\end{equation}
+odkaz na druhy vzorec \eqref{EE}
+
+\lipsum[1]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%% GENERUJ TEXT %%%%%%%%%%%%%
+
+\shorthandoff{-} 
+\lipsum[9-14]
+\index{nějaká!položka}
+\lipsum[35-41]
+
+\section{Podkapitola}
+
+\lipsum[50-53]
+\index{jiná položka}
+\shorthandon{-} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

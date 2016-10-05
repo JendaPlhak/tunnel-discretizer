@@ -1,0 +1,926 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Styl pro sablony Bc+Mgr+RNDr (CZ) pro PriF MU                                                     %%%
+% Autor: Petr Zemanek (zemanekp@math.muni.cz)                                                       %%%
+% Pripominky, dotazy, namety smerujte na diskusni forum: https://is.muni.cz/auth/df/sablona-prif    %%%
+% Urceno pro LaTeX-2e                                                                               %%%
+% Verze: 1.9 (4. brezna 2016)                                                                       %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\filename{sci.muni.thesis.sty}
+\def\filedate{2016/03/04}
+\def\fileversion{1.9}
+
+\@ifundefined{NeedsTeXFormat}{
+\typeout{*******************************************************************************}
+\ProvidesClass{sci.muni.thesis}[\filedate\space v\fileversion]
+\typeout{This package provides the basic style for bachelor, master, and rigorous theses written by students of 
+the Faculty of Science (Masaryk University) with repect to the Provision of Dean No. 5/2014}
+\typeout{Author: Petr Zemanek (zemanekp@math.muni.cz)}
+\typeout{For bachelor and master theses see http://www.sci.muni.cz/en/BcMgrStudium/}
+\typeout{For rigorous theses see http://www.sci.muni.cz/en/RigRiz/}
+\typeout{}
+\typeout{Tento balik poskytuje zakladni styl potrebny pro bakalarske, diplomove a rigorozni prace psane studenty
+Prirodovedecke fakulty Masarykovy univerzity dle Opatreni dekana c. 5/2014}
+\typeout{Autor: Petr Zemanek (zemanekp@math.muni.cz)}
+\typeout{Pro bakalarske a diplomove prace viz http://www.sci.muni.cz/cz/BcMgrStudium/}
+\typeout{Pro rigorozni prace viz http://www.sci.muni.cz/cz/RigRiz/}
+\typeout{*******************************************************************************}
+}{
+\NeedsTeXFormat{LaTeX2e}
+\typeout{*******************************************************************************}
+\ProvidesClass{sci.muni.thesis}[\filedate\space v\fileversion]
+\typeout{This package provides the basic style for bachelor, master, and rigorous theses written by students of 
+the Faculty of Science (Masaryk University) with repect to the Provision of Dean No. 5/2014}
+\typeout{Author: Petr Zemanek (zemanekp@math.muni.cz)}
+\typeout{For bachelor and master theses see http://www.sci.muni.cz/en/BcMgrStudium/}
+\typeout{For rigorous theses see http://www.sci.muni.cz/en/RigRiz/}
+\typeout{}
+\typeout{Tento balik poskytuje zakladni styl potrebny pro bakalarske, diplomove a rigorozni prace psane studenty
+Prirodovedecke fakulty Masarykovy univerzity dle Opatreni dekana c. 5/2014}
+\typeout{Autor: Petr Zemanek (zemanekp@math.muni.cz)}
+\typeout{Pro bakalarske a diplomove prace viz http://www.sci.muni.cz/cz/BcMgrStudium/}
+\typeout{Pro rigorozni prace viz http://www.sci.muni.cz/cz/RigRiz/}
+\typeout{*******************************************************************************}
+\RequirePackage{etoolbox,graphicx,textfit,changepage,setspace,ifthen,fancyhdr,calc,pdfpages,makeidx,color}
+\RequirePackage{hyperref}
+\RequirePackage[all]{hypcap}
+}
+
+\DeclareOption{Bc}{\newcommand{\TypPrace}{Bakal{\'{a}}{\v{r}}sk{\'{a}} pr{\'{a}}ce}}
+\DeclareOption{Mgr}{\newcommand{\TypPrace}{Diplomov{\'{a}} pr{\'{a}}ce}}
+\DeclareOption{RNDr}{\newcommand{\TypPrace}{Rigorózn{\'{i}} pr{\'{a}}ce}}
+
+\DeclareOption{Barevne}{\hypersetup{
+linkcolor=red,
+citecolor=blue,
+filecolor=magenta,
+urlcolor=cyan,
+}}
+
+\DeclareOption{Tisk}{\hypersetup{
+linkcolor=black,
+citecolor=black,
+filecolor=black,
+urlcolor=black,
+}}
+
+\ProcessOptions
+
+\overfullrule10pt
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DEFINICE POVINNYCH CASTI %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\NazevUstavu}[2]{\newcommand{\Ustav}{#1} \newcommand{\Department}{#2}}
+\newcommand{\RokOdevzdaniPrace}[1]{\newcommand{\RokOdevzdani}{#1}}
+\newcommand{\AkademickyRok}[1]{\newcommand{\AkadRok}{#1}}
+\newcommand{\Autor}[2]{\newcommand{\JmenoAutora}{#1} \newcommand{\AutorSTituly}{#2}}
+\newcommand{\NazevPrace}[3]{\newcommand{\TitulPraceNaTitulnimListu}{#1}\newcommand{\TitulPrace}{#2}
+\newcommand{\TitleOfThesis}{#3}}
+\newcommand{\VedouciPraceSTituly}[1]{\newcommand{\VedouciPrace}{#1}}
+\newcommand{\StudijniProgram}[2]{\newcommand{\StudProg}{#1} \newcommand{\DegreeProgramme}{#2}}
+\newcommand{\StudijniObor}[2]{\newcommand{\StudOb}{#1} \newcommand{\FieldOfStudy}{#2}}
+\newcommand{\KlicovaSlova}[2]{\newcommand{\KlSlova}{#1} \newcommand{\Keywords}{#2}}
+\newcommand{\PocetStran}[1]{\newcommand{\Strany}{#1}}
+\newcommand{\Abstrakty}[2]{\newcommand{\Abstrakt}{#1} \newcommand{\Abstract}{#2}}
+\newcommand{\TextPodekovani}[1]{\newcommand{\Podekovani}{#1}}
+\newcommand{\TextProhlaseni}[1]{\newcommand{\Prohlaseni}{#1}}
+\newcommand{\DatumProhlaseni}[1]{\newcommand{\DatumProhl}{#1}}
+
+\newcommand{\NazevPraceSLOVENSKY}[1]{\newcommand{\TitulPraceSVK}{#1}}
+\newcommand{\NazevUstavuSLOVENSKY}[1]{\newcommand{\UstavSVK}{#1}}
+
+\newcommand{\StudijniProgramSLOVENSKY}[1]{\newcommand{\StudProgSVK}{#1}}
+
+\newcommand{\StudijniOborSLOVENSKY}[1]{\newcommand{\StudObSVK}{#1}}
+
+\newcommand{\KlicovaSlovaSLOVENSKY}[1]{\newcommand{\KlSlovaSVK}{#1}}
+
+\newcommand{\AbstraktSLOVENSKY}[1]{\newcommand{\AbstraktSVK}{#1}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ROZMERY STRANKY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\makeatletter
+\newcommand{\VelikostHlavicky}{12 pt+\@ptsize pt}
+\makeatother
+\usepackage[top=22mm,bottom=24mm,left=34mm,right=25mm,headsep=6mm,footskip=8mm,includeheadfoot,
+headheight=\VelikostHlavicky]{geometry}
+
+%%%%%%%%%%%%%%%%%
+%%%%% DATUM %%%%%
+%%%%%%%%%%%%%%%%%
+
+\def\Dnes{\number\day.~\ifcase
+\month\or ledna\or února\or
+b{\v{r}}ezna\or dubna\or kv{\v{e}}tna\or
+{\v{c}}ervna\or {\v{c}}ervence\or srpna\or
+z{\'{a}}{\v{r}}{\'{i}}\or {\v{r}}{\'{i}}jna\or listopadu\or
+prosince\fi \space\number\year}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% PREDEFINOVANI CLEARDOUBLEPAGE - NA PRAZDNYCH STRANACH PRI OBOUSTRANNEM TISKU NEBUDE HLAVICKA %%%%%%%
+
+\let\origcleardoublepage\cleardoublepage %%zachovani puvodniho prikazu
+
+\makeatletter
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+    \hbox{}
+    \thispagestyle{empty}
+    \newpage
+    \if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\makeatother \clearpage{\pagestyle{empty}\cleardoublepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HALVICKY POVINNYCH CASTI %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\makeatletter
+\newcommand{\NazevPovinneCasti}[1]{%
+  \vspace*{50\p@}%
+  {\parindent \z@ \raggedright
+    \normalfont
+    \interlinepenalty\@M
+    \Huge \bfseries  #1\par\nobreak
+    \vskip 30\p@
+  }}
+\makeatother
+
+%%%%%%%%%%%%%%%%%
+%%%%% DESKY %%%%%
+%%%%%%%%%%%%%%%%%
+
+\newcommand{\Desky}{
+\pagestyle{empty}
+\begin{titlepage}
+\pdfbookmark{Desky}{Desky}
+\pagenumbering{Alph}
+
+\newlength{\sirkaustavorig} %% urci puvodni sirku textu s nazvem ustavu
+\settowidth{\sirkaustavorig}{\fontsize{16pt}{28pt}\selectfont{\textbf{\textsc{\Ustav}}}}
+
+\newlength{\sirkafakultaorig} %% urci sirku textu s nazvem fakulty
+\settowidth{\sirkafakultaorig}{\fontsize{21pt}{28pt}\selectfont{\textbf{\textsc{P{\v{r}}{\'{i}}rodov{\v{e}}deck{\'{a}}
+fakulta}}}}
+
+
+  \begin{center}
+    {\fontsize{22pt}{28pt}\selectfont{\textbf{MASARYKOVA UNIVERZITA}}}\\[2mm]
+    {\fontsize{21pt}{28pt}\selectfont{\textbf{\textsc{P{\v{r}}{\'{i}}rodov{\v{e}}deck{\'{a}} fakulta}}}}\\
+    \ifthenelse{\lengthtest{\sirkaustavorig > 0.95\sirkafakultaorig}}%
+        {\textbf{\textsc{\scaletowidth{0.95\sirkafakultaorig}{\Ustav}}}}%
+        {\vspace*{-3mm}\fontsize{16pt}{28pt}\selectfont{\textbf{\textsc{\Ustav}}}}
+  \end{center}
+
+\vfill
+
+  \begin{center}
+    {\fontsize{34pt}{20pt}\selectfont{\bf \TypPrace}}
+  \end{center}
+
+\vfill
+
+
+\setbox2=\hbox{\textbf{\textsc{\JmenoAutora}}}
+\setbox1=\hbox{textbf{\textsc{Z}}}
+\ht2=\the\ht1
+\setbox0=\hbox{\resizebox{0.68\textwidth}{!}{\box2}}
+
+\newlength{\sirkadeskyorig} %% urci puvodni sirku textu se jmenem autora
+\settowidth{\sirkadeskyorig}{\fontsize{22pt}{28pt}\selectfont{\textbf{\textsc{\JmenoAutora}}}}
+
+\begin{raggedright}
+ \ifthenelse{\lengthtest{\sirkadeskyorig > 0.65\textwidth}}%
+       {\noindent \resizebox{!}{\the\ht0}{{\textbf{\textsc{Brno \RokOdevzdani}}}} \hfill \copy0}
+       {{\fontsize{22pt}{28pt}\selectfont{\textbf{\textsc{Brno \RokOdevzdani \hfill \JmenoAutora}}}}}
+\end{raggedright}
+
+\end{titlepage}
+ 
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% TITULNI STRANA %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \newcommand{\zvetsi}[2]{\begingroup\scalefont{#1}{#2}\endgroup}
+
+\newcommand{\TitulniStrana}{
+\pagenumbering{roman}
+\pagestyle{empty}
+\pdfbookmark{Tituln{\'{i}} strana}{Titulni strana}
+
+%%
+%% loga jsou umistena ve slozce ``loga''
+%% a jsou dostupna na http://www.muni.cz/general/mu_presentation/logos?lang=cs
+%%
+
+\changetext{}{11.6mm}{}{}{}
+\begin{adjustwidth}{-12mm}{}
+\vspace*{-5mm}
+% \hspace{-17mm}
+\begin{minipage}{28mm}
+  \includegraphics[width=28mm]{loga/MU_(black)}
+\end{minipage}\hspace{2mm}
+\begin{minipage}{113mm}
+  \begin{center}\vspace*{3mm}
+    {\fontsize{22pt}{28pt}\selectfont{\textbf{MASARYKOVA UNIVERZITA}}}\\[2mm]
+    {\fontsize{21pt}{28pt}\selectfont{\textbf{\textsc{P{\v{r}}{\'{i}}rodov{\v{e}}deck{\'{a}} fakulta}}}}\\[1mm]
+%
+    \settowidth{\sirkaustavorig}{\fontsize{16pt}{28pt}\selectfont{\textbf{\textsc{\Ustav}}}}
+   
+\settowidth{\sirkafakultaorig}{\fontsize{21pt}{28pt}\selectfont{\textbf{\textsc{P{\v{r}}{\'{i}}rodov{\v{e}}deck{\'{a}}
+fakulta}}}}
+%    
+    \ifthenelse{\lengthtest{\sirkaustavorig > 0.95\sirkafakultaorig}}%
+        {\vspace*{-0.5mm}\textbf{\textsc{\scaletowidth{0.95\sirkafakultaorig}{\Ustav}}}\\[-1mm]}%
+        {\vspace*{-4mm}\fontsize{16pt}{28pt}\selectfont{\textbf{\textsc{\Ustav}}}\\[-6mm]}
+    \noindent \rule{\textwidth}{2pt}\vspace*{2mm}
+  \end{center}
+\end{minipage}\hspace{2mm}
+\begin{minipage}{28mm}
+  \includegraphics[width=28mm]{loga/SCI_(black)}
+\end{minipage}
+\end{adjustwidth}
+\changetext{}{-11.6mm}{}{}{}
+
+ \vfill
+
+\newlength{\autororig} %% urci puvodni sirku textu se jmenem autora
+\settowidth{\autororig}{\fontsize{26pt}{28pt}\selectfont{\bf \JmenoAutora}}
+
+  \begin{raggedright}
+    \begin{spacing}{2.8}
+      {\fontsize{35pt}{28pt}\selectfont{\bf \TitulPraceNaTitulnimListu}}\\[-2mm]
+    \end{spacing}
+      {\fontsize{20pt}{28pt}\selectfont{\TypPrace}}\\[5mm]
+    \ifthenelse{\lengthtest{\autororig > 0.98\textwidth}}%
+        {\hspace*{-1mm}\textbf{\scaletowidth{0.98\textwidth}{\JmenoAutora}}}%
+        {\fontsize{26pt}{28pt}\selectfont{\bf \JmenoAutora}}
+  \end{raggedright}
+
+\vspace*{5mm}
+\vfill
+
+\newlength{\sirkatitulkaorig} %% urci puvodni sirku textu se jmenem vedouciho
+\settowidth{\sirkatitulkaorig}{\fontsize{18.5pt}{20pt}\selectfont{\textbf{Vedouc{\'{i}} pr{\'{a}}ce: \VedouciPrace}}}
+
+% \newlength{\vyskatitulka} %% urci novou vysku textu se jmenem vedouciho
+% \settoheight{\vyskatitulka}{\textbf{\scaletowidth{0.72\textwidth}{Vedouc{\'{i}} pr{\'{a}}ce: \VedouciPrace}}}
+
+\setbox2=\hbox{\bf Vedouc{\'{i}} pr{\'{a}}ce: \VedouciPrace}
+\setbox1=\hbox{\bf A}
+\ht2=\the\ht1
+\setbox0=\hbox{\resizebox{0.75\textwidth}{!}{\box2}}
+
+\begin{raggedright}
+ \ifthenelse{\lengthtest{\sirkatitulkaorig > 0.72\textwidth}}%
+       {\noindent\copy0 \hfill \resizebox{!}{\the\ht0}{\bf Brno \RokOdevzdani}}
+       {{\fontsize{18.5pt}{20pt}\selectfont{\textbf{Vedouc{\'{i}} pr{\'{a}}ce: \VedouciPrace \hfill Brno
+\RokOdevzdani}}}}
+\end{raggedright}
+
+\normalsize
+
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% TITULNI STRANA RIGOROZNI PRACE %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \newcommand{\zvetsi}[2]{\begingroup\scalefont{#1}{#2}\endgroup}
+
+\newcommand{\TitulniStranaRP}{
+\pagenumbering{roman}
+\pagestyle{empty}
+\pdfbookmark{Tituln{\'{i}} strana}{Titulni strana}
+
+%%
+%% loga jsou umistena ve slozce ``loga''
+%% a jsou dostupna na http://www.muni.cz/general/mu_presentation/logos?lang=cs
+%%
+
+\changetext{}{11.6mm}{}{}{}
+\begin{adjustwidth}{-12mm}{}
+\vspace*{-5mm}
+% \hspace{-17mm}
+\begin{minipage}{28mm}
+  \includegraphics[width=28mm]{loga/MU_(black)}
+\end{minipage}\hspace{2mm}
+\begin{minipage}{113mm}
+  \begin{center}\vspace*{3mm}
+    {\fontsize{22pt}{28pt}\selectfont{\textbf{MASARYKOVA UNIVERZITA}}}\\[2mm]
+    {\fontsize{21pt}{28pt}\selectfont{\textbf{\textsc{P{\v{r}}{\'{i}}rodov{\v{e}}deck{\'{a}} fakulta}}}}\\[1mm]
+%
+    \settowidth{\sirkaustavorig}{\fontsize{16pt}{28pt}\selectfont{\textbf{\textsc{\Ustav}}}}
+   
+\settowidth{\sirkafakultaorig}{\fontsize{21pt}{28pt}\selectfont{\textbf{\textsc{P{\v{r}}{\'{i}}rodov{\v{e}}deck{\'{a}}
+fakulta}}}}
+%    
+    \ifthenelse{\lengthtest{\sirkaustavorig > 0.95\sirkafakultaorig}}%
+        {\vspace*{-0.5mm}\textbf{\textsc{\scaletowidth{0.95\sirkafakultaorig}{\Ustav}}}\\[-1mm]}%
+        {\vspace*{-4mm}\fontsize{16pt}{28pt}\selectfont{\textbf{\textsc{\Ustav}}}\\[-6mm]}
+    \noindent \rule{\textwidth}{2pt}\vspace*{2mm}
+  \end{center}
+\end{minipage}\hspace{2mm}
+\begin{minipage}{28mm}
+  \includegraphics[width=28mm]{loga/SCI_(black)}
+\end{minipage}
+\end{adjustwidth}
+\changetext{}{-11.6mm}{}{}{}
+
+ \vfill
+
+\newlength{\autororig} %% urci puvodni sirku textu se jmenem autora
+\settowidth{\autororig}{\fontsize{26pt}{28pt}\selectfont{\bf \JmenoAutora}}
+
+  \begin{raggedright}
+    \begin{spacing}{2.8}
+      {\fontsize{35pt}{28pt}\selectfont{\bf \TitulPraceNaTitulnimListu}}\\[-2mm]
+    \end{spacing}
+      {\fontsize{20pt}{28pt}\selectfont{\TypPrace}}\\[5mm]
+    \ifthenelse{\lengthtest{\autororig > 0.98\textwidth}}%
+        {\hspace*{-1mm}\textbf{\scaletowidth{0.98\textwidth}{\JmenoAutora}}}%
+        {\fontsize{26pt}{28pt}\selectfont{\bf \JmenoAutora}}
+  \end{raggedright}
+
+\vspace*{5mm}
+\vfill
+
+\begin{raggedright}
+   {{\fontsize{18.5pt}{20pt}\selectfont{\textbf{\hfill Brno \RokOdevzdani}}}}
+\end{raggedright}
+
+
+\normalsize
+
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% BIBLIOGRAFICKY ZAZNAM %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\BibliografickyZaznam}{
+\pdfbookmark{Bibliografick{\'{y}} z{\'{a}}znam}{Bibliograficky zaznam}
+\NazevPovinneCasti{Bibliografick{\'{y}} z{\'{a}}znam}
+\thispagestyle{empty}
+
+\newlength{\LevySloupecCZ}
+\settowidth{\LevySloupecCZ}{{\bf Studijn{\'{i}} program:} } %% urcit potrebnou sirku leveho sloupce 
+
+\newlength{\PravySloupecCZ}
+\setlength{\PravySloupecCZ}{\textwidth - \LevySloupecCZ - 24 pt} %% dopocitat pravy sloupec
+
+\noindent
+\begin{tabular}{p{\LevySloupecCZ} p{\PravySloupecCZ} }
+  {\bf Autor:}            & \AutorSTituly \\
+                          & P{\v{r}}{\'{i}}rodov{\v{e}}deck{\'{a}} fakulta, Masarykova univerzita\\
+                          & \Ustav  \\[6mm]
+  {\bf N{\'{a}}zev pr{\'{a}}ce:}      & \TitulPrace  \\[6mm]
+  {\bf Studijn{\'{i}} program:} & \StudProg  \\[6mm]
+  {\bf Studijn{\'{i}} obor:}    & \StudOb \\[6mm]
+  {\bf Vedouc{\'{i}} pr{\'{a}}ce:}    & \VedouciPrace \\[6mm]
+  {\bf Akademick{\'{y}} rok:}   & \AkadRok \\[6mm]
+  {\bf Po{\v{c}}et stran:}      & \Strany \\[6mm]
+  {\bf Kl{\'{i}}{\v{c}}ov{\'{a}} slova:}    & \KlSlova
+\end{tabular}
+
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% BIBLIOGRAFICKY ZAZNAM RIGOROZNI PRACE %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\BibliografickyZaznamRP}{
+\pdfbookmark{Bibliografick{\'{y}} z{\'{a}}znam}{Bibliograficky zaznam}
+\NazevPovinneCasti{Bibliografick{\'{y}} z{\'{a}}znam}
+\thispagestyle{empty}
+
+\newlength{\LevySloupecCZ}
+\settowidth{\LevySloupecCZ}{{\bf Studijn{\'{i}} program:} } %% urcit potrebnou sirku leveho sloupce 
+
+\newlength{\PravySloupecCZ}
+\setlength{\PravySloupecCZ}{\textwidth - \LevySloupecCZ - 24 pt} %% dopocitat pravy sloupec
+
+\noindent
+\begin{tabular}{p{\LevySloupecCZ} p{\PravySloupecCZ} }
+  {\bf Autor:}            & \AutorSTituly \\
+                          & P{\v{r}}{\'{i}}rodov{\v{e}}deck{\'{a}} fakulta, Masarykova univerzita\\
+                          & \Ustav  \\[6mm]
+  {\bf N{\'{a}}zev pr{\'{a}}ce:}      & \TitulPrace  \\[6mm]
+  {\bf Studijn{\'{i}} program:} & \StudProg  \\[6mm]
+  {\bf Studijn{\'{i}} obor:}    & \StudOb \\[6mm]
+  {\bf Akademick{\'{y}} rok:}   & \AkadRok \\[6mm]
+  {\bf Po{\v{c}}et stran:}      & \Strany \\[6mm]
+  {\bf Kl{\'{i}}{\v{c}}ov{\'{a}} slova:}    & \KlSlova
+\end{tabular}
+
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% BIBLIOGRAFICKY ZAZNAM SVK %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\BibliografickyZaznamSVK}{
+\pdfbookmark{Bibliografick{\'{y}} z{\'{a}}znam (SVK)}{Bibliograficky zaznam (SVK)}
+\NazevPovinneCasti{Bibliografick{\'{y}} z{\'{a}}znam}
+\thispagestyle{empty}
+
+\newlength{\LevySloupecSVK}
+\settowidth{\LevySloupecSVK}{{\bf {\v{S}}tudijn{\'{y}} program:} } %% urcit potrebnou sirku leveho sloupce 
+
+\newlength{\PravySloupecSVK}
+\setlength{\PravySloupecSVK}{\textwidth - \LevySloupecSVK - 24 pt} %% dopocitat pravy sloupec
+
+\noindent
+\begin{tabular}{p{\LevySloupecSVK} p{\PravySloupecSVK} }
+  {\bf Autor:}            & \AutorSTituly \\
+                          & Pr{\'{i}}rodovedeck{\'{a}} fakulta, Masarykova univerzita\\
+                          & \UstavSVK  \\[6mm]
+  {\bf N{\'{a}}zov pr{\'{a}}ce:}      & \TitulPraceSVK  \\[6mm]
+  {\bf {\v{S}}tudijn{\'{y}} program:} & \StudProgSVK  \\[6mm]
+  {\bf {\v{S}}tudijn{\'{y}} odbor:}    & \StudObSVK \\[6mm]
+  {\bf Ved{\'{u}}ci pr{\'{a}}ce:}     & \VedouciPrace \\[6mm]
+  {\bf Akademick{\'{y}} rok:}   & \AkadRok \\[6mm]
+  {\bf Po{\v{c}}et str{\'{a}}n:}      & \Strany \\[6mm]
+  {\bf K{\v{l}}{\'{u}}{\v{c}}ov{\'{e}} slov{\'{a}}:}    & \KlSlovaSVK
+\end{tabular}
+
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% BIBLIOGRAFICKY ZAZNAM PRO RIGOROZNI PRACE SVK %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\BibliografickyZaznamSVKRP}{
+\pdfbookmark{Bibliografick{\'{y}} z{\'{a}}znam (SVK)}{Bibliograficky zaznam (SVK)}
+\NazevPovinneCasti{Bibliografick{\'{y}} z{\'{a}}znam}
+\thispagestyle{empty}
+
+\newlength{\LevySloupecSVK}
+\settowidth{\LevySloupecSVK}{{\bf {\v{S}}tudijn{\'{y}} program:} } %% urcit potrebnou sirku leveho sloupce 
+
+\newlength{\PravySloupecSVK}
+\setlength{\PravySloupecSVK}{\textwidth - \LevySloupecSVK - 24 pt} %% dopocitat pravy sloupec
+
+\noindent
+\begin{tabular}{p{\LevySloupecSVK} p{\PravySloupecSVK} }
+  {\bf Autor:}            & \AutorSTituly \\
+                          & Pr{\'{i}}rodovedeck{\'{a}} fakulta, Masarykova univerzita\\
+                          & \UstavSVK  \\[6mm]
+  {\bf N{\'{a}}zov pr{\'{a}}ce:}      & \TitulPraceSVK  \\[6mm]
+  {\bf {\v{S}}tudijn{\'{y}} program:} & \StudProgSVK  \\[6mm]
+  {\bf {\v{S}}tudijn{\'{y}} odbor:}    & \StudObSVK \\[6mm]
+  {\bf Akademick{\'{y}} rok:}   & \AkadRok \\[6mm]
+  {\bf Po{\v{c}}et str{\'{a}}n:}      & \Strany \\[6mm]
+  {\bf K{\v{l}}{\'{u}}{\v{c}}ov{\'{e}} slov{\'{a}}:}    & \KlSlovaSVK
+\end{tabular}
+
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% BIBLIOGRAPHIC ENTRY %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\BibliographicEntry}{
+\pdfbookmark{Bibliographic Entry}{Bibliographic Entry}
+\NazevPovinneCasti{Bibliographic Entry}
+\thispagestyle{empty}
+
+\newlength{\LevySloupecENG}
+\settowidth{\LevySloupecENG}{{\bf Degree Programme:} } %% urcit potrebnou sirku leveho sloupce 
+
+\newlength{\PravySloupecENG}
+\setlength{\PravySloupecENG}{\textwidth - \LevySloupecENG - 24 pt} %% dopocitat pravy sloupec
+
+\noindent
+\begin{tabular}{ p{\LevySloupecENG} p{\PravySloupecENG} }
+  {\bf Author:}           & \AutorSTituly\\
+                          & Faculty of Science, Masaryk University\\
+                          & \Department \\[6mm]
+  {\bf Title of Thesis:}  & \TitleOfThesis  \\[6mm]
+  {\bf Degree Programme:} & \DegreeProgramme  \\[6mm]
+  {\bf Field of Study:}   & \FieldOfStudy \\[6mm]
+  {\bf Supervisor:}       & \VedouciPrace \\[6mm]
+  {\bf Academic Year:}    & \AkadRok \\[6mm]
+  {\bf Number of Pages:}  & \Strany \\[6mm]
+  {\bf Keywords:}         & \Keywords
+\end{tabular}
+
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% BIBLIOGRAPHIC ENTRY - RIGOROZNI PRACE%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\BibliographicEntryRP}{
+\pdfbookmark{Bibliographic Entry}{Bibliographic Entry}
+\NazevPovinneCasti{Bibliographic Entry}
+\thispagestyle{empty}
+
+\newlength{\LevySloupecENG}
+\settowidth{\LevySloupecENG}{{\bf Degree Programme:} } %% urcit potrebnou sirku leveho sloupce 
+
+\newlength{\PravySloupecENG}
+\setlength{\PravySloupecENG}{\textwidth - \LevySloupecENG - 24 pt} %% dopocitat pravy sloupec
+
+\noindent
+\begin{tabular}{ p{\LevySloupecENG} p{\PravySloupecENG} }
+  {\bf Author:}           & \AutorSTituly\\
+                          & Faculty of Science, Masaryk University\\
+                          & \Department \\[6mm]
+  {\bf Title of Thesis:}  & \TitleOfThesis  \\[6mm]
+  {\bf Degree Programme:} & \DegreeProgramme  \\[6mm]
+  {\bf Field of Study:}   & \FieldOfStudy \\[6mm]
+  {\bf Academic Year:}    & \AkadRok \\[6mm]
+  {\bf Number of Pages:}  & \Strany \\[6mm]
+  {\bf Keywords:}         & \Keywords
+\end{tabular}
+
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% UVODNI POVINNE STRANY %%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\VytvorPovinneStrany}{\Desky\TitulniStrana\BibliografickyZaznam\BibliographicEntry}
+
+\newcommand{\VytvorPovinneStranyRigorozniPrace}{\Desky\TitulniStranaRP\BibliografickyZaznamRP\BibliographicEntryRP}
+
+\newcommand{\VytvorPovinneStranySLOVENSKY}{
+\Desky\TitulniStrana\BibliografickyZaznam\BibliografickyZaznamSVK\BibliographicEntry}
+
+\newcommand{\VytvorPovinneStranyRigorozniPraceSVK}{
+\Desky\TitulniStranaRP\BibliografickyZaznamRP\BibliografickyZaznamSVKRP\BibliographicEntryRP}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% ABSTRAKTY NA JEDNE STRANE %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\AbstraktyNaJedneStrane}{
+\pdfbookmark{Abstrakt}{Abstrakt}
+\NazevPovinneCasti{Abstrakt}
+\thispagestyle{empty}
+\Abstrakt
+
+\vspace*{\fill}
+
+\pdfbookmark{Abstract}{Abstract}
+\NazevPovinneCasti{Abstract}
+
+\Abstract
+
+\vspace*{\fill}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% ABSTRAKTY NA DVOU STRANACH %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\AbstraktyNaDvouStranach}{
+\pdfbookmark{Abstrakt}{Abstrakt}
+\NazevPovinneCasti{Abstrakt}
+\thispagestyle{empty}
+
+\Abstrakt
+
+\cleardoublepage
+
+\pdfbookmark{Abstract}{Abstract}
+\NazevPovinneCasti{Abstract}
+\thispagestyle{empty}
+
+\Abstract
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% ABSTRAKTY NA JEDNE STRANE SVK %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\AbstraktyNaJedneStraneSLOVENSKY}{
+\pdfbookmark{Abstrakt}{Abstrakt}
+\NazevPovinneCasti{Abstrakt}
+\thispagestyle{empty}
+\Abstrakt
+
+\vspace*{\fill}
+
+\pdfbookmark{Abstrakt (SVK)}{Abstrakt (SVK)}
+\NazevPovinneCasti{Abstrakt}
+
+\AbstraktSVK
+
+\vspace*{\fill}
+
+\pdfbookmark{Abstract}{Abstract}
+\NazevPovinneCasti{Abstract}
+
+\Abstract
+
+\vspace*{\fill}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% ABSTRAKTY NA VICE STRANACH SVK %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\AbstraktyNaViceStranachSLOVENSKY}{
+\pdfbookmark{Abstrakt}{Abstrakt}
+\NazevPovinneCasti{Abstrakt}
+\thispagestyle{empty}
+
+\Abstrakt
+
+\cleardoublepage
+
+\pdfbookmark{Abstrakt (SVK)}{Abstrakt (SVK)}
+\NazevPovinneCasti{Abstrakt}
+\thispagestyle{empty}
+
+\AbstraktSVK
+
+\cleardoublepage
+
+\pdfbookmark{Abstract}{Abstract}
+\NazevPovinneCasti{Abstract}
+\thispagestyle{empty}
+
+\Abstract
+
+}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%% ZADANI %%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\SemVlozitZadani}{
+\phantomsection
+\chapter*{}
+\pdfbookmark{Ofici{\'{a}}ln{\'{i}} zad{\'{a}}n{\'{i}}}{Oficialni zadani}
+\thispagestyle{empty}
+\begin{center}
+\setlength\fboxrule{1.5pt}
+\setlength\fboxsep{8pt}
+\fbox{\textcolor{blue}{\bf M{\'{i}}sto tohoto listu vlo{\v{z}}te kopii ofici{\'{a}}ln{\'{i}}ho (podepsan{\'{e}}ho)
+zad{\'{a}}n{\'{i}} pr{\'{a}}ce.}} 
+\end{center}
+\cleardoublepage
+}
+
+\newcommand{\VlozZadani}[1]{
+\begin{center}
+\includepdf[pages={-},pagecommand={\thispagestyle{empty}\pdfbookmark{Ofici{\'{a}}ln{\'{i}}
+zad{\'{a}}n{\'{i}}}{Oficialni zadani}}]{#1}
+\end{center}
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% PODEKOVANI + PROHLASENI %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\PodekovaniAProhlaseni}{
+\pdfbookmark{Pod{\v{e}}kov{\'{a}}n{\'{i}}}{Podekovani}
+\NazevPovinneCasti{Pod{\v{e}}kov{\'{a}}n{\'{i}}}
+\thispagestyle{empty}
+
+\Podekovani
+
+\vspace*{\fill}
+\pdfbookmark{Prohl{\'{a}}{\v{s}}en{\'{i}}}{Prohlaseni}
+\NazevPovinneCasti{Prohl{\'{a}}{\v{s}}en{\'{i}}}
+
+\Prohlaseni
+ 
+\vspace*{15mm}
+
+\noindent Brno \DatumProhl \hfill \makebox[50mm]{\dotfill}\\
+\hspace*{\fill} \JmenoAutora\hspace*{10mm}
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% PODEKOVANI + PROHLASENI SVK %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\PodekovaniAProhlaseniSLOVENSKY}{
+\pdfbookmark{Po{\v{d}}akovanie}{Podakovanie}
+\NazevPovinneCasti{Po{\v{d}}akovanie}
+\thispagestyle{empty}
+
+\Podekovani
+
+\vspace*{\fill}
+\pdfbookmark{Prohl{\'{a}}{\v{s}}en{\'{i}}}{Prohlaseni}
+\NazevPovinneCasti{Prohl{\'{a}}{\v{s}}en{\'{i}}}
+
+\Prohlaseni
+ 
+\vspace*{15mm}
+
+\noindent Brno \DatumProhl \hfill \makebox[50mm]{\dotfill}\\
+\hspace*{\fill} \JmenoAutora\hspace*{10mm}
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% PROHLASENI BEZ PODEKOVANI %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\ProhlaseniBezPodekovani}{
+
+\vspace*{\fill}
+\pdfbookmark{Prohl{\'{a}}{\v{s}}en{\'{i}}}{Prohlaseni}
+\NazevPovinneCasti{\Huge Prohl{\'{a}}{\v{s}}en{\'{i}}}
+
+\Prohlaseni
+
+\vspace*{15mm}
+
+\noindent Brno \DatumProhl \hfill \makebox[50mm]{\dotfill}\\
+\hspace*{\fill} \JmenoAutora\hspace*{10mm}
+\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NASTAVENI ZAKLADNIHO ZAHLAVI A ZAPATI V SABLONE %%%%%%%%%%%%%%%%%%%%%%%
+
+\def\headrulewidth{0pt}%
+\def\footrulewidth{0pt}%
+
+\makeatletter
+\fancypagestyle{plain}{%
+\fancyhf{}
+  \if@twoside
+    \fancyfoot[RO]{\it\small--\,\thepage\,--}\fancyfoot[LE]{\it\small--\,\thepage\,--}% TWOSIDE
+  \else
+    \fancyfoot[R]{\it\small--\,\thepage\,--}% ONESIDE
+  \fi
+}
+
+\newcommand{\HlavickaUvod}{
+\pagestyle{fancy}%
+\fancyhf{}%
+  \if@twoside
+    \fancyhead[CO]{\small\it {\'{U}}vod\ \hrulefill\ \thepage}% TWOSIDE
+    \fancyhead[CE]{\small\it\thepage\ \hrulefill\ {\'{U}}vod}% TWOSIDE
+  \else
+    \fancyhead[C]{\small\it {\'{U}}vod\ \hrulefill\ \thepage}% ONESIDE
+  \fi
+}
+
+\newcommand{\HlavickaZnaceni}{
+\pagestyle{fancy}%
+\fancyhf{}%
+  \if@twoside
+    \fancyhead[CO]{\small\it P{\v{r}}ehled pou{\v{z}}it{\'{e}}ho zna{\v{c}}en{\'{i}}\ \hrulefill\ \thepage}% TWOSIDE
+    \fancyhead[CE]{\small\it\thepage\ \hrulefill\ P{\v{r}}ehled pou{\v{z}}it{\'{e}}ho zna{\v{c}}en{\'{i}}}% TWOSIDE
+  \else
+    \fancyhead[C]{\small\it P{\v{r}}ehled pou{\v{z}}it{\'{e}}ho zna{\v{c}}en{\'{i}}\ \hrulefill\ \thepage}% ONESIDE
+  \fi
+}
+
+\newcommand{\HlavickaKapitoly}{%
+\pagestyle{fancy}%
+\fancyhf{}%
+  \if@twoside
+    \fancyhead[CO]{\small\it \chaptername\ \leftmark\ \hrulefill\ \thepage}% TWOSIDE
+    \fancyhead[CE]{\small\it\thepage\ \hrulefill\ \chaptername\ \leftmark}% TWOSIDE
+  \else
+    \fancyhead[C]{\small\it \chaptername\ \leftmark\ \hrulefill\ \thepage}% ONESIDE
+  \fi
+}
+
+\newcommand{\HlavickaZaver}{
+\pagestyle{fancy}%
+\fancyhf{}%
+  \if@twoside
+    \fancyhead[CO]{\small\it Z{\'{a}}v{\v{e}}r\ \hrulefill\ \thepage}% TWOSIDE
+    \fancyhead[CE]{\small\it\thepage\ \hrulefill\ Z{\'{a}}v{\v{e}}r}% TWOSIDE
+   \else
+    \fancyhead[C]{\small\it Z{\'{a}}v{\v{e}}r\ \hrulefill\ \thepage}% ONESIDE
+  \fi
+}
+
+\newcommand{\HlavickaPriloha}{
+\pagestyle{fancy}%
+\fancyhf{}%
+  \if@twoside
+    \fancyhead[CO]{\small\it P{\v{r}}{\'{i}}loha\ \hrulefill\ \thepage}% TWOSIDE
+    \fancyhead[CE]{\small\it\thepage\ \hrulefill\ P{\v{r}}{\'{i}}loha}% TWOSIDE
+   \else
+    \fancyhead[C]{\small\it P{\v{r}}{\'{i}}loha\ \hrulefill\ \thepage}% ONESIDE
+  \fi
+}
+
+
+\newcommand{\HlavickaLiteratura}{
+\pagestyle{plain}%
+\fancyhf{}%
+  \if@twoside
+    \fancyhead[CO]{\small\it \bibname\ \hrulefill\ \thepage}% TWOSIDE
+    \fancyhead[CE]{\small\it\thepage\ \hrulefill\ \small \bibname}% TWOSIDE
+  \else
+    \fancyhead[C]{\small\it \bibname\ \hrulefill\ \thepage}% ONESIDE
+  \fi
+}
+
+\newcommand{\HlavickaRejstrik}{
+\pagestyle{plain}%
+\fancyhf{}%
+  \if@twoside
+    \fancyhead[CO]{\small\it \indexname\ \hrulefill\ \thepage}% TWOSIDE
+    \fancyhead[CE]{\small\it\thepage\ \hrulefill\ \indexname}% TWOSIDE
+  \else
+    \fancyhead[C]{\small\it \indexname\ \hrulefill\ \thepage}% ONESIDE
+  \fi
+}
+
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% VLOZ=INPUT %%%%%%%
+
+\newcommand{\vloz}{\input}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% REJSTRIK %%%%%%%%
+
+\makeatletter
+\renewenvironment{theindex}
+               {\if@twocolumn
+                  \@restonecolfalse
+                \else
+                  \@restonecoltrue
+                \fi
+                \twocolumn[\phantomsection\addcontentsline{toc}{chapter}{\indexname}\@makeschapterhead{\indexname}]%
+                \@mkboth{\MakeUppercase\indexname}%
+                        {\MakeUppercase\indexname}%
+                \thispagestyle{plain}\parindent\z@
+                \parskip\z@ \@plus .3\p@\relax
+                \columnseprule \z@
+                \columnsep 35\p@
+                \let\item\@idxitem}
+               {\if@restonecol\onecolumn\else\clearpage\fi}
+\makeatother
+
+\newcommand{\VytvorRejstrik}{
+\printindex
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%  INFORMACE PRO PDF %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\AtEndPreamble{
+\hypersetup{
+pdfencoding=unicode,
+pdftitle={\TitulPrace. \TypPrace},
+pdfauthor={\JmenoAutora{} (\Dnes)},
+pdfsubject={Masarykova univerzita, P{\v{r}}{\'{i}}rodov{\v{e}}deck{\'{a}} fakulta, {\Ustav}, Brno \RokOdevzdani},
+pdfkeywords={\KlSlova},
+linktoc=all,
+breaklinks=true,
+colorlinks=true,
+pdfencoding=auto,
+%% pro dalsi mozna nastaveni viz http://www.tug.org/applications/hyperref/manual.html
+}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VYLEPSENY VZHLED OBSAHU %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{tocloft}
+
+\renewcommand{\cftbeforetoctitleskip}{21.5mm} %%% Mezera pred nadpisem - needitujte
+\renewcommand{\cftaftertoctitleskip}{6.5mm}   %%% Mezera za nadpisem - needitujte
+
+\renewcommand{\cftchapfont}{\bfseries}        %%% font nazev kapitoly v obsahu
+\renewcommand{\cftchappagefont}{\bfseries}    %%% font pro cislo stranky u kapitoly
+\renewcommand{\cftchappresnum}{Kapitola }     %%% pred cislem kapitoly se vypisuje text ``Kapitola''
+\renewcommand{\cftchapaftersnum}{.}           %%% za cislem kapitoly je ``.''
+\setlength{\cftchapnumwidth}{22mm}            %%% mezera za cislem kapitoly - v pripade potreby zmente
+\renewcommand{\cftchapleader}{ \bf\dotfill\ } %%% oddelovac mezi nazvem kapitoly a cislem strany
+
+\setlength{\cftsecindent}{6mm}                %%% sirka odsazeni urovne podkapitoly
+\setlength{\cftbeforesecskip}{0.7mm}          %%% vertikalni mezera nad polozkou podkapitoly
+\setlength{\cftsecnumwidth}{8mm}              %%% mezera za cislem podkapitoly - v pripade potreby zmente
+\renewcommand{\cftsecdotsep}{3}               %%% hustota vyplne mezi nazvem podkapitoly a cislem stranky
+
+\setlength{\cftsubsecindent}{14mm}            %%% sirka odsazeni urovne odstavce
+\setlength{\cftbeforesubsecskip}{0.5mm}       %%% vertikalni mezera nad polozkou odstavce
+\setlength{\cftsubsecnumwidth}{10mm}          %%% mezera za cislem odstavce - v pripade potreby zmente
+\renewcommand{\cftsubsecdotsep}{3}            %%% hustota vyplne mezi nazvem odstavce a cislem stranky
+
+\newcommand{\VytvorObsah}{\tableofcontents}
