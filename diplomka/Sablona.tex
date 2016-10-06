@@ -28,7 +28,7 @@
 %% Nastavte si jazyk dokumentu
 %% lze pouzit volbu babel (pro pdflatex a latex) nebo bez babelu (pro pdfcslatex a cslatex
 %%
-%% pri volbe bez babelu bude zlobit v ukazkovych souborech prikaz ``\shorthandoff{-}'' a ``\shorthandoff{-}''
+%% pri volbe bez babelu bude zlobit v ukazkovych souborech prikaz ``\shorthandoff{-}'' a ``\shorthandoff{-}''	
 %% ty staci vymazat a je to bez problemu
 %%
 %% pri volbe ``\usepackage[english]{babel}'' nefunguji ceske uvozovky pomoci \uv{..} - staci nahradit ``..''
@@ -68,6 +68,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% BALIKY POTREBNE PRO MATEMATIKU %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage{amsmath}
+\usepackage{enumitem}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% NASTAVENI POVINNYCH CASTI DLE SMERNICE DEKANA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -184,6 +186,9 @@ zdrojů, které jsou v práci citovány.}
 \newcommand{\Zbb}{\mathbb{Z}}
 \newcommand{\Nbb}{\mathbb{N}}
 
+\newcommand{\Tau}{\mathrm{T}}
+\DeclareMathOperator{\dst}{dst}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%% VYTVOR POMOCNY SOUBOR PRO REJSTRIK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -287,8 +292,6 @@ zdrojů, které jsou v práci citovány.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TEXT PRACE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\newcommand{\Tau}{\mathrm{T}}
 
 \theoremstyle{plain}
 \newtheorem{vet}{Věta}[chapter] % reset theorem numbering for each chapter
