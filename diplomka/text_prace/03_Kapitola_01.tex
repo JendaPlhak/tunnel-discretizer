@@ -38,12 +38,21 @@ $ \dst(x, y) $, kterou popisuje následující definice.
 \begin{defi}
 Mějme řezy $ x = (A, u, r_1), y = (B, v, r_2) \in \Theta $. Rozlišíme dvě situace
     \begin{enumerate}[label={(\arabic*)}]
-        \item $ u = v $, pak $ \dst(x, y) = |B - A|$,
-        \item v opačném případě $u, v$ určují rovinu $ \varrho = \langle u, v \rangle $.
-        Kolmou projecí do roviny $ \varrho $ promítneme řezy $x $ resp. $y$, čímž získáme dvě úsečky
-        určené vrcholy $X_1, X_2 $ resp $Y_1, Y_2 $. Vzdálenost pak definujeme jako
-        $ \dst(x, y) = \min\{ \max\{|X_1 - Y_1|, |X_2 - Y_2|\}, \max\{|X_1 - Y_2|, |X_2 - Y_1|\}\}$.
+        \item $ u = v $, pak vezmeme libovolný vektor $ w $ tak, aby
+            $ \varrho = \langle u, w \rangle $ tvořilo rovinu.
+        \item V opačném případě položíme přímo $ \varrho = \langle u, v \rangle $.
     \end{enumerate}
+Kolmou projecí do roviny $ \varrho $ promítneme řezy $x $ resp. $y$, čímž získáme dvě úsečky
+určené vrcholy $X_1, X_2 $ resp $Y_1, Y_2 $. Vzdálenost pak definujeme jako
+    \begin{center}
+        $ \dst(x, y) = \min\{ \max\{|X_1 - Y_1|, |X_2 - Y_2|\}, \max\{|X_1 - Y_2|, |X_2 - Y_1|\}\}$.
+    \end{center}
 \end{defi}
+
+Nyní můžeme přistoupit k popisu samotného algoritmu, který má na vstupu tunel $ \Tau $
+a nějaké pevně zadané $ \delta > 0$, které určuje maximální vzdálenost, kterou
+od sebe dva po sobě jdoucí řezy mohou mít. Na výstupu pak budeme očkávat řezy pokrývající
+celý tunel, budou splňovat uvedené omezení na vzdálenost, přičemž bychom měli použít
+co nejméně řezů.
 
 \end{document}
