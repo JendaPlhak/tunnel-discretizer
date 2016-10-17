@@ -157,6 +157,7 @@ class Line:
     def intersection_sphere(self, sphere):
         return get_intersection_line_sphere(sphere, self)
 
+    # Compute intersection with given plane
     def intersection_plane(self, plane):
         # First get vectors for plane parametric form
         v1, v2 = plane.get_base_vectors()

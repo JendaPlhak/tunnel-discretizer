@@ -11,7 +11,6 @@ from tunnel_curve import TunnelCurve
 
 
 class DigOpts:
-
     def __init__(self, delta):
         self.delta = delta
         self.eps   = delta / 10.
@@ -34,13 +33,6 @@ def dig_tunnel(tunnel, opts):
         next_center  = centers[i + 1]
         centers_dist = np.linalg.norm(next_center - center)
 
-        # range_ = tunnel.get_neighbors(i)
-        # normal = normals[range_[0]]
-        # for n in normals[range_[0] + 1:range_[1]]:
-        #     normal += n
-        # normal = normal / (range_[1] - range_[0])
-        # print (range_[1] - range_[0])
-
         # line between centers
         line = Line(center, next_center - center)
 
@@ -51,12 +43,12 @@ def dig_tunnel(tunnel, opts):
             if (len(disks) > 1 and size != 0):
                 disk_plane = disks[-1].get_plane()
                 inter = line.intersection_plane(disk_plane)
-                size  = np.linalg.norm(inter - center) + opts.eps
+                size  = max(np.linalg.norm(inter - center) + opts.eps, size)
 
             disk_center = center + normal * size
             new_normal  = curve.get_weighted_dir(i, size)
 
-            new_disk   = fit_disk_tunnel(new_normal, disk_center, i, tunnel)
+            new_disk = fit_disk_tunnel(new_normal, disk_center, i, tunnel)
 
             if (len(disks) > 0):
                 if not is_follower(disks[-1], new_disk):
@@ -87,6 +79,7 @@ def fit_disk_tunnel(normal, center, ball_idx, tunnel):
 
         circle_cuts.append(cut_circle)
 
+    assert(circle_cuts)
     discrete_approx = []
     for c in circle_cuts:
         approx = c.get_approximation(n_samples)
@@ -126,7 +119,7 @@ def is_follower(prev_disk, new_disk):
     v2 = new_vert_2 - prev_disk.center
 
     return np.dot(prev_disk.normal, v1) > -f_error \
-        or np.dot(prev_disk.normal, v2) > -f_error
+        and np.dot(prev_disk.normal, v2) > -f_error
 
 # get vertices of segments determined by disks in orthogonal projection.
 def get_vertices(disk1, disk2):
@@ -200,14 +193,13 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
     new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, ball_idx, tunnel)
     # print "Revised disk : {}".format(new_disk.to_geogebra())
 
-    # Check whether our function does what it is supposed to do.
-    new_dir, prev_dir = get_radius_vectors(new_disk, prev_disk)
-
-
     if not is_follower(prev_disk, new_disk):
         # print "Recursive shift!"
         new_disk = shift_new_disk(new_disk, prev_disk, tunnel)
         # print "Complete!"
+
+    # Check whether our function does what it is supposed to do.
+    new_dir, prev_dir = get_radius_vectors(new_disk, prev_disk)
 
     #     print abs(get_radius(new_disk.normal, new_disk.center, tunnel) - new_disk.radius)
     new_vert_1 = new_disk.center + new_dir
