@@ -203,6 +203,13 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
     # Check whether our function does what it is supposed to do.
     new_dir, prev_dir = get_radius_vectors(new_disk, prev_disk)
 
+
+    if not is_follower(prev_disk, new_disk):
+        # print "Recursive shift!"
+        new_disk = shift_new_disk(new_disk, prev_disk, tunnel)
+        # print "Complete!"
+
+    #     print abs(get_radius(new_disk.normal, new_disk.center, tunnel) - new_disk.radius)
     new_vert_1 = new_disk.center + new_dir
     new_vert_2 = new_disk.center - new_dir
     # print "New vertex 1: '{}', New vertex 2: '{}'".format(new_vert_1, new_vert_2)
@@ -216,12 +223,6 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
     # print prev_disk.normal, v2
     # print np.dot(prev_disk.normal, v2)
 
-    # if not is_follower(prev_disk, new_disk):
-    #     print "Recursive shift!"
-    #     new_disk = shift_new_disk(new_disk, prev_disk, tunnel)
-    #     print "Complete!"
-
-        # print abs(get_radius(new_disk.normal, new_disk.center, tunnel) - new_disk.radius)
-    # assert np.dot(prev_disk.normal, v1) > -0.0001
-    # assert np.dot(prev_disk.normal, v2) > -0.0001
+    assert np.dot(prev_disk.normal, v1) > -0.0001
+    assert np.dot(prev_disk.normal, v2) > -0.0001
     return new_disk
