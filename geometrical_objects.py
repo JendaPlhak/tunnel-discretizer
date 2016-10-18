@@ -162,6 +162,8 @@ class Line:
         # First get vectors for plane parametric form
         v1, v2 = plane.get_base_vectors()
         assert is_3D_basis(plane.normal, v1, v2)
+        assert is_perpendicular(v1, plane.normal)
+        assert is_perpendicular(v2, plane.normal)
 
         r_side = np.transpose(np.array([plane.point - self.point]))
         l_side = np.transpose(np.array([self.dir, v1, v2]))
@@ -177,6 +179,8 @@ class Line:
         # print self.get_line_point(parameters[0])
         intersection = self.get_line_point(parameters[0])
         assert plane.contains(intersection)
+        assert self.contains(intersection)
+        print("Ok")
         return intersection
 
 class Circle:

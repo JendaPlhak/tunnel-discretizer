@@ -28,6 +28,8 @@ def dig_tunnel(tunnel, opts):
         if i == len(tunnel.t) - 2:
             break
 
+        print("Processing ball NO. %d" % i)
+
         normal       = normals[i]
         center       = centers[i]
         next_center  = centers[i + 1]
@@ -38,23 +40,24 @@ def dig_tunnel(tunnel, opts):
 
         size = 0;
         while size < centers_dist:
-            # print "size: {}".format(size)
+            print "size: {}".format(size)
             # Form initial disk center
             if (len(disks) > 1 and size != 0):
                 disk_plane = disks[-1].get_plane()
                 inter = line.intersection_plane(disk_plane)
-                size  = max(np.linalg.norm(inter - center) + opts.eps, size)
+                size  = np.linalg.norm(inter - center) + opts.eps
 
             disk_center = center + normal * size
             new_normal  = curve.get_weighted_dir(i, size)
 
             new_disk = fit_disk_tunnel(new_normal, disk_center, i, tunnel)
 
-            if (len(disks) > 0):
+            if len(disks) > 0:
                 if not is_follower(disks[-1], new_disk):
                     size += opts.eps
                     continue
                 new_disk = shift_new_disk(new_disk, disks[-1], i, tunnel, opts.delta)
+                disk_dist(new_disk, disks[-1]) < opts.delta + f_error
 
             if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < opts.delta):
                 disks[-1] = new_disk
@@ -195,7 +198,7 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
 
     if not is_follower(prev_disk, new_disk):
         # print "Recursive shift!"
-        new_disk = shift_new_disk(new_disk, prev_disk, tunnel)
+        new_disk = shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta)
         # print "Complete!"
 
     # Check whether our function does what it is supposed to do.

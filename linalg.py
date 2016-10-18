@@ -19,9 +19,10 @@ def null_space(A, eps=1e-15):
     return null_space[0]
 
 def is_3D_basis(v1, v2, v3):
-    return abs(np.dot(v1, v2)) < f_error  \
-        and abs(np.dot(v1, v3)) < f_error \
-        and abs(np.dot(v2, v3)) < f_error
+    return abs(np.linalg.det([v1, v2, v3])) > f_error
+
+def is_perpendicular(v1, v2):
+    return abs(np.dot(v1, v2)) < f_error
 
 # return true if point1 and point2 are in the same half-plane based on plane
 # normal and line_point
