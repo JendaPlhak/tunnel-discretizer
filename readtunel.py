@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # draw tunnel
 
     disks = dig_tunnel(tunnel, DigOpts(0.1))
-    # disks = smoothen_tunnel(disks, SmoothOpts(0.025))
+    disks = smoothen_tunnel(disks, SmoothOpts(0.05))
 
     # draw disks
     if draw_ARG:

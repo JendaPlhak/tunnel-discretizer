@@ -29,7 +29,6 @@ def dig_tunnel(tunnel, opts):
             break
 
         print("Processing ball NO. %d" % i)
-
         normal       = normals[i]
         center       = centers[i]
         next_center  = centers[i + 1]
@@ -40,13 +39,12 @@ def dig_tunnel(tunnel, opts):
 
         size = 0;
         while size < centers_dist:
-            print "size: {}".format(size)
+            # print "size: {}".format(size)
             # Form initial disk center
-            # if (len(disks) > 1 and size != 0):
-            #     disk_plane = disks[-1].get_plane()
-            #     inter = line.intersection_plane(disk_plane)
-            #     size  = np.linalg.norm(inter - center) + opts.eps
-            #     print("After intersection %f" % size)
+            if (len(disks) > 1 and size != 0):
+                disk_plane = disks[-1].get_plane()
+                inter = line.intersection_plane(disk_plane)
+                size  = np.linalg.norm(inter - center) + opts.eps
 
             disk_center = center + normal * size
             new_normal  = curve.get_weighted_dir(i, size)
@@ -54,14 +52,6 @@ def dig_tunnel(tunnel, opts):
             new_disk = fit_disk_tunnel(new_normal, disk_center, i, tunnel)
 
             if len(disks) > 0:
-                # if not is_follower(disks[-1], new_disk):
-                #     print("Not follower.")
-                #     size += opts.eps
-                #     print(size)
-                #     continue
-                print("Shift begins!")
-                if len(disks) > 1:
-                    print disks[-2].to_geogebra()
                 new_disk = shift_new_disk(new_disk, disks[-1], i, tunnel, opts.delta)
                 disk_dist(new_disk, disks[-1]) < opts.delta + f_error
 
@@ -140,18 +130,21 @@ def get_vertices(disk1, disk2):
     disk2_vert_2 = disk2.center - dir2
 
     # Ensure that vertices corresponds to each other in given order.
-    if not in_same_half_plane(dir2, disk2.center, \
-                                disk1_vert_1, disk2_vert_1):
+    dist11 = point_dist(disk1_vert_1, disk2_vert_1)
+    dist12 = point_dist(disk1_vert_1, disk2_vert_2)
+    dist21 = point_dist(disk1_vert_2, disk2_vert_1)
+    dist22 = point_dist(disk1_vert_2, disk2_vert_2)
+    if dist11 + dist22 > dist12 + dist21:
         disk2_vert_1, disk2_vert_2 = disk2_vert_2, disk2_vert_1
 
     return disk1_vert_1, disk1_vert_2, disk2_vert_1, disk2_vert_2
 
 def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
-    print "\n\n"
-    print "Previous Disk:"
-    print prev_disk.to_geogebra()
-    print "New Disk: "
-    print new_disk.to_geogebra()
+    # print "\n\n"
+    # print "Previous Disk:"
+    # print prev_disk.to_geogebra()
+    # print "New Disk:"
+    # print new_disk.to_geogebra()
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 \
         = get_vertices(new_disk, prev_disk)
 
@@ -181,16 +174,13 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
         elif np.dot(prev_disk.normal, v2) < 0.:
             # print "Second one!"
             shift_vert = prev_vert_2 + prev_disk.normal * (delta / 5)
-            new_disk   = get_new_disk_points(prev_vert_2, new_vert_1, prev_disk.normal)
+            new_disk   = get_new_disk_points(shift_vert, new_vert_1, prev_disk.normal)
 
             new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 \
                 = get_vertices(new_disk, prev_disk)
             v1 = new_vert_1 - prev_disk.center
             v2 = new_vert_2 - prev_disk.center
 
-    # print "After shift: "
-    # print new_disk.to_geogebra()
-    print("Check")
     assert is_follower(prev_disk, new_disk)
 
     # Ensure that disks are not too far from each other.
@@ -211,6 +201,7 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
     new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, ball_idx, tunnel)
     # print "Revised disk : {}".format(new_disk.to_geogebra())
 
+    assert is_follower(prev_disk, new_disk)
     if not is_follower(prev_disk, new_disk):
         # print "Recursive shift!"
         new_disk = shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta)
