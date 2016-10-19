@@ -40,7 +40,8 @@ def get_normal_in_plane(n, v):
     k = 1
     l = - np.dot(n, v) / np.dot(v, v)
     u = normalize(k * n + l * v)
-    assert np.dot(u, v) < 0.00001
+    assert abs(np.dot(u, v)) < f_error
+    assert abs(np.dot(n, u)) > -f_error
     return u
 
 # For two disks calculate vector that realizes radius of segment that emerges by

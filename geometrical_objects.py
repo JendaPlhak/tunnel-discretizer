@@ -141,8 +141,7 @@ class Line:
     def contains(self, point):
         if (point == self.point).all():
             return True
-        v = normalize(point - self.point)
-        return np.linalg.norm(v - self._norm_dir) < f_error
+        return np.linalg.norm(point - self.orthogonal_proj(point)) < f_error
 
     def get_line_point(self, t):
         return self.point + t * self.dir
@@ -150,9 +149,7 @@ class Line:
     def orthogonal_proj(self, point):
         p = self.point \
             + np.dot(point - self.point, self._norm_dir) * self._norm_dir
-        assert self.contains(p)
         return p
-
 
     def intersection_sphere(self, sphere):
         return get_intersection_line_sphere(sphere, self)
@@ -165,8 +162,8 @@ class Line:
         assert is_perpendicular(v1, plane.normal)
         assert is_perpendicular(v2, plane.normal)
 
-        r_side = np.transpose(np.array([plane.point - self.point]))
-        l_side = np.transpose(np.array([self.dir, v1, v2]))
+        r_side = np.transpose(np.array([self.point - plane.point]))
+        l_side = np.transpose(np.array([v1, v2, -self.dir]))
         # print "left side:\n", l_side
         # print "right side:\n", r_side
 
@@ -177,10 +174,10 @@ class Line:
         # print "parameters:\n", parameters
         # print "dir:\n", self.dir
         # print self.get_line_point(parameters[0])
-        intersection = self.get_line_point(parameters[0])
+        intersection = self.get_line_point(parameters[2])
+
         assert plane.contains(intersection)
         assert self.contains(intersection)
-        print("Ok")
         return intersection
 
 class Circle:
