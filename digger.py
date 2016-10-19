@@ -49,7 +49,7 @@ def dig_tunnel(tunnel, opts):
             disk_center = center + normal * size
             new_normal  = curve.get_weighted_dir(i, size)
 
-            new_disk = fit_disk_tunnel(new_normal, disk_center, i, tunnel)
+            new_disk = fit_disk_tunnel(new_normal, disk_center, i, tunnel, opts.delta)
 
             if len(disks) > 0:
                 new_disk = shift_new_disk(new_disk, disks[-1], i, tunnel, opts.delta)
@@ -64,7 +64,7 @@ def dig_tunnel(tunnel, opts):
     return disks
 
 
-def fit_disk_tunnel(normal, center, ball_idx, tunnel):
+def fit_disk_tunnel(normal, center, ball_idx, tunnel, delta):
     disk_plane  = Plane(center, normal)
     circle_cuts = []
     n_samples   = 15
@@ -81,7 +81,7 @@ def fit_disk_tunnel(normal, center, ball_idx, tunnel):
     assert(circle_cuts)
     discrete_approx = []
     for c in circle_cuts:
-        approx = c.get_approximation(n_samples)
+        approx = c.get_approximation_delta(delta)
         discrete_approx.extend([tuple(x) for x in approx])
     t, u, radius = make_circle(discrete_approx)
 
@@ -198,7 +198,7 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
 
     assert is_follower(prev_disk, new_disk)
     # perform re-fitting
-    new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, ball_idx, tunnel)
+    new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, ball_idx, tunnel, delta)
     # print "Revised disk : {}".format(new_disk.to_geogebra())
 
     assert is_follower(prev_disk, new_disk)

@@ -197,5 +197,11 @@ class Circle:
     def get_approximation(self, n_samples):
         return [self.get_point(float(x) / n_samples) for x in xrange(n_samples)]
 
+    # Calculates equidistant approximation of circle
+    def get_approximation_delta(self, delta):
+        n_samples = max(4, int(math.ceil((self.radius * 2 * math.pi) / delta)))
+        # print n_samples
+        return self.get_approximation(n_samples)
+
 
 
