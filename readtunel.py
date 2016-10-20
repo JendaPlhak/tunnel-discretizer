@@ -3,13 +3,14 @@
 """Tunnel generator.
 
 Usage:
-  readtunel.py (-f | --file) <filename> (-d | --draw)
-  readtunel.py (-f | --file) <filename>
+  readtunel.py -f | --file <in-filename> [-d] [--delta <delta>] [-o <out-filename>]
 
 Options:
-  -h --help     Show this screen.
-  -f --file     File containing information about tunnel in molecule.
-  -d --draw     Draw scenario into picture using vpython
+  -h --help                         Show this screen.
+  -f --file                         File containing information about tunnel in molecule.
+  -d --draw                         Draw scenario into picture using vpython
+  -o --output-file <out-filename>   Dump disks to file in dsd format.
+  --delta <delta>                   Maximal distance between disks.
 
 """
 
@@ -27,15 +28,11 @@ from smoother import smoothen_tunnel, SmoothOpts
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     tunnel = Tunnel()
-    tunnel.load_from_file(arguments['<filename>'])
+    tunnel.load_from_file(arguments['<in-filename>'])
     tunnel.t = tunnel.t[:]
     draw_ARG = arguments["--draw"]
 
-    # print make_circle([(random.random() * 10, random.random() * 10) for _ in xrange(100000)])
-    # sys.exit()
-    # draw tunnel
-
-    disks = dig_tunnel(tunnel, DigOpts(0.1))
+    disks = dig_tunnel(tunnel, DigOpts(float(arguments["--delta"] or 0.1)))
     disks = smoothen_tunnel(disks, SmoothOpts(0.05))
 
     # draw disks
@@ -76,8 +73,12 @@ if __name__ == '__main__':
             #                     axis=tuple(disk.normal * 0.25) ,
             #                     color=(0,1,0), shaftwidth=0.5)
 
-
-    disks_structured = [disk.to_dict() for disk in disks]
-    # print json.dumps(disks_structured, sort_keys=True,
-    #                     indent=4, separators=(',', ': '))
+    output_path = arguments.get("--output-file")
+    if output_path:
+        with open(output_path, "w") as output_file:
+            for disk in disks:
+                line = "{} {} {} {} {} {} {}\n".format(disk.center[0],
+                    disk.center[1], disk.center[2], disk.normal[0], disk.normal[1],
+                    disk.normal[2], disk.radius)
+                output_file.write(line)
 
