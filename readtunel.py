@@ -33,7 +33,7 @@ if __name__ == '__main__':
     draw_ARG = arguments["--draw"]
 
     disks = dig_tunnel(tunnel, DigOpts(float(arguments["--delta"] or 0.1)))
-    disks = smoothen_tunnel(disks, SmoothOpts(0.05))
+    # disks = smoothen_tunnel(disks, SmoothOpts(0.05))
 
     # draw disks
     if draw_ARG:

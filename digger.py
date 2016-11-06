@@ -16,10 +16,10 @@ class DigOpts:
         self.eps   = delta / 10.
 
 def dig_tunnel(tunnel, opts):
-    disks   = []
     centers = [s.center for s in tunnel.t]
     normals = [normalize(centers[i + 1] - centers[i]) \
                for i in xrange(len(centers) - 1)]
+    disks   = [fit_disk_tunnel(normals[0], centers[0], 0, tunnel, opts.delta)]
 
     curve = TunnelCurve(centers, 8.)
 
@@ -39,9 +39,8 @@ def dig_tunnel(tunnel, opts):
 
         size = 0;
         while size < centers_dist:
-            # print "size: {}".format(size)
             # Form initial disk center
-            if (len(disks) > 1 and size != 0):
+            if (size != 0):
                 disk_plane = disks[-1].get_plane()
                 inter = line.intersection_plane(disk_plane)
                 size  = np.linalg.norm(inter - center) + opts.eps
@@ -50,10 +49,8 @@ def dig_tunnel(tunnel, opts):
             new_normal  = curve.get_weighted_dir(i, size)
 
             new_disk = fit_disk_tunnel(new_normal, disk_center, i, tunnel, opts.delta)
-
-            if len(disks) > 0:
-                new_disk = shift_new_disk(new_disk, disks[-1], i, tunnel, opts.delta)
-                disk_dist(new_disk, disks[-1]) < opts.delta + f_error
+            new_disk = shift_new_disk(new_disk, disks[-1], i, tunnel, opts.delta)
+            disk_dist(new_disk, disks[-1]) < opts.delta + f_error
 
             if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < opts.delta):
                 disks[-1] = new_disk
