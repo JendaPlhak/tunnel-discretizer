@@ -13,7 +13,7 @@ from tunnel_curve import TunnelCurve
 class DigOpts:
     def __init__(self, delta):
         self.delta = delta
-        self.eps   = delta / 10.
+        self.eps   = delta * 0.1
 
 def dig_tunnel(tunnel, opts):
     centers = [s.center for s in tunnel.t]

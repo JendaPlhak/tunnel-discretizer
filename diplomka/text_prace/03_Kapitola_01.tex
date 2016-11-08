@@ -143,12 +143,60 @@ Kostru naznačeného algoritmu zachycuje následující pseudokód.
 \Function{digTunnel}{$\Tau, \delta$}
     \State $ centers \gets [ S_{center} \in \Tau ] $
     \State $ normals \gets [ \operatorname{norm}(C_{i + 1} - C_{i}) \mid 0 \leq i < |centers| ] $
-    \State $ disks \gets   [fitDiskTunnel(normals[0], centers[0], 0, \Tau, \delta)] $
+    \State $ disks \gets   [ \operatorname{fitDiskTunnel}(normals[0], centers[0], \Tau, \delta)] $
     \State $ curve \gets \operatorname{TunnelCurve}(centers) $
+    \State
+
+    \For{$ S_i \in \Tau $}
+        \If{$ i = |T| - 2 $}
+            \Break
+        \EndIf
+        \State $ \vec{n} \gets normals[i] $
+        \State $ center \gets centers[i] $
+        \State $ dir \gets centers[i + 1] - center $
+        \State $ line \gets \operatorname{Line}(center, dir) $
+        \State
+
+        \State $ size \gets 0 $
+        \While {$ size < \norm{dir} $}
+            \If{$ size \neq 0 $}
+                \State $ plane \gets \operatorname{getPlane}(disks[-1]) $
+                \State $ size \gets \dis(plane \cap line, center) + \epsilon $
+            \EndIf
+            \State
+
+            \State $ disk\_center \gets center + normal * size $
+            \State $ disk\_normal \gets \operatorname{getWeightedDir}(curve, i, size) $
+
+            \State $ disk \gets \operatorname{fitDiskTunnel}(disk\_normal, disk\_center) $
+            \State $ disk \gets \operatorname{shiftDisk}(disk, disks[-1]) $
+            \State
+
+            \If{$ |disks| > 1  \And \dst(disk, disks[-2]) < \delta $}
+                \State $ disks[-1] \gets disk $
+            \Else
+                \State $ \operatorname{Push}(disks, disk) $
+            \EndIf
+            \State $ size \gets size + \epsilon $
+        \EndWhile
+    \EndFor
 \EndFunction
 
 \end{algorithmic}
 \end{algorithm}
 
+Výsledný algoritmus tedy iterativně prochází tajektorii tunelu a postupně vytváří řezy
+se středem iniciálně umístěným na trajektorii, které pak v případě potřeby posune tak,
+aby byly zachovány námi požadované podmínky.
+
+Dříve než budeme pokračovat v dalším popisu, rozvedeme dva dříve neokomentované
+detaily kostry algoritmu. První věcí, které si čtenář mohl povšimnout, je použití přímky
+$ line $. Díky výpočtu průsečíku roviny určené předchozím řezem s touto přímkou, se
+vždy posuneme tunelem vpřed, a to před předchozí řez. Druhým detailem je použití
+konstanty $ \epsilon $. Ta udává s jakým krokem se budeme tunelem pohybovat.
+Volíme ji tak, aby platilo  $ \epsilon < \delta $, byla dostatečně malá abychom
+předešli zaokrouhlovacím chybám, ale zároveň čím větší bude, tím rychleji se
+budeme tunelem pohybovat a tím rychleji také celý algoritmus doběhne. Experimentálně
+jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{9}{10} \delta $.
 
 \end{document}
