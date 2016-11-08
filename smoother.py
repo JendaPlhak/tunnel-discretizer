@@ -4,8 +4,10 @@ class SmoothOpts:
 
 
 def smoothen_tunnel(disks, opts):
+    print(opts.max_diff)
+    print(opts)
     for i in xrange(len(disks) - 1):
-        if disks[i].radius - disks[i+1].radius   > opts.max_diff:
+        if disks[i].radius - disks[i+1].radius > opts.max_diff:
             disks[i+1].radius = disks[i].radius - opts.max_diff
 
         j = i

@@ -19,7 +19,7 @@ def dig_tunnel(tunnel, opts):
     centers = [s.center for s in tunnel.t]
     normals = [normalize(centers[i + 1] - centers[i]) \
                for i in xrange(len(centers) - 1)]
-    disks   = [fit_disk_tunnel(normals[0], centers[0], 0, tunnel, opts.delta)]
+    disks   = [fit_disk_tunnel(normals[0], centers[0], tunnel, opts.delta)]
 
     curve = TunnelCurve(centers, 8.)
 
@@ -33,6 +33,7 @@ def dig_tunnel(tunnel, opts):
         center       = centers[i]
         next_center  = centers[i + 1]
         centers_dist = np.linalg.norm(next_center - center)
+        print centers_dist
 
         # line between centers
         line = Line(center, next_center - center)
@@ -48,9 +49,9 @@ def dig_tunnel(tunnel, opts):
             disk_center = center + normal * size
             new_normal  = curve.get_weighted_dir(i, size)
 
-            new_disk = fit_disk_tunnel(new_normal, disk_center, i, tunnel, opts.delta)
-            new_disk = shift_new_disk(new_disk, disks[-1], i, tunnel, opts.delta)
-            disk_dist(new_disk, disks[-1]) < opts.delta + f_error
+            new_disk = fit_disk_tunnel(new_normal, disk_center, tunnel, opts.delta)
+            new_disk = shift_new_disk(new_disk, disks[-1], tunnel, opts.delta)
+            # disk_dist(new_disk, disks[-1]) < opts.delta + f_error
 
             if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < opts.delta):
                 disks[-1] = new_disk
@@ -61,7 +62,7 @@ def dig_tunnel(tunnel, opts):
     return disks
 
 
-def fit_disk_tunnel(normal, center, ball_idx, tunnel, delta):
+def fit_disk_tunnel(normal, center, tunnel, delta):
     disk_plane  = Plane(center, normal)
     circle_cuts = []
     n_samples   = 15
@@ -70,12 +71,12 @@ def fit_disk_tunnel(normal, center, ball_idx, tunnel, delta):
         # calculate center of cap that we get by intersection disk_plane
         # and sphere
         cut_circle = disk_plane.intersection_sphere(sphere)
-        if cut_circle == None:
+        if cut_circle is None:
             continue
 
         circle_cuts.append(cut_circle)
+    assert circle_cuts
 
-    assert(circle_cuts)
     discrete_approx = []
     for c in circle_cuts:
         approx = c.get_approximation_delta(delta)
@@ -136,7 +137,7 @@ def get_vertices(disk1, disk2):
 
     return disk1_vert_1, disk1_vert_2, disk2_vert_1, disk2_vert_2
 
-def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
+def shift_new_disk(new_disk, prev_disk, tunnel, delta):
     # print "\n\n"
     # print "Previous Disk:"
     # print prev_disk.to_geogebra()
@@ -195,14 +196,10 @@ def shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta):
 
     assert is_follower(prev_disk, new_disk)
     # perform re-fitting
-    new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, ball_idx, tunnel, delta)
+    new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, tunnel, delta)
     # print "Revised disk : {}".format(new_disk.to_geogebra())
 
     assert is_follower(prev_disk, new_disk)
-    if not is_follower(prev_disk, new_disk):
-        # print "Recursive shift!"
-        new_disk = shift_new_disk(new_disk, prev_disk, ball_idx, tunnel, delta)
-        # print "Complete!"
 
     # Check whether our function does what it is supposed to do.
     new_dir, prev_dir = get_radius_vectors(new_disk, prev_disk)

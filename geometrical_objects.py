@@ -77,7 +77,7 @@ class Plane:
         return Circle(self.orthogonal_proj_param(cap_center), r)
 
     def get_base_vectors(self):
-        if self._basis == None:
+        if self._basis is None:
             v1 = normalize(null_space(np.array([self.normal, null_vec, null_vec])))
             v2 = normalize(null_space(np.array([self.normal, v1, null_vec])))
             assert abs(np.dot(v1, v2)) < f_error
@@ -87,7 +87,7 @@ class Plane:
         return self._basis
 
     def get_orthogonal_projector(self):
-        if self._projector == None:
+        if self._projector is None:
             v1, v2      = self.get_base_vectors()
             base_matrix = np.transpose(np.array([v1, v2]))
             self._projector = np.linalg.pinv(base_matrix)

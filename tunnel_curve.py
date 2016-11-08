@@ -24,7 +24,7 @@ class TunnelCurve:
         max_dist = self.delta
         i = active_segment_idx
         cent_dist = []
-        w_dir = np.array([0,0,0])
+        w_dir = np.array([0.,0.,0.])
 
         for j in xrange(len(self.dirs)):
             dist = self._center_distance_from_point(j, i, d)
