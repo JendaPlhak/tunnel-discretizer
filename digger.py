@@ -71,8 +71,7 @@ def fit_disk_tunnel(normal, center, tunnel, delta):
         # calculate center of cap that we get by intersection disk_plane
         # and sphere
         cut_circle = disk_plane.intersection_sphere(sphere)
-        if cut_circle is None:
-            continue
+        assert cut_circle is not None
 
         circle_cuts.append(cut_circle)
     assert circle_cuts
