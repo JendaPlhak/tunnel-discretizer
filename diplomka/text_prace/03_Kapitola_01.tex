@@ -201,25 +201,44 @@ jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{9}{10} \del
 
 \subsection{Disk fitting}
 Nyní se budeme věnovat funkci $ \operatorname{fitDiskTunnel} $ použité na řádku
-\ref{alg:fit_disk}. Na tomto místě již víme jaké rovině by měl řez ležet a
-zároveň máme k dispozici referenční bod $ P $, který nám bude sloužit jako výchozí
-střed nového řezu. Rovinu určenou normálou a bodem $ P $ označíme $ \rho $.
-Řez ležící v rovině $ \rho $ bychom nyní mohli zkonstruovat jednoduše tak, že
-bychém bod $ P $ prohlásili za jeho střed a iterativně našli co nejtěsnější poloměr.
-Tento přístup by skutečně vygeneroval řez, nicméně ten by zdaleka nemusel být nejmenší
-možný. Uvažme například řez tunelu rovinou $ \rho $ na obrázku \ref{fig:cut_by_rho}.
+\ref{alg:fit_disk}. Na tomto místě již víme jaký normálový vektor by měl řez mít a
+zároveň máme k dispozici referenční bod $ P $, který nám společně s normálou
+určuje rovinu $ \rho $. Našim úkolem je najít střed a poloměr řezu tak, aby
+byly splněny požadované podmínky a zároveň aby byl poloměr řezu co nejmenší.
 
-
-Nejprve je potřeba vybrat všechny koule $ S_j \in \Tau $, které udávají výsledný
-poloměr. K těm jistě budou patřit ty, které střed $ P $ přímo obsahují. Explicitně
+První věc, kterou musíme vyřešit je, že rovina $ \rho $ může protínat tunel $ \Tau $
+na více místech, avšak nás zajímá jen okolí bodu $ P $. Do tohoto okolí jistě
+budou patřit ty koule, které bod $ P $ přímo obsahují. Explicitně
 zapsáno $ C = \{S_i \in \Tau \mid P \in S_i \} $. Dále musíme pokrýt všechny
 koule které mají neprázdný průnik s rovinou $ \rho $ a některou z koulí z $ C $.
+Celkem dostáváme
+$ O = \{ S_i \in \Tau \mid S_i \cap \rho \neq \emptyset \wedge \exists S \in C \colon S \cap S_i \neq \emptyset  \}$
 Tímto způsobem pokrýváme rozumné okolí bodu $ P $. To sice v případě špatného
 natočení normálového vektoru a extrémně zakrouceného tunelu nemusí stačit, ale
-experimenty ukázaly, že tento přístup je naprosto dostatečný a v praxi funguje
+experimenty ukazují, že tento přístup je naprosto dostatečný a v praxi funguje
 naprosto spolehlivě.
 
-Když teď
+Teď když víme, které koule jsou pro nás relevantní, uvážíme průřez rovinou
+$ \rho $ koulemi z $ O $. Každá z těchto koulí v uvažovaném řezu vykreslí
+kružnici (nebo jediný bod, který ale můžeme považovat za speciální případ kružnice).
+Náš problém se tak redukuje na planární úlohu konstrukce minimální kružnice obsahující
+všechny zadané kružnice. Jak se v práci Kaspara Fishera \cite{FisherBalls} ukazuje,
+jedná se o silně netriviální problém. Zde si nastíníme dvě možnosti jeho řešení.
+
+Jednodušší přístup spočívá v aproximaci kružnic pomocí dostatečného množství bodů
+rovnoměrně rozložených po jejich obvodu. Můžeme například požadovat, aby dva
+po sobě jdoucí body od sebe nebyly vzdáleny o více než $ \frac{\delta}{10} $.
+Pro tyto body pak můžeme použít například Welzlův náhodnostní algoritmus
+\cite{WelzlRandom}, jehož očekávaná doba běhu je v $ \mathcal{O}(n) $.
+
+Složitější, ale přesnější způsob popisuje již zmíněná práce Kaspara Fishera
+\cite{FisherBalls}. Zde je problém řešen v plné obecnosti libovolné dimenze $ d $.
+Popsaný algoritmus dosahuje očekávané doby běhu
+$ \mathcal{O}(d^2n) + e^{\mathcal{O}(\sqrt{d \log{d}})} $. V našem případě tak pro
+$ d = 2 $ dostáváme velmi efektivní algoritmus. K dispozici je dokonce velice
+robustní C++ implementace dostupná z \cite{cpp_balls}, která podle uvedených informací
+zvládá řešit úlohy ve 3D o velikosti 1 milionu koulí v čase pod 1 sekundu. To
+je rozhodně velmi působivý výsledek.
 
 
-\end{document}
+
