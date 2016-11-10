@@ -229,7 +229,10 @@ Jednodušší přístup spočívá v aproximaci kružnic pomocí dostatečného 
 rovnoměrně rozložených po jejich obvodu. Můžeme například požadovat, aby dva
 po sobě jdoucí body od sebe nebyly vzdáleny o více než $ \frac{\delta}{10} $.
 Pro tyto body pak můžeme použít například Welzlův náhodnostní algoritmus
-\cite{WelzlRandom}, jehož očekávaná doba běhu je v $ \mathcal{O}(n) $.
+\cite{WelzlRandom}, jehož očekávaná doba běhu je v $ \mathcal{O}(n) $. Tento
+přístup byl první, který jsme zkusili, protože implementace níže uvedeného algoritmu
+existuje (alespoň pokud je nám známo) pouze v C++ a naším výchozím jazykem byl
+Python. O tomto budeme ještě hovořit později.
 
 Složitější, ale přesnější způsob popisuje již zmíněná práce Kaspara Fishera
 \cite{FisherBalls}. Zde je problém řešen v plné obecnosti libovolné dimenze $ d $.
