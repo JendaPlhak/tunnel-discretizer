@@ -1,4 +1,5 @@
 import math
+import minball
 import numpy as np
 from decimal import *
 
@@ -76,19 +77,15 @@ def fit_disk_tunnel(normal, center, tunnel, delta):
         circle_cuts.append(cut_circle)
     assert circle_cuts
 
-    discrete_approx = []
+    circles = []
     for c in circle_cuts:
-        approx = c.get_approximation_delta(delta)
-        discrete_approx.extend([tuple(x) for x in approx])
-    t, u, radius = make_circle(discrete_approx)
+        circles.append(minball.Sphere2D(list(c.center), c.radius))
+
+    min_circle = minball.get_min_sphere2D(circles)
+    t, u = min_circle.center
+    radius = min_circle.radius
 
     new_center = disk_plane.get_point_for_param(t, u)
-    # control that calculation went as it was supposed to go.
-    # control_s = Sphere(new_center, radius)
-    # for point in discrete_approx:
-    #     control_point = disk_plane.get_point_for_param(point[0], point[1])
-    #     assert control_s.ball_contains(control_point)
-
     return Disk(new_center, normal, radius)
 
 # For two given points and vector determining plane, calculate disk, that is

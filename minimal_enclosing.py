@@ -1,40 +1,40 @@
-# 
+#
 # Smallest enclosing circle
-# 
+#
 # Copyright (c) 2014 Project Nayuki
 # http://www.nayuki.io/page/smallest-enclosing-circle
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program (see COPYING.txt).
 # If not, see <http://www.gnu.org/licenses/>.
-# 
+#
 
 import math, random
 
 
 # Data conventions: A point is a pair of floats (x, y). A circle is a triple of floats (center x, center y, radius).
 
-# 
+#
 # Returns the smallest circle that encloses all the given points. Runs in expected O(n) time, randomized.
 # Input: A sequence of pairs of floats or ints, e.g. [(0,5), (3.1,-2.7)].
 # Output: A triple of floats representing a circle.
 # Note: If 0 points are given, None is returned. If 1 point is given, a circle of radius 0 is returned.
-# 
+#
 def make_circle(points):
     # Convert to float and randomize order
     shuffled = [(float(p[0]), float(p[1])) for p in points]
     random.shuffle(shuffled)
-    
+
     # Progressively add points to circle or recompute circle
     c = None
     for (i, p) in enumerate(shuffled):
@@ -60,7 +60,7 @@ def _make_circle_two_points(points, p, q):
     diameter = _make_diameter(p, q)
     if all(_is_in_circle(diameter, r) for r in points):
         return diameter
-    
+
     left = None
     right = None
     for r in points:
