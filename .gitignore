@@ -1,0 +1,6 @@
+.DS_Store
+*.pyc
+*.pdb
+diplomka/geogebra
+*sublime*
+*.so

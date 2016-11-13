@@ -180,6 +180,7 @@ Kostru naznačeného algoritmu zachycuje následující pseudokód.
             \State $ size \gets size + \epsilon $
         \EndWhile
     \EndFor
+    \State \Return $ disks $
 \EndFunction
 
 \end{algorithmic}
@@ -243,5 +244,29 @@ robustní C++ implementace dostupná z \cite{cpp_balls}, která podle uvedených
 zvládá řešit úlohy ve 3D o velikosti 1 milionu koulí v čase pod 1 sekundu. To
 je rozhodně velmi působivý výsledek.
 
+Výše uvedené pak můžeme vyjádřit pomocí jednoduchého pseudokódu \ref{alg:fitDiskTunnel}.
 
+\begin{algorithmic}[1]
+\label{alg:fitDiskTunnel}
+
+\Function{fitDiskTunnel}{$ \vec{n}, P$}
+    \State $ \rho \gets Plane(\vec{n}, P) $
+    \State $ C \gets \{S_i \in \Tau \mid P \in S_i \} $
+    \State $ O \gets \{ S_i \in \Tau
+        \mid S_i \cap \rho \neq \emptyset
+            \wedge \exists S \in C \colon S \cap S_i \neq \emptyset  \} $
+    \State $ circles \gets \{ \operatorname{Circle}_{\rho}(S \cap \rho) \mid S \in O \} $
+    \State
+
+    \State $ Q, radius \gets \operatorname{getMinCircle}(circles) $
+    \State \Return $ \operatorname{Disk}(\vec{n}, \rho(Q), radius) $
+\EndFunction
+
+\end{algorithmic}
+
+Poznamenejme, že $ \operatorname{Circle}_{\rho} $ značí konstrukci 2D kružnice
+v parametrizaci roviny $ \rho $, $ \operatorname{getMinCircle} $ je některý z
+uvedených algoritmů pro nalezení minimální kružnice (vrací střed a poloměr)
+a konečně $ \rho(Q) $ značí převod bodu $ Q $ (středu) z lokálních souřadnic
+roviny $ \rho $ do souřadného systému původního prostoru.
 
