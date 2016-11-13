@@ -1,4 +1,8 @@
-Tunel $ \Tau $ v molekule je v našem případě modelován posloupností koulí o různých poloměrech umístěných v prostoru. Pro posloupnost koulí $ \Tau = \{S_i\}_{i=0}^{n} $ navíc platí $ S_i \bigcap S_{i+1} \neq \emptyset $ pro všechna $ 0 \leq i < n $.
+Tunel $ \Tau $ v molekule je v našem případě modelován posloupností koulí o různých
+poloměrech umístěných v prostoru. Pro posloupnost koulí $ \Tau = \{S_i\}_{i=0}^{n} $
+také musí platit $ S_i \bigcap S_{i+1} \neq \emptyset $ pro všechna $ 0 \leq i < n - 1$.
+A konečně budeme požadovat, aby tunel sám sebe nikdy neprotínal. Exaktněji řečeno
+chceme, aby byl objem tunelu $ \Tau $ topologicky ekvivalentní kouli.
 Pro představu jak takový tunel může vypadat uvádíme obrázek \ref{fig:basic_tunnel}.
 \begin{figure}[ht]
   	\centering
@@ -9,16 +13,21 @@ Pro představu jak takový tunel může vypadat uvádíme obrázek \ref{fig:basi
 \end{figure}
 
 
-Abychom mohli provádět docking ligandu, musíme nejprve takto definovaný tunel nařezat na jemné plátky - kruhy, na které pak v průběhu výpočtu budeme dokovat průběžné konformace ligandu. Popišme si nyní, jak by takové řezy měly vypadat.
+Abychom mohli provádět docking ligandu, musíme nejprve takto definovaný tunel nařezat na
+jemné plátky - kruhy, na které pak v průběhu výpočtu budeme dokovat průběžné konformace ligandu.
+Popišme si nyní, jak by takové řezy měly vypadat.
 
 \begin{defi}
-Řezem tunelu $ \Tau $ rozumíme kruh v prostoru, který je určen uspořádanou trojicí $\theta = (A, u, r)$, kde $ A $ je střed, $ u \in \Rbb^3 $ je normálnový vektor a $ r > 0 $ je poloměr.
+Řezem tunelu $ \Tau $ rozumíme kruh v prostoru, který je určen uspořádanou trojicí
+$\theta = (A, u, r)$, kde $ A $ je střed, $ u \in \Rbb^3 $ je normálnový vektor a $ r > 0 $ je poloměr.
 Pro tento kruh $ \theta $ musí platit, že $ \Tau \cap \theta $ je souvislá množina a navíc
-$ \exists \delta > 0 $ tak, že $ \forall \varepsilon > 0,  \varepsilon < \delta $ je  $ (A, u, r + \varepsilon) \cap \Tau = \theta \cap \Tau $.
+$ \exists \delta > 0 $ tak, že $ \forall \varepsilon > 0,  \varepsilon < \delta $ je
+$ (A, u, r + \varepsilon) \cap \Tau = \theta \cap \Tau $.
 (Alternativně řečeno $\Tau \setminus \theta $ má dvě komponenty.)
 \end{defi}
 
-Uvedená definice prakticky říká, že řez tunel řeže jen na jednom místě (podmínka souvislosti). Druhá podmínka znamená, že řez je úplný, tedy že řezem skutečně rozdělíme tunel na dvě části.
+Uvedená definice prakticky říká, že řez tunel řeže jen na jednom místě (podmínka souvislosti).
+Druhá podmínka znamená, že řez je úplný, tedy že řezem skutečně rozdělíme tunel na dvě části.
 Pro ilustraci, jak takové řezy mohou vypadat, přikládáme obrázek č. \ref{fig:tunnel_cuts}.
 \begin{figure}[ht]
     \centering
@@ -30,7 +39,12 @@ Pro ilustraci, jak takové řezy mohou vypadat, přikládáme obrázek č. \ref{
 
 S takto definovanými řezy můžeme začít uvažovat o tom, jak tunel nařezat jako celek.
 Mějme $ \Theta = \{\theta_i\}_{i=0}^{k}$ posloupnost řezů tunelu $ \Tau $. Pro potřeby správného
-dockingu bude nezbytné, aby platilo $ x, y \in \Theta \Rightarrow |x \cap y| \leq 1 $,
+dockingu bude nezbytné, aby platilo
+
+\begin{align}
+x, y \in \Theta \Rightarrow |x \cap y| \leq 1,
+\end{align}
+
 tedy každé dva řezy se dotýkají nejvýše v jednom bodě. Dále budeme chtít, aby po sobě
 jdoucí řezy od sebe \textit{nebyly příliš daleko}. Vzdálenost budeme měřit pomocí funkce
 $ \dst(x, y) $, kterou popisuje následující definice.
@@ -48,6 +62,26 @@ určené vrcholy $X_1, X_2 $ resp $Y_1, Y_2 $. Vzdálenost pak definujeme jako
         $ \dst(x, y) = \min\{ \max\{|X_1 - Y_1|, |X_2 - Y_2|\}, \max\{|X_1 - Y_2|, |X_2 - Y_1|\}\}$.
     \end{center}
 \end{defi}
+
+Tím dostáváme podmínku
+\begin{align}
+    \theta_i, \theta_{i+1} \in \Theta \Rightarrow \dst(\theta_i, \theta_{i+1}) < \delta.
+\end{align}
+
+A konečně budeme chtít, abychom se tunelem pohybovali od začátku stále vpřed
+a až na konec.
+Vzhledem k tomu, že řez musí dělit tunel vždy na dvě části, stačí požadovat
+aby následující řez vždy náležel do opačné části tunelu, než střed koule
+$ \theta_1 \in \Theta $. Celkem tedy
+\begin{align}
+    \operatorname{center}(S_1) \in \theta_1 \wedge \operatorname{center}(S_n) \in \theta_k
+\end{align}
+\begin{align}
+    \theta_i, \theta_{i+1} \in \Theta
+        \Rightarrow \theta_{i+1} \cap \Theta_{[S_1, \theta_i)} = \emptyset \text{,}
+\end{align}
+kde $ \Theta_{[S_1, \theta_i)} $ značí právě onu část tunelu od první koule po
+$ \theta_i $, bez tohoto řezu (to je nutné, neboť povolujeme dotyk řezů v jednom bodě).
 
 Nyní můžeme přistoupit k popisu samotného algoritmu, který má na vstupu tunel $ \Tau $
 a nějaké pevně zadané $ \delta > 0$, které určuje maximální vzdálenost, kterou
@@ -169,7 +203,7 @@ Kostru naznačeného algoritmu zachycuje následující pseudokód.
             \State $ disk\_normal \gets \operatorname{getWeightedDir}(curve, i, size) $
 
             \State $ disk \gets \operatorname{fitDiskTunnel}(disk\_normal, disk\_center) $ \label{alg:fit_disk}
-            \State $ disk \gets \operatorname{shiftDisk}(disk, disks[-1]) $
+            \State $ disk \gets \operatorname{shiftDisk}(disk, disks[-1]) $ \label{alg:shift_disk}
             \Statex
 
             \If{$ |disks| > 1  \And \dst(disk, disks[-2]) < \delta $}
@@ -270,3 +304,8 @@ uvedených algoritmů pro nalezení minimální kružnice (vrací střed a polom
 a konečně $ \rho(Q) $ značí převod bodu $ Q $ (středu) z lokálních souřadnic
 roviny $ \rho $ do souřadného systému původního prostoru.
 
+
+\subsection{Disk shifting}
+Druhou popisovanou funkcí bude $ \operatorname{shiftDisk} $, kterou jsme použili
+na řádku \ref{alg:shift_disk}. Jejím úkolem je posunout aktuální řez tak, aby
+byly splněny podmínky
