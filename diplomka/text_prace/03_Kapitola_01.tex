@@ -1,7 +1,7 @@
 Tunel $ \Tau $ v molekule je v našem případě modelován posloupností koulí o různých
 poloměrech umístěných v prostoru. Pro posloupnost koulí $ \Tau = \{S_i\}_{i=0}^{n} $
-také musí platit $ S_i \bigcap S_{i+1} \neq \emptyset $ pro všechna $ 0 \leq i < n - 1$.
-A konečně budeme požadovat, aby tunel sám sebe nikdy neprotínal. Exaktněji řečeno
+musí platit $ S_i \bigcap S_{i+1} \neq \emptyset $ pro všechna $ 0 \leq i < n - 1$ a
+také budeme požadovat, aby tunel sám sebe nikdy neprotínal. Exaktněji řečeno
 chceme, aby byl objem tunelu $ \Tau $ topologicky ekvivalentní kouli.
 Pro představu jak takový tunel může vypadat uvádíme obrázek \ref{fig:basic_tunnel}.
 \begin{figure}[ht]
@@ -42,7 +42,7 @@ Mějme $ \Theta = \{\theta_i\}_{i=0}^{k}$ posloupnost řezů tunelu $ \Tau $. Pr
 dockingu bude nezbytné, aby platilo
 
 \begin{align}
-x, y \in \Theta \Rightarrow |x \cap y| \leq 1,
+x, y \in \Theta \Rightarrow |x \cap y| \leq 1, \label{cond:not_intersecting}
 \end{align}
 
 tedy každé dva řezy se dotýkají nejvýše v jednom bodě. Dále budeme chtít, aby po sobě
@@ -66,6 +66,7 @@ určené vrcholy $X_1, X_2 $ resp $Y_1, Y_2 $. Vzdálenost pak definujeme jako
 Tím dostáváme podmínku
 \begin{align}
     \theta_i, \theta_{i+1} \in \Theta \Rightarrow \dst(\theta_i, \theta_{i+1}) < \delta.
+    \label{cond:distance}
 \end{align}
 
 A konečně budeme chtít, abychom se tunelem pohybovali od začátku stále vpřed
@@ -79,6 +80,7 @@ $ \theta_1 \in \Theta $. Celkem tedy
 \begin{align}
     \theta_i, \theta_{i+1} \in \Theta
         \Rightarrow \theta_{i+1} \cap \Theta_{[S_1, \theta_i)} = \emptyset \text{,}
+        \label{cond:going_forward}
 \end{align}
 kde $ \Theta_{[S_1, \theta_i)} $ značí právě onu část tunelu od první koule po
 $ \theta_i $, bez tohoto řezu (to je nutné, neboť povolujeme dotyk řezů v jednom bodě).
@@ -308,4 +310,23 @@ roviny $ \rho $ do souřadného systému původního prostoru.
 \subsection{Disk shifting}
 Druhou popisovanou funkcí bude $ \operatorname{shiftDisk} $, kterou jsme použili
 na řádku \ref{alg:shift_disk}. Jejím úkolem je posunout aktuální řez tak, aby
-byly splněny podmínky
+byly splněny podmínky (\ref{cond:not_intersecting}), (\ref{cond:distance})
+a (\ref{cond:going_forward}) na průnik, vzdálenost a pohyb vpřed.
+
+Funkce bude na vstupu očekávat poslední umístený řez $ V $ a aktuální řez $ W $,
+který se snažíme umístit. Pro správné fungování budeme vyžadovat aby nový řez
+alespoň částečně ležel v poloprostoru určeném normálou a středem řezu $ V $.
+Tento poloprostor budeme značit $ \mathcal{H}(V) $.
+
+Správný posun řezu v trojrozměrném prostoru se na první pohled může zdát jako
+poměrně obtížný úkol, avšak vzhledem k tomu, jak máme definovanou vzdálenost $ \dst $,
+stačí tento posun řešit v rovině $ \rho $ kolmé na řezy $ V $ a $ W $. Při hledání této
+roviny mohou nastat dva případy. Buďto jsou normálové vektory $ V $ a $ W $ lineárně
+nezávislé, pak je $ \rho $ určena bodem $ V_{center} $ a vektorovým součinem
+$ V_{normal} \times W_{normal} $, který udává normálový vektor. V opačném případě
+zřejmě stačí vzít libovolný vektor $ n $ kolmý na $ V_{normal} $ a dostáváme
+$ \rho = \operatorname{Plane}(V_{center}, V_{normal}) $.
+
+V rovině $ \rho $ jsou pak projekce řezů $ V, W $ ekvivalentní jejich průniku
+s rovinou $ \rho $ a odpovídají dvěma úsečkám $ \widetilde{V}, \widetilde{W} $.
+Náš problém se tím redukuje na whodné posunutí úsečky $ \widetilde{W} $.
