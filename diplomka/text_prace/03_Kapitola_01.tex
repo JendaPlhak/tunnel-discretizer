@@ -349,8 +349,9 @@ požadovat, aby platilo
     \dst(P_1, Q_1) + \dst(P_2, Q_2) \leq \dst(P_1, Q_2) + \dst(P_2, Q_1).
 \end{align*}
 
-V opačném případě označení vrcholů jednoduše prohodíme. Naši situaci pak
-ilustruje obrázek \ref{fig:segments_basic}.
+V opačném případě označení vrcholů jednoduše prohodíme. Toto označení vrcholů
+budeme nazývat správnou korespondencí. Naši situaci pak ilustruje obrázek
+\ref{fig:segments_basic}.
 
 \begin{figure}[ht]
     \centering
@@ -367,4 +368,54 @@ správné polorovině. K tomu nám poslouží vektory $ v_1 $ a $ v_2 $:
 \end{align*}
 
 Díky podmínce \ref{cond:halfspace} nastane vždy nejvýše jedna
-ze dvou možností.
+ze dvou možností. Buďto $ \langle V_{normal}, v_1\rangle < 0 $ a je potřeba
+přesunout vrchol $ Q_1 $. Posun provedeme ve směru normály $ V_{normal} $ položením
+$ Q_1 = P_1 + \epsilon V_{normal} $, kde epsilon může být opět libovolné
+kladné číslo menší než $ \delta $, nicméně v rámci alespoň částečného zachování
+zamýšleného směrování tunelu je vhodné jej volit co nejmenší. Experimentálně
+jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{\delta}{5} $.
+
+V případě, že $ \langle V_{normal}, v_2\rangle < 0 $, postupujeme zcela analogicky
+pro vrcholy $ P_2 $, $ Q_2 $. Nakonec ještě v případě nutnosti přeoznačením
+zajistíme správnou korespondenci, neboť ta by se mohla v některých patalogoických
+případech našimi úpravami porušit. Tím jsou vyřešeny podmínky
+(\ref{cond:not_intersecting}) a (\ref{cond:going_forward}).
+
+Teď když máme vrcholy na správné straně, můžeme provést úpravy, které zajistí,
+že nejsou příliš daleko od sebe. Prakticky to znamená pro obě dvojice
+korespondujících vrcholů spočítat $ v_i = Q_i - P_i $ a pokud platí
+$ \norm{v_i} > \delta $ provedeme posun
+$ Q_i = P_i + \delta \frac{v_i}{\norm{v_i}} $, čímž zajistíme podmínku
+(\ref{cond:distance}).
+
+Z výsledných bodů zrekonstruujeme řez jehož střed je určen vrcholy
+$ Q_1 $, $ Q_2 $ a normála $ \vec{n} $ bude vektor ležící v rovině $ \rho $
+kolmý na vektor $ \vec{Q_1 Q_2} $, který orientujeme tak, že bude platit
+$ \langle V_{normal}, \vec{n} \rangle \geq 0 $, tedy vyžadujeme souhlasnou
+orientaci jakou má předchozí řez. Nakonec zavolámě funkci
+$ \operatorname{fitDiskTunnel} $, která zajistí správně zvolený poloměr.
+Uvedený postup shrnuje následující pseudokod:
+
+
+\begin{algorithmic}[1]
+\label{alg:fitDiskTunnel}
+
+\Function{fitDiskTunnel}{$ \vec{n}, P$}
+    \State $ \rho \gets Plane(\vec{n}, P) $
+    \State $ C \gets \{S_i \in \Tau \mid P \in S_i \} $
+    \State $ O \gets \{ S_i \in \Tau
+        \mid S_i \cap \rho \neq \emptyset
+            \wedge \exists S \in C \colon S \cap S_i \neq \emptyset  \} $
+    \State $ circles \gets \{ \operatorname{Circle}_{\rho}(S \cap \rho) \mid S \in O \} $
+    \State
+
+    \State $ Q, radius \gets \operatorname{getMinCircle}(circles) $
+    \State \Return $ \operatorname{Disk}(\vec{n}, \rho(Q), radius) $
+\EndFunction
+
+\end{algorithmic}
+
+Poslední úprava na řádku BLABLABLA by ještě v některých případech mohla porušit podmínku
+na vzdálenost. To můžeme dodatečně napravit vložením dostatečného množství řezů
+(prakticky pouze jednoho) mezi předchozí a nově vytvořený řez, jejichž středy
+budou afinní kombinací ...

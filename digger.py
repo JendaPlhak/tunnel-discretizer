@@ -170,26 +170,20 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
             shift_vert = prev_vert_2 + prev_disk.normal * (delta / 5)
             new_disk   = get_new_disk_points(shift_vert, new_vert_1, prev_disk.normal)
 
-            new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 \
-                = get_vertices(new_disk, prev_disk)
-            v1 = new_vert_1 - prev_disk.center
-            v2 = new_vert_2 - prev_disk.center
-
     assert is_follower(prev_disk, new_disk)
+    new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
+
 
     # Ensure that disks are not too far from each other.
-    new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
-    v = new_vert_1 - prev_vert_1
-    if (not np.linalg.norm(v) < delta):
-        shifted_vert = prev_vert_1 + normalize(v) * delta
-        new_disk = get_new_disk_points(shifted_vert, new_vert_2, new_disk.normal)
+    v1 = new_vert_1 - prev_vert_1
+    if (not np.linalg.norm(v1) < delta):
+        new_vert_1 = prev_vert_1 + normalize(v1) * delta
 
-    new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
-    v = new_vert_2 - prev_vert_2
-    if (not np.linalg.norm(v) < delta):
-        shifted_vert = prev_vert_2 + normalize(v) * delta
-        new_disk = get_new_disk_points(new_vert_1, shifted_vert, new_disk.normal)
+    v2 = new_vert_2 - prev_vert_2
+    if (not np.linalg.norm(v2) < delta):
+        new_vert_2 = prev_vert_2 + normalize(v2) * delta
 
+    new_disk = get_new_disk_points(new_vert_1, new_vert_2, new_disk.normal)
     assert is_follower(prev_disk, new_disk)
     # perform re-fitting
     new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, tunnel, delta)
