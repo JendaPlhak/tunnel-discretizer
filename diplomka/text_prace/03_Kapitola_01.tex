@@ -316,7 +316,11 @@ a (\ref{cond:going_forward}) na průnik, vzdálenost a pohyb vpřed.
 Funkce bude na vstupu očekávat poslední umístený řez $ V $ a aktuální řez $ W $,
 který se snažíme umístit. Pro správné fungování budeme vyžadovat aby nový řez
 alespoň částečně ležel v poloprostoru určeném normálou a středem řezu $ V $.
-Tento poloprostor budeme značit $ \mathcal{H}(V) $.
+Tento poloprostor budeme značit $ \mathcal{H}(V) $. Formálně
+
+\begin{align} \label{cond:halfspace}
+    \mathcal{H}(V) \cap W \neq \emptyset
+\end{align}
 
 Správný posun řezu v trojrozměrném prostoru se na první pohled může zdát jako
 poměrně obtížný úkol, avšak vzhledem k tomu, jak máme definovanou vzdálenost $ \dst $,
@@ -324,9 +328,43 @@ stačí tento posun řešit v rovině $ \rho $ kolmé na řezy $ V $ a $ W $. P�
 roviny mohou nastat dva případy. Buďto jsou normálové vektory $ V $ a $ W $ lineárně
 nezávislé, pak je $ \rho $ určena bodem $ V_{center} $ a vektorovým součinem
 $ V_{normal} \times W_{normal} $, který udává normálový vektor. V opačném případě
-zřejmě stačí vzít libovolný vektor $ n $ kolmý na $ V_{normal} $ a dostáváme
-$ \rho = \operatorname{Plane}(V_{center}, V_{normal}) $.
+prakticky není co řešit, neboť díky uvedenému předpokladu mohou řezy být buďto
+v konfiguraci, která je v souladu s našimi požadavky, nebo splývají a v tom
+případě stačí nový řez posunout o libovolné $ 0 < \epsilon < \delta $ ve směru
+normálového vektoru.
 
 V rovině $ \rho $ jsou pak projekce řezů $ V, W $ ekvivalentní jejich průniku
 s rovinou $ \rho $ a odpovídají dvěma úsečkám $ \widetilde{V}, \widetilde{W} $.
-Náš problém se tím redukuje na whodné posunutí úsečky $ \widetilde{W} $.
+Náš problém se tím redukuje na vhodné posunutí úsečky $ \widetilde{W} $.
+Poznamenejme, že ačkoliv se při výpočtu budeme prakticky pořád pohybovat pouze
+v rovině $ \rho $, veškeré výpočty budeme provádět v původním 3D prostoru.
+
+Úsečky $ \widetilde{V} $ resp.
+$ \widetilde{W} $ jsou jednoznačně určeny svými vrcholy $ P_1, P_2 $ resp. $ Q_1, Q_2 $.
+Vzhledem k tomu, že vzdálenost mezi řezy jsme definovali právě na těchto vrcholech,
+bude pro nás důležité, abychom tyto vrcholy měli dobře označené. Budeme proto
+požadovat, aby platilo
+
+\begin{align*}
+    \dst(P_1, Q_1) + \dst(P_2, Q_2) \leq \dst(P_1, Q_2) + \dst(P_2, Q_1).
+\end{align*}
+
+V opačném případě označení vrcholů jednoduše prohodíme. Naši situaci pak
+ilustruje obrázek \ref{fig:segments_basic}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics{img/segments_basic.png}
+    \caption{Basic segments}
+  \centering
+  \label{fig:segments_basic}
+\end{figure}
+
+Nyní už ale k samotnému posunu. Prvně zajistíme, aby oba dva vrcholy ležely ve
+správné polorovině. K tomu nám poslouží vektory $ v_1 $ a $ v_2 $:
+\begin{align*}
+    v_1 = Q_1 - V_{center} &v_2 = Q_2 - V_{center}
+\end{align*}
+
+Díky podmínce \ref{cond:halfspace} nastane vždy nejvýše jedna
+ze dvou možností.
