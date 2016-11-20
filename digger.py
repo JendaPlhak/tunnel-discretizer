@@ -147,7 +147,7 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
 
     # Determine whether both segment vertices lie in the same half-plane. If not
     # fix it.
-    if not (np.dot(prev_disk.normal, v1) >= 0 and np.dot(prev_disk.normal, v2) >= 0.):
+    if not np.dot(prev_disk.normal, v1) >= 0 and np.dot(prev_disk.normal, v2) >= 0.:
         # print prev_disk.normal, v1, prev_disk.normal, prev_disk.normal
         # print np.dot(prev_disk.normal, v1) * np.dot(prev_disk.normal, prev_disk.normal)
 
@@ -176,11 +176,11 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
 
     # Ensure that disks are not too far from each other.
     v1 = new_vert_1 - prev_vert_1
-    if (not np.linalg.norm(v1) < delta):
+    if not np.linalg.norm(v1) < delta:
         new_vert_1 = prev_vert_1 + normalize(v1) * delta
 
     v2 = new_vert_2 - prev_vert_2
-    if (not np.linalg.norm(v2) < delta):
+    if not np.linalg.norm(v2) < delta:
         new_vert_2 = prev_vert_2 + normalize(v2) * delta
 
     new_disk = get_new_disk_points(new_vert_1, new_vert_2, new_disk.normal)

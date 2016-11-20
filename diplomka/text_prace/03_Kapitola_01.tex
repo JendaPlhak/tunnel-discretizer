@@ -307,6 +307,7 @@ a konečně $ \rho(Q) $ značí převod bodu $ Q $ (středu) z lokálních souř
 roviny $ \rho $ do souřadného systému původního prostoru.
 
 
+
 \subsection{Disk shifting}
 Druhou popisovanou funkcí bude $ \operatorname{shiftDisk} $, kterou jsme použili
 na řádku \ref{alg:shift_disk}. Jejím úkolem je posunout aktuální řez tak, aby
@@ -362,9 +363,9 @@ budeme nazývat správnou korespondencí. Naši situaci pak ilustruje obrázek
 \end{figure}
 
 Nyní už ale k samotnému posunu. Prvně zajistíme, aby oba dva vrcholy ležely ve
-správné polorovině. K tomu nám poslouží vektory $ v_1 $ a $ v_2 $:
+správné polorovině. K tomu nám poslouží vektory
 \begin{align*}
-    v_1 = Q_1 - V_{center} &v_2 = Q_2 - V_{center}
+    v_1 = Q_1 - V_{center} \qquad\text{a}\qquad v_2 = Q_2 - V_{center}.
 \end{align*}
 
 Díky podmínce \ref{cond:halfspace} nastane vždy nejvýše jedna
@@ -383,9 +384,9 @@ případech našimi úpravami porušit. Tím jsou vyřešeny podmínky
 
 Teď když máme vrcholy na správné straně, můžeme provést úpravy, které zajistí,
 že nejsou příliš daleko od sebe. Prakticky to znamená pro obě dvojice
-korespondujících vrcholů spočítat $ v_i = Q_i - P_i $ a pokud platí
-$ \norm{v_i} > \delta $ provedeme posun
-$ Q_i = P_i + \delta \frac{v_i}{\norm{v_i}} $, čímž zajistíme podmínku
+korespondujících vrcholů spočítat $ w_i = Q_i - P_i $ a pokud platí
+$ \norm{w_i} > \delta $ provedeme posun
+$ Q_i = P_i + \delta \frac{w_i}{\norm{w_i}} $, čímž zajistíme podmínku
 (\ref{cond:distance}).
 
 Z výsledných bodů zrekonstruujeme řez jehož střed je určen vrcholy
@@ -398,24 +399,76 @@ Uvedený postup shrnuje následující pseudokod:
 
 
 \begin{algorithmic}[1]
-\label{alg:fitDiskTunnel}
+\label{alg:shiftDisk}
 
-\Function{fitDiskTunnel}{$ \vec{n}, P$}
-    \State $ \rho \gets Plane(\vec{n}, P) $
-    \State $ C \gets \{S_i \in \Tau \mid P \in S_i \} $
-    \State $ O \gets \{ S_i \in \Tau
-        \mid S_i \cap \rho \neq \emptyset
-            \wedge \exists S \in C \colon S \cap S_i \neq \emptyset  \} $
-    \State $ circles \gets \{ \operatorname{Circle}_{\rho}(S \cap \rho) \mid S \in O \} $
-    \State
+\Function{shiftDisk}{$ V, W$}
+    \State $ P_1, P_2, Q_1, Q_2 \gets $ Správná korespondence vrcholů
+    \State $ \vec{v_1} \gets Q_1 - V_{center} $
+    \State $ \vec{v_2} \gets Q_2 - V_{center} $
+    \Statex
 
-    \State $ Q, radius \gets \operatorname{getMinCircle}(circles) $
-    \State \Return $ \operatorname{Disk}(\vec{n}, \rho(Q), radius) $
+    \If {$ \langle V_{normal}, \vec{v_1} \rangle < 0 $}
+        \State $ Q_1 \gets P_1 + \epsilon V_{normal} $
+    \ElsIf {$ \langle V_{normal}, \vec{v_2} \rangle < 0 $}
+        \State $ Q_2 \gets P_2 + \epsilon V_{normal} $
+    \EndIf
+    \State $ P_1, P_2, Q_1, Q_2 \gets $ Správná korespondence vrcholů
+    \Statex
+
+    \State $ \vec{w_1} \gets Q_1 - P_1 $
+    \If {$ \norm{w_1} > \delta $}
+        $ Q_1 \gets P_1 + \delta \frac{w_1}{\norm{w_1}} $ \label{shiftDisk:correction1}
+    \EndIf
+
+    \State $ \vec{w_2} \gets Q_2 - P_2 $
+    \If {$ \norm{w_2} > \delta $}
+        $ Q_2 \gets P_2 + \delta \frac{w_2}{\norm{w_2}} $ \label{shiftDisk:correction2}
+    \EndIf
+    \Statex
+
+    \State $ Z \gets $ Construct disk from $ Q_1$, $Q_2$ perpendicular to $ \rho $
+    \State $ new\_disk \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $ \label{shiftDisk:fit}
+    \State \Return $ new\_disk $
 \EndFunction
 
 \end{algorithmic}
 
-Poslední úprava na řádku BLABLABLA by ještě v některých případech mohla porušit podmínku
-na vzdálenost. To můžeme dodatečně napravit vložením dostatečného množství řezů
-(prakticky pouze jednoho) mezi předchozí a nově vytvořený řez, jejichž středy
-budou afinní kombinací ...
+Poslední úprava na řádku \ref{shiftDisk:fit} by ještě v některých případech mohla
+porušit podmínku na vzdálenost. Tomu můžeme částečně předejít tak, že případné korekce
+na řádcích \ref{shiftDisk:correction1} a \ref{shiftDisk:correction2} nebudeme
+dělat tak těsné a použijeme posun o něco menší než je $ \delta $. Pokud i tak
+dojde k porušení této podmínky, aplikujeme jednoduchý algoritmus, který bude
+vkládat řezy mezi $ V $ a $ new\_disk $ tak dlouho, dokud nebude podmínka na
+vzdálenost splněna.
+
+\begin{algorithmic}[1]
+\label{alg:extraDisks}
+
+\Function{extraDisks}{$ V, W$}
+    \State $extra \gets $ []
+    \If {$ \dst(V, W) > \delta $}
+        \State $ \vec{n} \gets \frac{V_{normal} + W_{normal}}{2} $
+        \State $ S \gets \frac{V_{center} + W_{center}}{2} $
+        \State $ X \gets \operatorname{fitDiskTunnel}(\vec{n}, S) $
+        \Statex
+
+        \State $ \operatorname{EXTEND}(extra, extraDisks(V, X)) $
+        \State $ \operatorname{PUSH}(extra, X) $
+        \State $ \operatorname{EXTEND}(extra, extraDisks(X, W)) $
+    \EndIf
+
+    \State \Return $ extra $
+\EndFunction
+
+\end{algorithmic}
+
+Uvedený postup bude jistě konečný neboť námi pokrývaný tunel je tvořen konečným
+počtem koulí a má spojitý povrch, takže vzdálenost v každém rekurzivním zanoření
+o něco zmenšíme. Tento opravný mechanismus navíc stačí aplikovat až po ukončení
+hlavního výpočtu postupně na po sobě jdoucí dvojice řezů a případným vložením
+řezů navíc mezi dané dvojice dosáhneme splnění podmínky (\ref{cond:distance}).
+
+Nakonec ještě poznamenejme, že námi zvolený přístup jistě může v některých případech
+generovat zbytečně mnoho řezů, nicméně vhodnou volbou již dříve
+diskutované délky posunu algoritmus dosahuje velmi dobrých výsledků, takže
+jsme se rozhodli tento postup dále již nemodifikovat.
