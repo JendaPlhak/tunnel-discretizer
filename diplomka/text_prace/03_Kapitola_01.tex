@@ -1,17 +1,31 @@
 Tunel $ \Tau $ v molekule je v našem případě modelován posloupností koulí o různých
 poloměrech umístěných v prostoru. Pro posloupnost koulí $ \Tau = \{S_i\}_{i=0}^{n} $
-musí platit $ S_i \bigcap S_{i+1} \neq \emptyset $ pro všechna $ 0 \leq i < n - 1$ a
-také budeme požadovat, aby tunel sám sebe nikdy neprotínal. Exaktněji řečeno
-chceme, aby byl objem tunelu $ \Tau $ topologicky ekvivalentní kouli.
+musí platit
+
+    \begin{enumerate}[label={(\arabic*)}]
+        \item $ S_i \bigcap S_{i+1} \neq \emptyset $ pro všechna $ 0 \leq i < n - 1$
+        \item $ S_i \nsubseteq S_j$  pro $ i \neq j $.
+    \end{enumerate}
+
+K tomu ještě budeme požadovat, aby tunel sám sebe nikdy neprotínal. Exaktněji řečeno
+chceme, aby byl objem tunelu $ \Tau $ topologicky ekvivalentní válci.
 Pro představu jak takový tunel může vypadat uvádíme obrázek \ref{fig:basic_tunnel}.
 \begin{figure}[ht]
   	\centering
 	\includegraphics[width=100mm]{img/basic_tunnel.jpg}
-	\caption{Sample of molecule tunnel}
+	\caption{Tunel v molekule}
   \centering
   \label{fig:basic_tunnel}
 \end{figure}
 
+Na mnohých místech budeme potřebovat mluvit o takzvané trajektorii tunelu. Tu popisuje
+následující definice.
+
+\begin{defi}
+Mějme tunel $ \Tau $. Trajektorií tunelu $ \Tau $ budeme rozumět křivku tvořenou
+úsečkami danými dvojicemi středů po sobě jdoucích koulí $ S_i^{center} $,
+$ S_{i+1}^{center} $.
+\end{defi}
 
 Abychom mohli provádět docking ligandu, musíme nejprve takto definovaný tunel nařezat na
 jemné plátky - kruhy, na které pak v průběhu výpočtu budeme dokovat průběžné konformace ligandu.
@@ -32,7 +46,7 @@ Pro ilustraci, jak takové řezy mohou vypadat, přikládáme obrázek č. \ref{
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{img/simple_cuts.png}
-    \caption{Sample of molecule tunnel}
+    \caption{Řezy}
   \centering
   \label{fig:tunnel_cuts}
 \end{figure}
@@ -45,22 +59,26 @@ dockingu bude nezbytné, aby platilo
 x, y \in \Theta \Rightarrow |x \cap y| \leq 1, \label{cond:not_intersecting}
 \end{align}
 
-tedy každé dva řezy se dotýkají nejvýše v jednom bodě. Dále budeme chtít, aby po sobě
-jdoucí řezy od sebe \textit{nebyly příliš daleko}. Vzdálenost budeme měřit pomocí funkce
+tedy každé dva řezy se dotýkají nejvýše v jednom bodě. Dále budeme chtít, aby vzdálenost
+po sobě jdoucích řezů byla shora omezená. Vzdálenost budeme měřit pomocí funkce
 $ \dst(x, y) $, kterou popisuje následující definice.
 
 \begin{defi}
-Mějme řezy $ x = (A, u, r_1), y = (B, v, r_2) \in \Theta $. Rozlišíme dvě situace
+Mějme řezy $ x = (A, u, r_1), y = (B, v, r_2) \in \Theta $. Vzdálenost řezů budeme
+měřit v jejich projekci do roviny $ \rho = (A, u, w) $, určenou středem $ A $,
+vektorem $ u $ a druhým vektorem $ w $, který definujeme následovně:
     \begin{enumerate}[label={(\arabic*)}]
-        \item $ u = v $, pak vezmeme libovolný vektor $ w $ tak, aby
-            $ \varrho = \langle u, w \rangle $ tvořilo rovinu.
-        \item V opačném případě položíme přímo $ \varrho = \langle u, v \rangle $.
+        \item Pokud jsou vektory $ u $, $ v $ a $ A - B $ lineárně závislé (LZ), vezmeme
+            za $ w $ libovolný vektor lineárně nezávislý (LN) na $ u $.
+        \item V případě, že $ u $, $ v $ jsou LZ ale $ u $ a $ A - B $ jsou LN,
+            definujeme $ w = A - B $.
+        \item Jinak položíme $ w = v $.
     \end{enumerate}
-Kolmou projecí do roviny $ \varrho $ promítneme řezy $x $ resp. $y$, čímž získáme dvě úsečky
+Kolmým promítáním řezů $ x $ resp. $ y $ do roviny  $ \rho $ získáme dvě úsečky
 určené vrcholy $X_1, X_2 $ resp $Y_1, Y_2 $. Vzdálenost pak definujeme jako
-    \begin{center}
-        $ \dst(x, y) = \min\{ \max\{|X_1 - Y_1|, |X_2 - Y_2|\}, \max\{|X_1 - Y_2|, |X_2 - Y_1|\}\}$.
-    \end{center}
+\begin{center}
+    $ \dst(x, y) = \min\{ \max\{|X_1 - Y_1|, |X_2 - Y_2|\}, \max\{|X_1 - Y_2|, |X_2 - Y_1|\}\}$.
+\end{center}
 \end{defi}
 
 Tím dostáváme podmínku
@@ -69,21 +87,28 @@ Tím dostáváme podmínku
     \label{cond:distance}
 \end{align}
 
-A konečně budeme chtít, abychom se tunelem pohybovali od začátku stále vpřed
-a až na konec.
-Vzhledem k tomu, že řez musí dělit tunel vždy na dvě části, stačí požadovat
-aby následující řez vždy náležel do opačné části tunelu, než střed koule
-$ \theta_1 \in \Theta $. Celkem tedy
-\begin{align}
-    \operatorname{center}(S_1) \in \theta_1 \wedge \operatorname{center}(S_n) \in \theta_k
-\end{align}
+
+Přirozeným požadavkem je abychom se tunelem pohybovali stále vpřed.
+Vzhledem k tomu, že řez $ \theta_i \in \Theta $ musí dělit tunel vždy na dvě části, stačí
+požadovat aby střed následujícího řezu $ \theta_{i + 1} \in \Theta $ ležel před
+$ \theta_i $. To zajistíme podmínkou \ref{cond:good_going}.
+
 \begin{align}
     \theta_i, \theta_{i+1} \in \Theta
-        \Rightarrow \theta_{i+1} \cap \Theta_{[S_1, \theta_i)} = \emptyset \text{,}
+        \Rightarrow \langle \theta_i^{normal}, \theta_{i+1}^{center} - \theta_i^{center} \rangle > 0
         \label{cond:going_forward}
 \end{align}
-kde $ \Theta_{[S_1, \theta_i)} $ značí právě onu část tunelu od první koule po
-$ \theta_i $, bez tohoto řezu (to je nutné, neboť povolujeme dotyk řezů v jednom bodě).
+
+Nakonec přidáním podmínky \ref{cond:good_start} na první a poslední řez zajistíme,
+že řezy pokryjí tunel v celé jeho délce. Pro potřeby této podmínky označme
+$ w = S_2^{center} - S_1^{center} $.
+
+\begin{align}
+    \theta_1^{normal} = \frac{w}{\norm{w}}
+    \qquad  \qquad S_1^{center} \in \theta_1
+    \qquad  \qquad S_n^{center} \in \theta_k
+    \label{cond:good_start}
+\end{align}
 
 Nyní můžeme přistoupit k popisu samotného algoritmu, který má na vstupu tunel $ \Tau $
 a nějaké pevně zadané $ \delta > 0$, které určuje maximální vzdálenost, kterou
@@ -95,9 +120,9 @@ aby počet řezů byl při splnění uvedených kritérií pokud možno co nejme
 
 \subsection{Algoritmus}
 
-Celý algoritmus se sestává z celé řady funkcí řešících méně či více důležité podproblémy.
-Domníváme se, že vyčerpávající popis všech komponent by byl zbytečně technický a snad i
-ubíjející, proto se zde zaměříme zejména na popis těch opravdu klíčových, zajímavých
+Celý algoritmus se sestává z celé řady funkcí řešících více či méně důležité podproblémy.
+Domníváme se, že vyčerpávající popis všech komponent by byl zbytečně technický,
+proto se zde zaměříme zejména na popis těch opravdu klíčových
 a tam, kde implementace nějakého výpočtu nebude důležitá pro pochopení fungování
 algoritmu jako celku, se omezíme pouze na symbolický zápis, případně stručný slovní
 popis.
@@ -110,10 +135,10 @@ Takovýto přístup by fungoval vcelku dobře pro tunely, které by byly relativ
 přímé bez zatáček, avšak pro \say{klikaté} tunely by generoval řezy zcela nepoužitelné.
 Pro ilustraci uvádíme obrázek \ref{fig:naive_cuts}.
 
-\begin{figure}[ht]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{img/naive_cuts.png}
-    \caption{Naive cuts}
+    \caption{Naivní řezy}
   \centering
   \label{fig:naive_cuts}
 \end{figure}
@@ -122,30 +147,30 @@ K problémům docházi proto, že bere v potaz pouze velmi lokální informace o
 tunelu a zřejmě zcela ignorujeme dříve uvedené požadavky na řezy. Tento postup ale
 můžeme zdokonalit. Prvním problémem je, že když takto postupně generujeme nové řezy,
 může se stát, že od sebe budou příliš daleko nebo se budou protínat. Potřebujeme proto
-funkci $ shiftNewDisk $, která přesně toto zajistí. Jak ale můžeme vidět na obrázku
-\ref{fig:shift_cuts}, toto způsobí, že se v případě nevhodné orientace normálových
-vektorů sice zachovají naše požadavky na řezy, avšak dostaneme jich zbytečně mnoho.
+funkci $ shiftNewDisk $, která přesně toto znemožní. Tuto funkci do detailu rozvedeme v
+podkapitole \ref{subsec:disk_shift}. Ve stručnosti pouze poznamenejme, že tato funkce
+vstupní řez upraví tak, aby neprotínal předchozí řez a byl od něj vzdálen nejvýše
+o $ \delta $. Jak ale můžeme vidět na obrázku \ref{fig:shift_cuts}, toto způsobí,
+že se v případě nevhodné orientace normálových vektorů sice zachovají naše
+požadavky na řezy, avšak dostaneme jich zbytečně mnoho.
 
-\begin{figure}[ht]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{img/shift_cuts.png}
-    \caption{Shifting cuts}
+    \caption{Posun řezů}
   \centering
   \label{fig:shift_cuts}
 \end{figure}
 
 Z toho důvodu je ještě vhodné po každém posunu zkontrolovat, zda nemůžeme předchozí
-řez prostě jen nahradit novým řezem $ \theta $. To jest pro
-$ \theta_{i - 2} \in \Theta $ zkontrolovat zda náhodou neplatí
-$ \dst(\theta_{i - 2}, \theta) < \delta $. Pokud ano, můžeme zřejmě nahradit
-$ \theta_{i - 1} = \theta $. (Toto má samozřejmě smysl jen pokud
-$ |\Theta| > 1 $.) Jak můžeme vidět na obrázku \ref{fig:cuts_with_replace}
-výsledek již vypadá o mnoho lépe.
+řez vynechat. To jest pro $ \theta_{i - 2} \in \Theta $ zkontrolovat zda
+náhodou neplatí $ \dst(\theta_{i - 2}, \theta) < \delta $. Jak můžeme vidět na
+obrázku \ref{fig:cuts_with_replace} výsledek již vypadá o mnoho lépe.
 
-\begin{figure}[ht]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{img/cuts_with_replace.png}
-    \caption{Cuts with replace}
+    \caption{Vynechání přebytečných řezů}
   \centering
   \label{fig:cuts_with_replace}
 \end{figure}
@@ -166,20 +191,22 @@ Pro ilustraci se ještě podívejme na obrázek \ref{fig:weighted_dir}. Je vidě
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{img/weighted_dir.png}
-    \caption{Cuts with weighted direction}
+    \caption{Řezy s váženým průměrem směru}
   \centering
   \label{fig:weighted_dir}
 \end{figure}
 
-Kostru naznačeného algoritmu zachycuje následující pseudokód.
+
+Kostru naznačeného algoritmu zachycuje následující pseudokód. Poznamenejme, že
+budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$.
 
 \begin{algorithmic}[1]
 \label{alg:digTunnel}
 
 \Function{digTunnel}{$\Tau, \delta$}
     \State $ centers \gets [ S_{center} \in \Tau ] $
-    \State $ normals \gets [ \operatorname{norm}(C_{i + 1} - C_{i}) \mid 0 \leq i < |centers| ] $
-    \State $ disks \gets   [ \operatorname{fitDiskTunnel}(normals[0], centers[0], \Tau, \delta)] $
+    \State $ normals \gets [ \operatorname{norm}(S_{i + 1}^{center} - S_{i}^{center}) \mid 0 \leq i < |\Tau| ] $
+    \State $ disks \gets   [ \operatorname{fitDiskTunnel}(normals[0], S_0^{center})] $
     \State $ curve \gets \operatorname{TunnelCurve}(centers) $
     \Statex
 
@@ -188,30 +215,29 @@ Kostru naznačeného algoritmu zachycuje následující pseudokód.
             \Break
         \EndIf
         \State $ \vec{n} \gets normals[i] $
-        \State $ center \gets centers[i] $
-        \State $ dir \gets centers[i + 1] - center $
-        \State $ line \gets \operatorname{Line}(center, dir) $
+        \State $ dir \gets S_{i + 1}^{center} - S_{i}^{center} $
+        \State $ line \gets \operatorname{Line}(S_{i}^{center}, dir) $
         \Statex
 
         \State $ size \gets 0 $
         \While {$ size < \norm{dir} $}
             \If{$ size \neq 0 $}
-                \State $ plane \gets \operatorname{getPlane}(disks[-1]) $
-                \State $ size \gets \dis(plane \cap line, center) + \epsilon $
+                \State $ plane \gets \operatorname{getPlane}(disks[|disks|-1]) $
+                \State $ size \gets \dis(plane \cap line, S_{i}^{center}) + \epsilon $
             \EndIf
             \Statex
 
-            \State $ disk\_center \gets center + normal * size $
+            \State $ disk\_center \gets S_{i}^{center} + normal * size $
             \State $ disk\_normal \gets \operatorname{getWeightedDir}(curve, i, size) $
 
             \State $ disk \gets \operatorname{fitDiskTunnel}(disk\_normal, disk\_center) $ \label{alg:fit_disk}
-            \State $ disk \gets \operatorname{shiftDisk}(disk, disks[-1]) $ \label{alg:shift_disk}
+            \State $ disk \gets \operatorname{shiftDisk}(disk, disks[|disks|-1]) $ \label{alg:shift_disk}
             \Statex
 
-            \If{$ |disks| > 1  \And \dst(disk, disks[-2]) < \delta $}
-                \State $ disks[-1] \gets disk $
+            \If{$ |disks| \geq 2  \And \dst(disk, disks[|disks|-2]) < \delta $}
+                \State $ disks[|disks|-1] \gets disk $
             \Else
-                \State $ \operatorname{Push}(disks, disk) $
+                \State $ \operatorname{APPEND}(disks, disk) $
             \EndIf
             \State $ size \gets size + \epsilon $
         \EndWhile
@@ -236,7 +262,7 @@ budeme tunelem pohybovat a tím rychleji také celý algoritmus doběhne. Experi
 jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{9}{10} \delta $.
 
 
-\subsection{Disk fitting}
+\subsection{Disk fitting} \label{subsec:disk_fit}
 Nyní se budeme věnovat funkci $ \operatorname{fitDiskTunnel} $ použité na řádku
 \ref{alg:fit_disk}. Na tomto místě již víme jaký normálový vektor by měl řez mít a
 zároveň máme k dispozici referenční bod $ P $, který nám společně s normálou
@@ -308,7 +334,7 @@ roviny $ \rho $ do souřadného systému původního prostoru.
 
 
 
-\subsection{Disk shifting}
+\subsection{Disk shifting} \label{subsec:disk_shift}
 Druhou popisovanou funkcí bude $ \operatorname{shiftDisk} $, kterou jsme použili
 na řádku \ref{alg:shift_disk}. Jejím úkolem je posunout aktuální řez tak, aby
 byly splněny podmínky (\ref{cond:not_intersecting}), (\ref{cond:distance})
@@ -357,7 +383,7 @@ budeme nazývat správnou korespondencí. Naši situaci pak ilustruje obrázek
 \begin{figure}[ht]
     \centering
     \includegraphics{img/segments_basic.png}
-    \caption{Basic segments}
+    \caption{Řezy v roviě $ \rho $}
   \centering
   \label{fig:segments_basic}
 \end{figure}
