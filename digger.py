@@ -26,7 +26,7 @@ def dig_tunnel(tunnel, opts):
 
     # Calculate disks position
     for i, s in enumerate(tunnel.t):
-        if i == len(tunnel.t) - 2:
+        if i == len(tunnel.t) - 1:
             break
 
         print("Processing ball NO. %d" % i)
@@ -42,10 +42,9 @@ def dig_tunnel(tunnel, opts):
         size = 0;
         while size < centers_dist:
             # Form initial disk center
-            if (size != 0):
-                disk_plane = disks[-1].get_plane()
-                inter = line.intersection_plane(disk_plane)
-                size  = np.linalg.norm(inter - center) + opts.eps
+            disk_plane = disks[-1].get_plane()
+            inter = line.intersection_plane(disk_plane)
+            size  = max(np.linalg.norm(inter - center) + opts.eps, size)
 
             disk_center = center + normal * size
             new_normal  = curve.get_weighted_dir(i, size)
@@ -145,18 +144,17 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
     v1 = new_vert_1 - prev_disk.center
     v2 = new_vert_2 - prev_disk.center
 
+    # At least one of the vertices must be on the right side
+    assert np.dot(prev_disk.normal, v1) >= 0. or np.dot(prev_disk.normal, v2) >= 0.
+
     # Determine whether both segment vertices lie in the same half-plane. If not
     # fix it.
-    if not np.dot(prev_disk.normal, v1) >= 0 and np.dot(prev_disk.normal, v2) >= 0.:
+    if not (np.dot(prev_disk.normal, v1) >= 0 and np.dot(prev_disk.normal, v2) >= 0.):
         # print prev_disk.normal, v1, prev_disk.normal, prev_disk.normal
         # print np.dot(prev_disk.normal, v1) * np.dot(prev_disk.normal, prev_disk.normal)
 
         # print prev_disk.normal, v2, prev_disk.normal, prev_disk.normal
         # print np.dot(prev_disk.normal, v2) * np.dot(prev_disk.normal, prev_disk.normal)
-
-
-        # At least one of the vertices must be on the right side
-        assert np.dot(prev_disk.normal, v1) >= 0. or np.dot(prev_disk.normal, v2) >= 0.
 
         # Find which vertex is in the wrong half plane.
         # Then shift appropriate vertex so that prev_disk is followed by
@@ -172,7 +170,6 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
 
     assert is_follower(prev_disk, new_disk)
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
-
 
     # Ensure that disks are not too far from each other.
     v1 = new_vert_1 - prev_vert_1
