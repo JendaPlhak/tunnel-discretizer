@@ -307,18 +307,35 @@ budou patřit ty koule, které bod $ P $ přímo obsahují. Explicitně
 zapsáno $ C = \{S_i \in \Tau \mid P \in S_i \} $. Dále musíme pokrýt všechny
 koule které mají neprázdný průnik s rovinou $ \rho $ a některou z koulí z $ C $.
 Celkem dostáváme
-$ O = \{ S_i \in \Tau \mid S_i \cap \rho \neq \emptyset \wedge \exists S \in C \colon S \cap S_i \neq \emptyset  \}$
-Tímto způsobem pokrýváme rozumné okolí bodu $ P $. To sice v případě špatného
-natočení normálového vektoru a extrémně zakrouceného tunelu nemusí stačit, ale
-experimenty ukazují, že tento přístup je naprosto dostatečný a v praxi funguje
-naprosto spolehlivě.
+$ N = \{ S_i \in \Tau \mid S_i \cap \rho \neq \emptyset \wedge \exists S \in C \colon S \cap S_i \neq \emptyset  \}$.
+Tímto způsobem můžeme postupovat rekurzivně. Algoritmický rekurzivní postup
+popisuje následující jednoduchá funkce $ findNeighbors $.
+
+\begin{algorithmic}[1]
+\label{alg:findNeighbors}
+
+\Function{findNeighbors}{$C$, $\rho$}
+    \State $ N \gets \{ S_i \in \Tau \mid S_i \cap \rho \neq \emptyset
+        \wedge \exists S \in C \colon S \cap S_i \neq \emptyset \} $
+    \If{$ N = C $}
+        \State \Return C
+    \Else
+        \State \Return $\operatorname{findNeighbors}(N$, $\rho)$
+    \EndIf
+\EndFunction
+
+\end{algorithmic}
+
+Výpočet bude zřejmě pro libovolný vstup konečný neboť tunel je tvořen jen konečným
+počtem koulí.
 
 Teď když víme, které koule jsou pro nás relevantní, uvážíme průřez rovinou
-$ \rho $ koulemi z $ O $. Každá z těchto koulí v uvažovaném řezu vykreslí
+$ \rho $ koulemi z $ O = \operatorname{findNeighbors}(C$, $\rho)$.
+Každá z těchto koulí v uvažovaném řezu vykreslí
 kružnici (nebo jediný bod, který ale můžeme považovat za speciální případ kružnice).
 Náš problém se tak redukuje na planární úlohu konstrukce minimální kružnice obsahující
 všechny zadané kružnice. Jak se v práci Kaspara Fishera \cite{FisherBalls} ukazuje,
-jedná se o silně netriviální problém. Zde si nastíníme dvě možnosti jeho řešení.
+jedná se o netriviální problém. Zde si nastíníme dvě možnosti jeho řešení.
 
 Jednodušší přístup spočívá v aproximaci kružnic pomocí dostatečného množství bodů
 rovnoměrně rozložených po jejich obvodu. Můžeme například požadovat, aby dva
@@ -346,9 +363,7 @@ Výše uvedené pak můžeme vyjádřit pomocí jednoduchého pseudokódu \ref{a
 \Function{fitDiskTunnel}{$ \vec{n}, P$}
     \State $ \rho \gets Plane(\vec{n}, P) $
     \State $ C \gets \{S_i \in \Tau \mid P \in S_i \} $
-    \State $ O \gets \{ S_i \in \Tau
-        \mid S_i \cap \rho \neq \emptyset
-            \wedge \exists S \in C \colon S \cap S_i \neq \emptyset  \} $
+    \State $ O \gets \operatorname{findNeighbors}(C$, $\rho)$
     \State $ circles \gets \{ \operatorname{Circle}_{\rho}(S \cap \rho) \mid S \in O \} $
     \State
 
