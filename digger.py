@@ -174,11 +174,11 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
     # Ensure that disks are not too far from each other.
     v1 = new_vert_1 - prev_vert_1
     if not np.linalg.norm(v1) < delta:
-        new_vert_1 = prev_vert_1 + normalize(v1) * delta
+        new_vert_1 = prev_vert_1 + normalize(v1) * delta * 0.99
 
     v2 = new_vert_2 - prev_vert_2
     if not np.linalg.norm(v2) < delta:
-        new_vert_2 = prev_vert_2 + normalize(v2) * delta
+        new_vert_2 = prev_vert_2 + normalize(v2) * delta * 0.99
 
     new_disk = get_new_disk_points(new_vert_1, new_vert_2, new_disk.normal)
     assert is_follower(prev_disk, new_disk)
@@ -187,6 +187,8 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
     # print "Revised disk : {}".format(new_disk.to_geogebra())
 
     assert is_follower(prev_disk, new_disk)
+    if disk_dist(new_disk, prev_disk) > delta:
+        new_disk = shift_new_disk(new_disk, prev_disk, tunnel, delta)
 
     # Check whether our function does what it is supposed to do.
     new_dir, prev_dir = get_radius_vectors(new_disk, prev_disk)
