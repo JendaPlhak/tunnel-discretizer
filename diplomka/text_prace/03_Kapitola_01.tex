@@ -229,7 +229,7 @@ Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$.
             \State $ disk\_normal \gets \operatorname{getWeightedDir}(curve, i, d) $ \label{digTunnel:normal}
 
             \State $ disk \gets \operatorname{fitDiskTunnel}(disk\_normal, disk\_center) $ \label{alg:fit_disk}
-            \State $ disk \gets \operatorname{shiftDisk}(disk, disks[|disks|-1]) $ \label{alg:shift_disk}
+            \State $ disk \gets \operatorname{shiftDisk}(disks[|disks|-1], disk) $ \label{alg:shift_disk}
             \Statex
 
             \If{$ |disks| \geq 2  \And \dst(disk, disks[|disks|-2]) < \delta $} \label{digTunnel:last_if}
@@ -459,8 +459,9 @@ Teď když máme vrcholy na správné straně, můžeme provést úpravy, které
 že nejsou příliš daleko od sebe. Prakticky to znamená pro obě dvojice
 korespondujících vrcholů spočítat $ w_i = Q_i - P_i $ a pokud platí
 $ \norm{w_i} > \delta $ provedeme posun
-$ Q_i = P_i + \delta \frac{w_i}{\norm{w_i}} $, čímž zajistíme podmínku
-(\ref{cond:distance}).
+$ Q_i = P_i + \tilde{\epsilon} \frac{w_i}{\norm{w_i}} $, kde
+$ 0 < \tilde{\epsilon} < \delta $. Proč za epsilon nezvolit přímo $ \delta $
+bude zřejmé z pozdějšího textu.
 
 Z výsledných bodů zrekonstruujeme řez jehož střed je určen vrcholy
 $ Q_1 $, $ Q_2 $ a normála $ \vec{n} $ bude vektor ležící v rovině $ \rho $
@@ -490,58 +491,44 @@ Uvedený postup shrnuje následující pseudokod:
 
     \State $ \vec{w_1} \gets Q_1 - P_1 $
     \If {$ \norm{w_1} > \delta $}
-        $ Q_1 \gets P_1 + \delta \frac{w_1}{\norm{w_1}} $ \label{shiftDisk:correction1}
+        $ Q_1 \gets P_1 + \tilde{\epsilon} \frac{w_1}{\norm{w_1}} $ \label{shiftDisk:correction1}
     \EndIf
 
     \State $ \vec{w_2} \gets Q_2 - P_2 $
     \If {$ \norm{w_2} > \delta $}
-        $ Q_2 \gets P_2 + \delta \frac{w_2}{\norm{w_2}} $ \label{shiftDisk:correction2}
+        $ Q_2 \gets P_2 + \tilde{\epsilon} \frac{w_2}{\norm{w_2}} $ \label{shiftDisk:correction2}
     \EndIf
     \Statex
 
     \State $ Z \gets $ Construct disk from $ Q_1$, $Q_2$ perpendicular to $ \rho $
     \State $ new\_disk \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $ \label{shiftDisk:fit}
-    \State \Return $ new\_disk $
+    \Statex
+
+    \If {$ \dst(V, new\_disk) > \delta $}
+        \State \Return $ \operatorname{shiftDisk}(V, new\_disk) $ \label{shiftDisk:recursion}
+    \Else
+        \State \Return $ new\_disk $
+    \EndIf
+
 \EndFunction
 
 \end{algorithmic}
 
 Poslední úprava na řádku \ref{shiftDisk:fit} by ještě v některých případech mohla
-porušit podmínku na vzdálenost. Tomu můžeme částečně předejít tak, že případné korekce
-na řádcích \ref{shiftDisk:correction1} a \ref{shiftDisk:correction2} nebudeme
-dělat tak těsné a použijeme posun o něco menší než je $ \delta $. Pokud i tak
-dojde k porušení této podmínky, aplikujeme jednoduchý algoritmus, který bude
-vkládat řezy mezi $ V $ a $ new\_disk $ tak dlouho, dokud nebude podmínka na
-vzdálenost splněna.
+porušit podmínku na vzdálenost. Kvůli tomu zvolíme na řádcích
+\ref{shiftDisk:correction1} a \ref{shiftDisk:correction2} posun o něco
+menší než je $ \delta $. Pokud nový řez bude i tak porušovat podmínku (\ref{cond:distance}),
+aplikujeme celý postup rekurzivním voláním na řádku \ref{shiftDisk:recursion} znovu.
 
-\begin{algorithmic}[1]
-\label{alg:extraDisks}
+Algoritmus tak bude jistě korektní. Konečnost plyne z toho, že
+algoritmus $\operatorname{fitDiskTunnel} $ nemění normálový vektor řezu a proto
+rovina $ \rho $ zůstane během rekurze stále stejná. Díky tomu jistě úsečku
+$ \widetilde{W} $ při každém rekurzivním zanoření posuneme o kousek blíže k
+$ \widetilde{V} $. To společně se spojitostí a konečnými rozměry tunelu zajistí,
+že se po konečném počtu kroků dostaneme do vzdálenosti menší než $ \delta $.
 
-\Function{extraDisks}{$ V, W$}
-    \State $extra \gets $ []
-    \If {$ \dst(V, W) > \delta $}
-        \State $ \vec{n} \gets \frac{V_{normal} + W_{normal}}{2} $
-        \State $ S \gets \frac{V_{center} + W_{center}}{2} $
-        \State $ X \gets \operatorname{fitDiskTunnel}(\vec{n}, S) $
-        \Statex
+Experimentálně jsme ověřili, že vhodnou volbou pro $ \tilde{\epsilon} $ je
+$ \tilde{\epsilon} = \frac{99}{100} \delta$. Vzdálenost takto generovaných řezů
+byla dostatečně blízko k $ \delta $, ale zároveň byl počet rekurzivních zanoření
+minimální (nejvýše 2) a dopad na celkový výkon algoritmu nebyl vůbec měřitelný.
 
-        \State $ \operatorname{EXTEND}(extra, extraDisks(V, X)) $
-        \State $ \operatorname{PUSH}(extra, X) $
-        \State $ \operatorname{EXTEND}(extra, extraDisks(X, W)) $
-    \EndIf
-
-    \State \Return $ extra $
-\EndFunction
-
-\end{algorithmic}
-
-Uvedený postup bude jistě konečný neboť námi pokrývaný tunel je tvořen konečným
-počtem koulí a má spojitý povrch, takže vzdálenost v každém rekurzivním zanoření
-o něco zmenšíme. Tento opravný mechanismus navíc stačí aplikovat až po ukončení
-hlavního výpočtu postupně na po sobě jdoucí dvojice řezů a případným vložením
-řezů navíc mezi dané dvojice dosáhneme splnění podmínky (\ref{cond:distance}).
-
-Nakonec ještě poznamenejme, že námi zvolený přístup jistě může v některých případech
-generovat zbytečně mnoho řezů, nicméně vhodnou volbou již dříve
-diskutované délky posunu algoritmus dosahuje velmi dobrých výsledků, takže
-jsme se rozhodli tento postup dále již nemodifikovat.
