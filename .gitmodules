@@ -3,4 +3,4 @@
 	url = https://github.com/pybind/pybind11.git
 [submodule "extern/minballPy"]
 	path = extern/minballPy
-	url = git@github.com:JendaPlhak/minballPy.git
+	url = https://github.com/JendaPlhak/minballPy.git
