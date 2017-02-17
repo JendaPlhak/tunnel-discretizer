@@ -147,7 +147,7 @@ K problémům docházi proto, že bere v potaz pouze velmi lokální informace o
 tunelu a zřejmě zcela ignorujeme dříve uvedené požadavky na řezy. Tento postup ale
 můžeme zdokonalit. Prvním problémem je, že když takto postupně generujeme nové řezy,
 může se stát, že od sebe budou příliš daleko nebo se budou protínat. Potřebujeme proto
-funkci $ shiftNewDisk $, která přesně toto znemožní. Tuto funkci do detailu rozvedeme v
+funkci $ shiftDisk $, která přesně toto znemožní. Tuto funkci do detailu rozvedeme v
 podkapitole \ref{subsec:disk_shift}. Ve stručnosti pouze poznamenejme, že tato funkce
 vstupní řez upraví tak, aby neprotínal předchozí řez a byl od něj vzdálen nejvýše
 o $ \delta $. Jak ale můžeme vidět na obrázku \ref{fig:shift_cuts}, toto způsobí,

@@ -180,7 +180,7 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
     if not np.linalg.norm(v2) < delta:
         new_vert_2 = prev_vert_2 + normalize(v2) * delta * 0.99
 
-    new_disk = get_new_disk_points(new_vert_1, new_vert_2, new_disk.normal)
+    new_disk = get_new_disk_points(new_vert_1, new_vert_2, prev_disk.normal)
     assert is_follower(prev_disk, new_disk)
     # perform re-fitting
     new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, tunnel, delta)
