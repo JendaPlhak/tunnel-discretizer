@@ -46,9 +46,13 @@ def get_normal_in_plane(n, v):
 
 # For two disks calculate vector that realizes radius of segment that emerges by
 # projecting disk into the plane determined by normals of disks d1 and d2.
-def get_radius_vectors(d1, d2):
-    # Get normal vector of plan given by normal vectors of disks.
-    normal = null_space(np.array([d1.normal, d2.normal, null_vec]))
+def get_radius_vectors(d1, d2, normal = None):
+    # Get normal vector of plane given by normal vectors of disks.
+    if normal is not None:
+        assert abs(np.dot(normal, d1.normal)) < f_error
+        assert abs(np.dot(normal, d2.normal)) < f_error
+    else:
+        normal = null_space(np.array([d1.normal, d2.normal, null_vec]))
     # print "Normal:\n{}".format(normal)
     # Calculate directions of segments created by projection to the plan.
     seg_dir1 = null_space(np.array([d1.normal, normal, null_vec]))
@@ -83,12 +87,12 @@ def get_intersection_line_sphere(sphere, line):
     return inter_points
 
 # projection distance of two discs
-def disk_dist(d1, d2):
-    if (d1.normal == d2.normal).all():
+def disk_dist(d1, d2, normal = None):
+    if (d1.normal == d2.normal).all() and normal is None :
         return np.linalg.norm(d1.center - d2.center)
     else:
         # get radius vectors
-        seg_dir1, seg_dir2 = get_radius_vectors(d1, d2)
+        seg_dir1, seg_dir2 = get_radius_vectors(d1, d2, normal = normal)
         # print "Radius vector 1:\n{}".format(seg_dir1)
         # print "Radius vector 2:\n{}".format(seg_dir2)
 
@@ -98,9 +102,14 @@ def disk_dist(d1, d2):
 
         seg_1_verts = [d1.center + seg_dir1, d1.center - seg_dir1]
         seg_2_verts = [d2.center + seg_dir2, d2.center - seg_dir2]
+        # print("Segment[({},{}), ({},{})],".format(seg_1_verts[0][0],seg_1_verts[0][1],
+        #     seg_1_verts[1][0],seg_1_verts[1][1]))
+        # print("Segment[({},{}), ({},{})],".format(seg_2_verts[0][0],seg_2_verts[0][1],
+        #     seg_2_verts[1][0],seg_2_verts[1][1]))
 
         dists_1 = distances(seg_1_verts, seg_2_verts)
         dists_2 = distances(list(reversed(seg_1_verts)), seg_2_verts)
+        # print(dists_1, dists_2)
 
         if sum(dists_1) < sum(dists_2):
             return max(dists_1)

@@ -6,6 +6,8 @@ class Disk:
         self.center = center
         self.normal = normalize(normal)
         self.radius = radius
+        self._plane = Plane(center, normal)
+        self._perpen_vec = null_space(np.array([normal, null_vec, null_vec]))
 
     def to_dict(self):
         packer  = lambda c : tuple([c[0], c[1], c[2]])
@@ -41,6 +43,12 @@ class Disk:
         if not abs(np.dot(vec, self.normal)) < f_error:
             return False
         return abs(np.linalg.norm(vec) - self.radius) < f_error
+
+    def get_point(self, alpha):
+        circle2D = Circle(self._plane.orthogonal_proj_param(self.center), self.radius)
+        full_angle = 2 * math.pi
+        point = circle2D.get_point((alpha % (2 * math.pi)) / full_angle)
+        return self._plane.get_point_for_param(point[0], point[1])
 
 
 class Plane:
