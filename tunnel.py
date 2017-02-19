@@ -14,10 +14,11 @@ class Tunnel:
                 center = np.array([float(words[6]), float(words[7]), float(words[8])])
                 radius = float(words[9])
                 self.t.append(Sphere(center, radius));
-            else:
-                print "Unexpected data: " + line
+            # else:
+                # print "Unexpected data: " + line
 
         infile.close()
+        self.check_requirements()
         print "Tunnel readed (" + str(len(self.t)) + " spheres)."
 
     def get_neighbors(self, sphere_idx):
@@ -43,11 +44,28 @@ class Tunnel:
         return spheres;
 
     def get_all_intersecting_disk(self, plane, center):
+        # print "Containing center %d" % len(self.get_all_containing_point(center))
         cont_spheres = self.get_all_containing_point(center)
         inters       = []
+        inter_circs  = set(plane.intersection_sphere(s) for s in cont_spheres)
 
-        for s1 in self.t:
-            for s2 in cont_spheres:
-                if s2.intersect_ball(s1) and plane.intersection_sphere(s1) != None:
-                    inters.append(s1)
+        circles_count = 0
+
+        while len(inter_circs) != circles_count:
+            circles_count = len(inter_circs)
+            for s1 in self.t:
+                c1 = plane.intersection_sphere(s1)
+                if c1 is None:
+                    continue
+                for ref_circle in set(inter_circs):
+                    if ref_circle.has_intersection_circle(c1):
+                        inters.append(s1)
+                        inter_circs.add(c1)
+                        break
         return inters
+
+    def check_requirements(self):
+        for i, s1 in enumerate(self.t):
+            for s2 in self.t[i+1:]:
+                assert(not s1.contains_sphere(s2))
+                assert(not s2.contains_sphere(s1))

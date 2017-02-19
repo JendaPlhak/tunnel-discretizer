@@ -45,7 +45,7 @@ def get_normal_in_plane(n, v):
     return u
 
 # For two disks calculate vector that realizes radius of segment that emerges by
-# projecting disk into the plan determined by normals of disks d1 and d2.
+# projecting disk into the plane determined by normals of disks d1 and d2.
 def get_radius_vectors(d1, d2):
     # Get normal vector of plan given by normal vectors of disks.
     normal = null_space(np.array([d1.normal, d2.normal, null_vec]))

@@ -131,6 +131,10 @@ class Sphere:
     def ball_contains(self, point):
         return np.linalg.norm(self.center - point) - self.radius < f_error
 
+    def contains_sphere(self, other):
+        v = normalize(other.center - self.center)
+        return self.ball_contains(other.center + v * other.radius)
+
 class Line:
 
     def __init__(self, point, dir_):
@@ -186,6 +190,19 @@ class Circle:
         self.center = center
         self.radius = radius
 
+    def __str__(self):
+        return str(self.center) + str(self.radius)
+
+    def __hash__(self):
+        return hash(str(self))
+
+    def __eq__(self, other):
+        return (self.center == other.center).all() and (self.radius == other.radius).all()
+
+    def to_geogebra(self):
+        return "Circle[({},{}), {}]"\
+            .format(self.center[0], self.center[1], self.radius)
+
     # For parameter in float in [0, 1] return proportional point on circle.
     def get_point(self, c_percetage):
         assert 0 <= c_percetage and c_percetage <= 1
@@ -203,5 +220,6 @@ class Circle:
         # print n_samples
         return self.get_approximation(n_samples)
 
-
-
+    def has_intersection_circle(self, other):
+        return np.linalg.norm(self.center - other.center) \
+            <= self.radius + other.radius
