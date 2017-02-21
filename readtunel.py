@@ -63,6 +63,7 @@ if __name__ == '__main__':
                 #                         s2.center[2]-s.center[2]),
                 #                 color=(1,0,0), shaftwidth=1)
         for i, disk in enumerate(disks[:]):
+            print disk.radius
             # if (i != 0):
             #     print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
             vs.ring(pos=disk.center - centScene,

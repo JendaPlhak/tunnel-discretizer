@@ -20,7 +20,7 @@ def dig_tunnel(tunnel, opts):
     centers = [s.center for s in tunnel.t]
     normals = [normalize(centers[i + 1] - centers[i]) \
                for i in xrange(len(centers) - 1)]
-    curve = TunnelCurve(centers, 8.)
+    curve = TunnelCurve(centers, 6.)
     disks = [
         fit_disk_tunnel(curve.get_weighted_dir(0, 0), centers[0], tunnel)
     ]
@@ -50,19 +50,21 @@ def dig_tunnel(tunnel, opts):
             if size > centers_dist:
                 break
 
-            disk_center = disks[-1].center + disks[-1].normal * opts.delta * 2
+            disk_center = disks[-1].center + disks[-1].normal * opts.delta * 1.5
 
             new_disk = fit_disk_tunnel(disks[-1].normal, disk_center, tunnel)
             # print(disk_dist(disks[-1], new_disk))
             try:
-                if disk_dist(disks[-1], new_disk) > 3 * opts.delta:
+                if abs(disks[-1].radius - new_disk.radius) > opts.delta:
+                    print("Curving!")
                     new_normal = disks[-1].normal
 
-                    # disk_center = disks[-1].center + disks[-1].normal * opts.eps
                     new_disk = shift_new_disk2(disks[-1], new_disk, tunnel, opts)
                     # print "new disk distance: ", disk_dist(disks[-1], new_disk)
                 else:
-                    disk_center = center + normal * size
+                    print("Moving!")
+                    disk_center = disks[-1].center + disks[-1].normal * opts.eps
+                    # new_normal  = disks[-1].normal
                     new_normal  = curve.get_weighted_dir(i, size)
                     new_disk = fit_disk_tunnel(new_normal, disk_center, tunnel)
 
@@ -287,15 +289,22 @@ def shift_new_disk2(prev_disk, new_disk, tunnel, opts):
             # print "Circle[({},{}), {}],".format(radius_point[0], radius_point[1], d1.radius)
             plane_normal = radius_point - d1.center
             # print(alpha, radius_point, disk_dist(d1, d2, normal = plane_normal))
-            return disk_dist(d1, d2, normal = plane_normal), plane_normal
+            # return disk_dist(d1, d2, normal = plane_normal), plane_normal
+            new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
+                get_vertices(d1, d2, normal = plane_normal)
+            v1 = new_vert_1 - prev_vert_1
+            v2 = new_vert_2 - prev_vert_2
+            dst1 = np.linalg.norm(v1)
+            dst2 = np.linalg.norm(v2)
+            return max(dst1, dst2) / min(dst1, dst2), plane_normal
 
         return max(
-            (dst(a) for a in np.arange(0, math.pi, opts.eps / 10.)),
+            (dst(a) for a in np.arange(0, math.pi, opts.eps)),
             key = lambda x: x[0]
         )
 
-    dst, new_seg_dir = find_max_distance(prev_disk, new_disk)
-    plane_normal = null_space(np.array([prev_disk.normal, new_seg_dir, null_vec]))
+    dst, plane_normal = find_max_distance(prev_disk, new_disk)
+    # plane_normal = null_space(np.array([prev_disk.normal, new_seg_dir, null_vec]))
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
         get_vertices(new_disk, prev_disk, normal = plane_normal)
 
@@ -308,24 +317,24 @@ def shift_new_disk2(prev_disk, new_disk, tunnel, opts):
     v2 = new_vert_2 - prev_vert_2
     d1 = np.linalg.norm(v1)
     d2 = np.linalg.norm(v2)
-    print d1, d2
-    if d1 > opts.eps:
-        if d1 > d2:
-            print("new_vert_1 = prev_vert_1")
-            new_vert_1 = prev_vert_1
-        else:
-            print("new_vert_1 = prev_vert_1 + normalize(v1) * opts.eps")
-            new_vert_1 = prev_vert_1 + normalize(v1) * opts.eps
-    if d2 > opts.eps:
-        if d1 < d2:
-            print("new_vert_2 = prev_vert_2")
-            new_vert_2 = prev_vert_2
-        else:
-            print("new_vert_2 = prev_vert_2 + normalize(v1) * opts.eps")
-            new_vert_2 = prev_vert_2 + normalize(v1) * opts.eps
+    # if d1 > opts.eps:
+    if d1 > d2:
+        # print("new_vert_1 = prev_vert_1")
+        new_vert_1 = prev_vert_1
+    else:
+        # print("new_vert_1 = prev_vert_1 + normalize(v1) * opts.eps")
+        new_vert_1 = prev_vert_1 + normalize(v1) * opts.delta * 0.9
+    # if d2 > opts.eps:
+    if d1 < d2:
+        # print("new_vert_2 = prev_vert_2")
+        new_vert_2 = prev_vert_2
+    else:
+        # print("new_vert_2 = prev_vert_2 + normalize(v1) * opts.eps")
+        new_vert_2 = prev_vert_2 + normalize(v1) * opts.delta * 0.9
 
     seg_dir = new_vert_2 - new_vert_1
     new_disk_normal = null_space(np.array([plane_normal, seg_dir, null_vec]))
+    new_disk_normal *= np.sign(np.dot(prev_disk.normal, new_disk_normal))
     # print("({},{}),".format(new_vert_1[0],new_vert_1[1]))
     # print("({},{}),".format(new_vert_2[0],new_vert_2[1]))
     # print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
@@ -341,7 +350,6 @@ def shift_new_disk2(prev_disk, new_disk, tunnel, opts):
     # print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
     # print("({},{}),".format(prev_vert_2[0],prev_vert_2[1]))
 
-    print "New distance: ", disk_dist(prev_disk, new_disk)
     assert disk_dist(prev_disk, new_disk) < opts.delta
 
     return new_disk
