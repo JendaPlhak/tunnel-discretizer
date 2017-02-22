@@ -36,6 +36,8 @@ def dig_tunnel(tunnel, opts):
         center       = centers[i]
         next_center  = centers[i + 1]
         centers_dist = np.linalg.norm(next_center - center)
+        disks.append(find_minimal_disk(center, curve.get_weighted_dir(i, 0), tunnel, opts))
+        continue
 
         # line between centers
         line = Line(center, next_center - center)
@@ -46,23 +48,22 @@ def dig_tunnel(tunnel, opts):
             disk_plane = disks[-1].get_plane()
             inter = line.intersection_plane(disk_plane)
             size  = max(np.linalg.norm(inter - center) + opts.eps, size)
-            print size
+            # print size
             if size > centers_dist:
                 break
 
             disk_center = disks[-1].center + disks[-1].normal * opts.delta * 1.5
 
             new_disk = fit_disk_tunnel(disks[-1].normal, disk_center, tunnel)
-            print disks[-1].radius, new_disk.radius
             try:
-                if new_disk.radius - disks[-1].radius > opts.delta * 2:
-                    print("Curving!")
+                if abs(new_disk.radius - disks[-1].radius) > opts.delta * 2:
+                    # print("Curving!")
                     new_normal = disks[-1].normal
 
                     new_disk = shift_new_disk2(disks[-1], new_disk, tunnel, opts)
                     # print "new disk distance: ", disk_dist(disks[-1], new_disk)
                 else:
-                    print("Moving!")
+                    # print("Moving!")
                     disk_center = disks[-1].center + disks[-1].normal * opts.eps
                     # new_normal  = disks[-1].normal
                     new_normal  = curve.get_weighted_dir(i, size)
@@ -299,7 +300,7 @@ def shift_new_disk2(prev_disk, new_disk, tunnel, opts):
             return max(dst1, dst2) / min(dst1, dst2), plane_normal
 
         return max(
-            (dst(a) for a in np.arange(0, math.pi, opts.eps)),
+            (dst(a) for a in np.arange(0, math.pi, 0.1)),
             key = lambda x: x[0]
         )
 
@@ -308,10 +309,10 @@ def shift_new_disk2(prev_disk, new_disk, tunnel, opts):
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
         get_vertices(new_disk, prev_disk, normal = plane_normal)
 
-    print("({},{}),".format(new_vert_1[0],new_vert_1[1]))
-    print("({},{}),".format(new_vert_2[0],new_vert_2[1]))
-    print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
-    print("({},{}),".format(prev_vert_2[0],prev_vert_2[1]))
+    # print("({},{}),".format(new_vert_1[0],new_vert_1[1]))
+    # print("({},{}),".format(new_vert_2[0],new_vert_2[1]))
+    # print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
+    # print("({},{}),".format(prev_vert_2[0],prev_vert_2[1]))
 
     v1 = new_vert_1 - prev_vert_1
     v2 = new_vert_2 - prev_vert_2
@@ -350,7 +351,31 @@ def shift_new_disk2(prev_disk, new_disk, tunnel, opts):
     # print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
     # print("({},{}),".format(prev_vert_2[0],prev_vert_2[1]))
 
-    print("Distance:", disk_dist(prev_disk, new_disk))
+    # print("Distance:", disk_dist(prev_disk, new_disk))
     assert disk_dist(prev_disk, new_disk) < opts.delta
 
     return new_disk
+
+def find_minimal_disk(point, init_normal, tunnel, opts):
+    best_disk = fit_disk_tunnel(init_normal, point, tunnel)
+
+    print("Initial radius: ", best_disk.radius)
+    for i in xrange(30):
+        print("Round %d" % i)
+        init_disk = best_disk
+        found_better = False
+        for alpha in np.arange(0, math.pi, 0.1):
+            radius_point = init_disk.get_point(alpha)
+            new_norm = init_normal + 1. / (i + 1) * normalize(radius_point - point)
+            disk = fit_disk_tunnel(new_norm, point, tunnel)
+
+            if disk.radius < best_disk.radius:
+                best_disk = disk
+                found_better = True
+                print "Found better!", best_disk.radius
+        if i >= 5 and not found_better:
+            break
+
+
+    return best_disk
+
