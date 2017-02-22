@@ -53,9 +53,9 @@ def dig_tunnel(tunnel, opts):
             disk_center = disks[-1].center + disks[-1].normal * opts.delta * 1.5
 
             new_disk = fit_disk_tunnel(disks[-1].normal, disk_center, tunnel)
-            # print(disk_dist(disks[-1], new_disk))
+            print disks[-1].radius, new_disk.radius
             try:
-                if abs(disks[-1].radius - new_disk.radius) > opts.delta:
+                if new_disk.radius - disks[-1].radius > opts.delta * 2:
                     print("Curving!")
                     new_normal = disks[-1].normal
 
@@ -215,11 +215,11 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
         # new disk.
         if np.dot(prev_disk.normal, v1) < 0.:
             # print "First one!"
-            shift_vert = prev_vert_1 + prev_disk.normal * (delta / 100.)
+            shift_vert = prev_vert_1 + prev_disk.normal
             new_disk   = get_new_disk_points(shift_vert, new_vert_2, prev_disk.normal)
         elif np.dot(prev_disk.normal, v2) < 0.:
             # print "Second one!"
-            shift_vert = prev_vert_2 + prev_disk.normal * (delta / 100.)
+            shift_vert = prev_vert_2 + prev_disk.normal
             new_disk   = get_new_disk_points(shift_vert, new_vert_1, prev_disk.normal)
 
     assert is_follower(prev_disk, new_disk)
@@ -238,9 +238,9 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
 
     # Ensure that disks are not too far from each other.
     if d1 > delta:
-        new_vert_1 = prev_vert_1 + normalize(v1) * delta * 0.99
+        new_vert_1 = prev_vert_1 + normalize(v1) * delta * 0.95
     if d2 > delta:
-        new_vert_2 = prev_vert_2 + normalize(v2) * delta * 0.99
+        new_vert_2 = prev_vert_2 + normalize(v2) * delta * 0.95
 
     # print "Disk distance: %f" % disk_dist(new_disk, prev_disk)
     new_disk = get_new_disk_points(new_vert_1, new_vert_2, prev_disk.normal)
@@ -308,10 +308,10 @@ def shift_new_disk2(prev_disk, new_disk, tunnel, opts):
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
         get_vertices(new_disk, prev_disk, normal = plane_normal)
 
-    # print("({},{}),".format(new_vert_1[0],new_vert_1[1]))
-    # print("({},{}),".format(new_vert_2[0],new_vert_2[1]))
-    # print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
-    # print("({},{}),".format(prev_vert_2[0],prev_vert_2[1]))
+    print("({},{}),".format(new_vert_1[0],new_vert_1[1]))
+    print("({},{}),".format(new_vert_2[0],new_vert_2[1]))
+    print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
+    print("({},{}),".format(prev_vert_2[0],prev_vert_2[1]))
 
     v1 = new_vert_1 - prev_vert_1
     v2 = new_vert_2 - prev_vert_2
@@ -350,6 +350,7 @@ def shift_new_disk2(prev_disk, new_disk, tunnel, opts):
     # print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
     # print("({},{}),".format(prev_vert_2[0],prev_vert_2[1]))
 
+    print("Distance:", disk_dist(prev_disk, new_disk))
     assert disk_dist(prev_disk, new_disk) < opts.delta
 
     return new_disk
