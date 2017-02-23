@@ -1,3 +1,4 @@
+import minball
 import numpy as np
 from geometrical_objects import *
 
@@ -69,3 +70,53 @@ class Tunnel:
             for s2 in self.t[i+1:]:
                 assert(not s1.contains_sphere(s2))
                 assert(not s2.contains_sphere(s1))
+
+    def fit_disk(self, normal, center):
+        disk_plane  = Plane(center, normal)
+        circle_cuts = []
+
+        for sphere in self.get_all_intersecting_disk(disk_plane, center):
+            # calculate center of cap that we get by intersection disk_plane
+            # and sphere
+            cut_circle = disk_plane.intersection_sphere(sphere)
+            assert cut_circle is not None
+
+            circle_cuts.append(cut_circle)
+        assert circle_cuts
+
+        circles = []
+        # print "{"
+        for c in circle_cuts:
+            # print "%s,"% c.to_geogebra()
+            circles.append(minball.Sphere2D(list(c.center), c.radius))
+        # print "}"
+
+        min_circle = minball.get_min_sphere2D(circles)
+        t, u = min_circle.center
+        radius = min_circle.radius
+
+        new_center = disk_plane.get_point_for_param(t, u)
+        assert disk_plane.contains(new_center)
+        return Disk(new_center, normal, radius)
+
+    def find_minimal_disk(self, point, init_normal):
+        best_disk = self.fit_disk(init_normal, point)
+        init_radius = best_disk.radius
+
+        for i in xrange(12):
+            # print("Round %d" % i)
+            found_better = True
+            while found_better:
+                init_disk = best_disk
+                found_better = False
+                for alpha in np.arange(0, 2*math.pi, 0.1):
+                    radius_point = init_disk.get_point(alpha)
+                    new_norm = init_normal + 10. / 2**(i / 2. + 1) * normalize(radius_point - point)
+                    disk = self.fit_disk(new_norm, point)
+
+                    if disk.radius < best_disk.radius:
+                        best_disk = disk
+                        found_better = True
+                        # print "Found better!", best_disk.radius
+        print "Init radius {}, Final radius: {}".format(init_radius, best_disk.radius)
+        return best_disk

@@ -57,13 +57,12 @@ if __name__ == '__main__':
             # central line
             if (i < len(tunnel.t)-1):
                 s2 = tunnel.t[i+1]
-                # vVis = vs.arrow(pos=s.center - centScene,
-                #                 axis=(s2.center[0]-s.center[0],
-                #                         s2.center[1]-s.center[1],
-                #                         s2.center[2]-s.center[2]),
-                #                 color=(1,0,0), shaftwidth=1)
+                vVis = vs.arrow(pos=s.center - centScene,
+                                axis=(s2.center[0]-s.center[0],
+                                        s2.center[1]-s.center[1],
+                                        s2.center[2]-s.center[2]),
+                                color=(1,0,0), shaftwidth=1)
         for i, disk in enumerate(disks[:]):
-            print disk.radius
             # if (i != 0):
             #     print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
             vs.ring(pos=disk.center - centScene,

@@ -1,5 +1,4 @@
 import math
-import minball
 import numpy as np
 from decimal import *
 
@@ -20,9 +19,9 @@ def dig_tunnel(tunnel, opts):
     centers = [s.center for s in tunnel.t]
     normals = [normalize(centers[i + 1] - centers[i]) \
                for i in xrange(len(centers) - 1)]
-    curve = TunnelCurve(centers, 6.)
+    curve = TunnelCurve(tunnel, 7.)
     disks = [
-        fit_disk_tunnel(curve.get_weighted_dir(0, 0), centers[0], tunnel)
+        tunnel.fit_disk(curve.get_weighted_dir(0, 0), centers[0])
     ]
 
 
@@ -36,8 +35,8 @@ def dig_tunnel(tunnel, opts):
         center       = centers[i]
         next_center  = centers[i + 1]
         centers_dist = np.linalg.norm(next_center - center)
-        disks.append(find_minimal_disk(center, curve.get_weighted_dir(i, 0), tunnel, opts))
-        continue
+        # disks.append(tunnel.fit_disk(curve.dirs[i], center))
+        # continue
 
         # line between centers
         line = Line(center, next_center - center)
@@ -54,7 +53,7 @@ def dig_tunnel(tunnel, opts):
 
             disk_center = disks[-1].center + disks[-1].normal * opts.delta * 1.5
 
-            new_disk = fit_disk_tunnel(disks[-1].normal, disk_center, tunnel)
+            new_disk = tunnel.fit_disk(disks[-1].normal, disk_center)
             try:
                 if abs(new_disk.radius - disks[-1].radius) > opts.delta * 2:
                     # print("Curving!")
@@ -67,7 +66,7 @@ def dig_tunnel(tunnel, opts):
                     disk_center = disks[-1].center + disks[-1].normal * opts.eps
                     # new_normal  = disks[-1].normal
                     new_normal  = curve.get_weighted_dir(i, size)
-                    new_disk = fit_disk_tunnel(new_normal, disk_center, tunnel)
+                    new_disk = tunnel.fit_disk(new_normal, disk_center)
 
                     # print("Start shifting.......")
                     new_disk = shift_new_disk(new_disk, disks[-1], tunnel, opts.delta)
@@ -216,11 +215,11 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
         # new disk.
         if np.dot(prev_disk.normal, v1) < 0.:
             # print "First one!"
-            shift_vert = prev_vert_1 + prev_disk.normal
+            shift_vert = prev_vert_1 + prev_disk.normal * delta * 0.1
             new_disk   = get_new_disk_points(shift_vert, new_vert_2, prev_disk.normal)
         elif np.dot(prev_disk.normal, v2) < 0.:
             # print "Second one!"
-            shift_vert = prev_vert_2 + prev_disk.normal
+            shift_vert = prev_vert_2 + prev_disk.normal * delta * 0.1
             new_disk   = get_new_disk_points(shift_vert, new_vert_1, prev_disk.normal)
 
     assert is_follower(prev_disk, new_disk)
@@ -248,7 +247,7 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
     # print "Disk distance: %f" % disk_dist(new_disk, prev_disk)
     assert is_follower(prev_disk, new_disk)
     # perform re-fitting
-    new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, tunnel)
+    new_disk = tunnel.fit_disk(new_disk.normal, new_disk.center)
     # print "Revised disk : {}".format(new_disk.to_geogebra())
     # print "Disk distance: %f > %f\n" % (disk_dist(new_disk, prev_disk), delta)
 
@@ -341,7 +340,7 @@ def shift_new_disk2(prev_disk, new_disk, tunnel, opts):
     # print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
     # print("({},{}),".format(prev_vert_2[0],prev_vert_2[1]))
 
-    new_disk = fit_disk_tunnel(new_disk_normal, (new_vert_2 + new_vert_1)/2., tunnel)
+    new_disk = tunnel.fit_disk(new_disk_normal, (new_vert_2 + new_vert_1)/2.)
 
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
         get_vertices(new_disk, prev_disk)
@@ -355,27 +354,3 @@ def shift_new_disk2(prev_disk, new_disk, tunnel, opts):
     assert disk_dist(prev_disk, new_disk) < opts.delta
 
     return new_disk
-
-def find_minimal_disk(point, init_normal, tunnel, opts):
-    best_disk = fit_disk_tunnel(init_normal, point, tunnel)
-
-    print("Initial radius: ", best_disk.radius)
-    for i in xrange(30):
-        print("Round %d" % i)
-        init_disk = best_disk
-        found_better = False
-        for alpha in np.arange(0, math.pi, 0.1):
-            radius_point = init_disk.get_point(alpha)
-            new_norm = init_normal + 1. / (i + 1) * normalize(radius_point - point)
-            disk = fit_disk_tunnel(new_norm, point, tunnel)
-
-            if disk.radius < best_disk.radius:
-                best_disk = disk
-                found_better = True
-                print "Found better!", best_disk.radius
-        if i >= 5 and not found_better:
-            break
-
-
-    return best_disk
-
