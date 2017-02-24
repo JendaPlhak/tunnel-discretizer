@@ -11,15 +11,16 @@ from tunnel_curve import TunnelCurve
 
 
 class DigOpts:
-    def __init__(self, delta):
+    def __init__(self, delta, filename):
         self.delta = delta
         self.eps   = delta * 0.1
+        self.filename = filename
 
 def dig_tunnel(tunnel, opts):
     centers = [s.center for s in tunnel.t]
     normals = [normalize(centers[i + 1] - centers[i]) \
                for i in xrange(len(centers) - 1)]
-    curve = TunnelCurve(tunnel, 7.)
+    curve = TunnelCurve(tunnel, 7., opts)
     disks = [
         tunnel.fit_disk(curve.get_weighted_dir(0, 0), centers[0])
     ]
@@ -51,11 +52,11 @@ def dig_tunnel(tunnel, opts):
             if size > centers_dist:
                 break
 
-            disk_center = disks[-1].center + disks[-1].normal * opts.delta * 1.5
+            disk_center = disks[-1].center + disks[-1].normal * opts.delta * 2
 
-            new_disk = tunnel.fit_disk(disks[-1].normal, disk_center)
             try:
-                if abs(new_disk.radius - disks[-1].radius) > opts.delta * 2:
+                new_disk = tunnel.fit_disk(disks[-1].normal, disk_center)
+                if abs(new_disk.radius - disks[-1].radius) > opts.delta * 2.5:
                     # print("Curving!")
                     new_normal = disks[-1].normal
 
@@ -73,7 +74,7 @@ def dig_tunnel(tunnel, opts):
                     # print("\n\n")
                     # disk_dist(new_disk, disks[-1]) < opts.delta + f_error
             except:
-                # raise
+                raise
                 return disks
 
             if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < opts.delta):
@@ -215,11 +216,11 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
         # new disk.
         if np.dot(prev_disk.normal, v1) < 0.:
             # print "First one!"
-            shift_vert = prev_vert_1 + prev_disk.normal * delta * 0.1
+            shift_vert = prev_vert_1 + prev_disk.normal * delta * 0.01
             new_disk   = get_new_disk_points(shift_vert, new_vert_2, prev_disk.normal)
         elif np.dot(prev_disk.normal, v2) < 0.:
             # print "Second one!"
-            shift_vert = prev_vert_2 + prev_disk.normal * delta * 0.1
+            shift_vert = prev_vert_2 + prev_disk.normal * delta * 0.01
             new_disk   = get_new_disk_points(shift_vert, new_vert_1, prev_disk.normal)
 
     assert is_follower(prev_disk, new_disk)
@@ -251,9 +252,9 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
     # print "Revised disk : {}".format(new_disk.to_geogebra())
     # print "Disk distance: %f > %f\n" % (disk_dist(new_disk, prev_disk), delta)
 
-    assert is_follower(prev_disk, new_disk)
-    if disk_dist(new_disk, prev_disk) > delta:
+    if disk_dist(new_disk, prev_disk) > delta or not is_follower(prev_disk, new_disk):
         new_disk = shift_new_disk(new_disk, prev_disk, tunnel, delta)
+    assert is_follower(prev_disk, new_disk)
 
     # Check whether our function does what it is supposed to do.
     new_dir, prev_dir = get_radius_vectors(new_disk, prev_disk)

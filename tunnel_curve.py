@@ -2,19 +2,17 @@ from linalg import *
 from multiprocessing import Process, Queue, cpu_count
 import numpy as np
 import json
-
-
+import os
 
 class TunnelCurve:
-    def __init__(self, tunnel, delta):
+    def __init__(self, tunnel, delta, opts):
         self.centers = [s.center for s in tunnel.t]
         self.dirs = []
         self.delta = delta
-        dump_file = "/home/asd/tmp/curve_dirs.json"
-        load_file = "/home/asd/tmp/curve_dirs.json"
+        dump_file = "tunnel/" + opts.filename.replace("/", "") + ".json"
+        load_file = dump_file if os.path.exists(dump_file) else None
 
-
-        if False:
+        if load_file:
             with open(load_file) as infile:
                 self.dirs = [np.array(d) for d in json.load(infile)]
         else:
