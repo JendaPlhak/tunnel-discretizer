@@ -74,7 +74,7 @@ def dig_tunnel(tunnel, opts):
                     # print("\n\n")
                     # disk_dist(new_disk, disks[-1]) < opts.delta + f_error
             except:
-                raise
+                # raise
                 return disks
 
             if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < opts.delta):

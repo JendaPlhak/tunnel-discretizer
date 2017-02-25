@@ -99,7 +99,7 @@ class Tunnel:
         assert disk_plane.contains(new_center)
         return Disk(new_center, normal, radius)
 
-    def find_minimal_disk(self, point, init_normal):
+    def find_minimal_disk(self, point, init_normal, curve):
         best_disk = self.fit_disk(init_normal, point)
         init_radius = best_disk.radius
 
@@ -114,7 +114,7 @@ class Tunnel:
                     new_norm = init_normal + 10. / 2**(i / 2. + 1) * normalize(radius_point - point)
                     disk = self.fit_disk(new_norm, point)
 
-                    if disk.radius < best_disk.radius:
+                    if disk.radius < best_disk.radius and curve.pass_through_disk(disk):
                         best_disk = disk
                         found_better = True
                         # print "Found better!", best_disk.radius

@@ -50,6 +50,9 @@ class Disk:
         point = circle2D.get_point((alpha % (2 * math.pi)) / full_angle)
         return self._plane.get_point_for_param(point[0], point[1])
 
+    def intersection_segment(self, segment):
+        return segment.intersection_disk(self)
+
 
 class Plane:
 
@@ -170,7 +173,9 @@ class Line:
     def intersection_plane(self, plane):
         # First get vectors for plane parametric form
         v1, v2 = plane.get_base_vectors()
-        assert is_3D_basis(plane.normal, v1, v2)
+        if not is_3D_basis(plane.normal, v1, v2):
+            # Line is either contained in plane or has no intersection
+            return None
         assert is_perpendicular(v1, plane.normal)
         assert is_perpendicular(v2, plane.normal)
 
@@ -191,6 +196,28 @@ class Line:
         assert plane.contains(intersection)
         assert self.contains(intersection)
         return intersection
+
+class Segment:
+    def __init__(self, p1, p2):
+        assert (p1 != p2).any()
+        self.p1 = p1
+        self.p2 = p2
+
+    def intersection_disk(self, disk):
+        line = Line(self.p1, self.p2 - self.p1)
+        plane = disk.get_plane()
+        inter = line.intersection_plane(plane)
+        if inter is not None and self.contains(inter) and disk.contains(inter):
+            return inter
+        else:
+            return None
+
+    def contains(self, point):
+        d1 = np.linalg.norm(self.p1 - point)
+        d2 = np.linalg.norm(self.p2 - point)
+        d3 = np.linalg.norm(self.p1 - self.p2)
+        return abs(d1 + d2 - d3) < f_error
+
 
 class Circle:
 

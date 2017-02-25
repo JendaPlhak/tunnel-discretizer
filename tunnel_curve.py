@@ -1,4 +1,5 @@
 from linalg import *
+from geometrical_objects import Segment
 from multiprocessing import Process, Queue, cpu_count
 import numpy as np
 import json
@@ -30,7 +31,7 @@ class TunnelCurve:
                     task_q.put(None)
                     break
                 center, normal, idx = task
-                result_q.put((idx, tunnel.find_minimal_disk(center, normal).normal))
+                result_q.put((idx, tunnel.find_minimal_disk(center, normal, self).normal))
 
         N_CORES = cpu_count()
         task_q = Queue()
@@ -99,3 +100,27 @@ class TunnelCurve:
 
         return dist
 
+    def pass_through_disk(self, disk):
+        first_pass_sgn = None
+        last_pass_sgn = None
+        split = None
+
+        for i in xrange(len(self.centers) - 1):
+            seg = Segment(self.centers[i], self.centers[i + 1])
+            inter = seg.intersection_disk(disk)
+
+            if inter is not None:
+                d = self.centers[i + 1] - self.centers[i]
+                d_sgn = np.sign(np.dot(disk.normal, d))
+                if disk.contains(self.centers[i + 1]):
+                    split = split or d
+                elif split is not None:
+                    sgn = d_sgn * np.sign(np.dot(disk.normal, split))
+                    if sgn > 0:
+                        first_pass_sgn = first_pass_sgn or d_sgn
+                        last_pass_sgn = d_sgn
+                    split = None
+                else:
+                    first_pass_sgn = first_pass_sgn or d_sgn
+                    last_pass_sgn = d_sgn
+        return first_pass_sgn is not None and first_pass_sgn == last_pass_sgn
