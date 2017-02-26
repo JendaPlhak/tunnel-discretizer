@@ -1,5 +1,4 @@
 import math
-import minball
 import numpy as np
 from decimal import *
 
@@ -12,17 +11,18 @@ from tunnel_curve import TunnelCurve
 
 
 class DigOpts:
-    def __init__(self, delta):
+    def __init__(self, delta, filename):
         self.delta = delta
         self.eps   = delta * 0.1
+        self.filename = filename
 
 def dig_tunnel(tunnel, opts):
     centers = [s.center for s in tunnel.t]
     normals = [normalize(centers[i + 1] - centers[i]) \
                for i in xrange(len(centers) - 1)]
-    curve = TunnelCurve(centers, 8.)
+    curve = TunnelCurve(tunnel, 6., opts)
     disks = [
-        fit_disk_tunnel(curve.get_weighted_dir(0, 0), centers[0], tunnel, opts.delta)
+        tunnel.fit_disk(curve.get_weighted_dir(0, 0), centers[0])
     ]
 
 
@@ -36,6 +36,8 @@ def dig_tunnel(tunnel, opts):
         center       = centers[i]
         next_center  = centers[i + 1]
         centers_dist = np.linalg.norm(next_center - center)
+        # disks.append(tunnel.fit_disk(curve.dirs[i], center))
+        # continue
 
         # line between centers
         line = Line(center, next_center - center)
@@ -49,25 +51,38 @@ def dig_tunnel(tunnel, opts):
             if size > centers_dist:
                 break
 
-            disk_center = center + normal * size
-            new_normal  = curve.get_weighted_dir(i, size)
+            disk_center = disks[-1].center + disks[-1].normal * opts.delta * 2.5
 
-            new_disk = fit_disk_tunnel(new_normal, disk_center, tunnel, opts.delta)
-            # print("Start shifting.......")
-            new_disk = shift_new_disk(new_disk, disks[-1], tunnel, opts.delta)
-            # print("\n\n")
-            # disk_dist(new_disk, disks[-1]) < opts.delta + f_error
+            try:
+                new_disk = tunnel.fit_disk(disks[-1].normal, disk_center)
+                ratio = (disks[-1].radius - new_disk.radius) / disks[-1].radius
+                if abs(ratio) > 0.4:
+                    # print("Curving!", ratio)
+                    new_normal = disks[-1].normal
+
+                    new_disk = shift_to_bend(disks[-1], new_disk, tunnel, opts)
+                    # print "new disk distance: ", disk_dist(disks[-1], new_disk)
+                else:
+                    # print("Moving!", ratio)
+                    disk_center = disks[-1].center + disks[-1].normal * opts.eps
+                    new_normal  = curve.get_weighted_dir(i, size)
+                    new_disk = tunnel.fit_disk(new_normal, disk_center)
+
+                    new_disk = shift_new_disk(disks[-1], new_disk, tunnel, opts.delta)
+            except:
+                raise
+                return disks
 
             if (len(disks) > 1 and disk_dist(new_disk, disks[-2]) < opts.delta):
                 disks[-1] = new_disk
             else:
                 disks.append(new_disk)
-            size += opts.eps
+            # size += opts.eps
 
     return disks
 
 
-def fit_disk_tunnel(normal, center, tunnel, delta):
+def fit_disk_tunnel(normal, center, tunnel):
     disk_plane  = Plane(center, normal)
     circle_cuts = []
 
@@ -122,8 +137,8 @@ def is_follower(prev_disk, new_disk):
         and np.dot(prev_disk.normal, v2) > -f_error
 
 # get vertices of segments determined by disks in orthogonal projection.
-def get_vertices(disk1, disk2):
-    dir1, dir2 = get_radius_vectors(disk1, disk2)
+def get_vertices(disk1, disk2, normal = None):
+    dir1, dir2 = get_radius_vectors(disk1, disk2, normal = normal)
     # Get proj. disk vertices
     disk1_vert_1 = disk1.center + dir1
     disk1_vert_2 = disk1.center - dir1
@@ -144,7 +159,7 @@ def get_vertices(disk1, disk2):
     assert disk2.contains(disk2_vert_2) and disk2.circle_contains(disk2_vert_2)
     return disk1_vert_1, disk1_vert_2, disk2_vert_1, disk2_vert_2
 
-def shift_new_disk(new_disk, prev_disk, tunnel, delta):
+def shift_new_disk(prev_disk, new_disk, tunnel, delta):
     # print "\n\n"
     # print "Previous Disk:"
     # print prev_disk.to_geogebra()
@@ -173,37 +188,45 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
         # new disk.
         if np.dot(prev_disk.normal, v1) < 0.:
             # print "First one!"
-            shift_vert = prev_vert_1 + prev_disk.normal * (delta / 100.)
+            shift_vert = prev_vert_1 + prev_disk.normal * delta * 0.01
             new_disk   = get_new_disk_points(shift_vert, new_vert_2, prev_disk.normal)
         elif np.dot(prev_disk.normal, v2) < 0.:
             # print "Second one!"
-            shift_vert = prev_vert_2 + prev_disk.normal * (delta / 100.)
+            shift_vert = prev_vert_2 + prev_disk.normal * delta * 0.01
             new_disk   = get_new_disk_points(shift_vert, new_vert_1, prev_disk.normal)
 
     assert is_follower(prev_disk, new_disk)
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = get_vertices(new_disk, prev_disk)
+    # print("({},{}),".format(new_vert_1[0],new_vert_1[1]))
+    # print("({},{}),".format(new_vert_2[0],new_vert_2[1]))
+    # print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
+    # print("({},{}),".format(prev_vert_2[0],prev_vert_2[1]))
+
+
+    v1 = new_vert_1 - prev_vert_1
+    v2 = new_vert_2 - prev_vert_2
+    d1 = np.linalg.norm(v1)
+    d2 = np.linalg.norm(v2)
+    # print "Before: ", np.linalg.norm(v1), np.linalg.norm(v2)
 
     # Ensure that disks are not too far from each other.
-    v1 = new_vert_1 - prev_vert_1
-    if not np.linalg.norm(v1) < delta:
-        new_vert_1 = prev_vert_1 + normalize(v1) * delta * 0.99
-
-    v2 = new_vert_2 - prev_vert_2
-    if not np.linalg.norm(v2) < delta:
-        new_vert_2 = prev_vert_2 + normalize(v2) * delta * 0.99
+    if d1 > delta:
+        new_vert_1 = prev_vert_1 + normalize(v1) * delta * 0.95
+    if d2 > delta:
+        new_vert_2 = prev_vert_2 + normalize(v2) * delta * 0.95
 
     # print "Disk distance: %f" % disk_dist(new_disk, prev_disk)
     new_disk = get_new_disk_points(new_vert_1, new_vert_2, prev_disk.normal)
     # print "Disk distance: %f" % disk_dist(new_disk, prev_disk)
     assert is_follower(prev_disk, new_disk)
     # perform re-fitting
-    new_disk = fit_disk_tunnel(new_disk.normal, new_disk.center, tunnel, delta)
+    new_disk = tunnel.fit_disk(new_disk.normal, new_disk.center)
     # print "Revised disk : {}".format(new_disk.to_geogebra())
     # print "Disk distance: %f > %f\n" % (disk_dist(new_disk, prev_disk), delta)
 
+    if disk_dist(new_disk, prev_disk) > delta or not is_follower(prev_disk, new_disk):
+        new_disk = shift_new_disk(prev_disk, new_disk, tunnel, delta)
     assert is_follower(prev_disk, new_disk)
-    if disk_dist(new_disk, prev_disk) > delta:
-        new_disk = shift_new_disk(new_disk, prev_disk, tunnel, delta)
 
     # Check whether our function does what it is supposed to do.
     new_dir, prev_dir = get_radius_vectors(new_disk, prev_disk)
@@ -225,4 +248,73 @@ def shift_new_disk(new_disk, prev_disk, tunnel, delta):
     assert np.dot(prev_disk.normal, v1) > -f_error
     assert np.dot(prev_disk.normal, v2) > -f_error
     # assert disk_dist(prev_disk, new_disk) < delta
+    return new_disk
+
+def shift_to_bend(prev_disk, new_disk, tunnel, opts):
+
+    # For two disks calculate vector that realizes radius of segment that emerges by
+    # projecting disk into the plane determined by normals of disks d1 and d2.
+    def find_max_distance(d1, d2):
+        assert np.linalg.norm(d1.normal - d2.normal) < f_error
+        # Get normal vector of plane given by normal vectors of disks.
+        def dst(alpha):
+            radius_point = d1.get_point(alpha)
+            # print "Circle[({},{}), {}],".format(radius_point[0], radius_point[1], d1.radius)
+            plane_normal = radius_point - d1.center
+            # print(alpha, radius_point, disk_dist(d1, d2, normal = plane_normal))
+            # return disk_dist(d1, d2, normal = plane_normal), plane_normal
+            new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
+                get_vertices(d1, d2, normal = plane_normal)
+            dst1 = np.linalg.norm(new_vert_1 - prev_vert_1)
+            dst2 = np.linalg.norm(new_vert_2 - prev_vert_2)
+            return max(dst1, dst2) / min(dst1, dst2), plane_normal
+
+        return max(
+            (dst(a) for a in np.arange(0, math.pi, 0.1)),
+            key = lambda x: x[0]
+        )
+
+    dst, plane_normal = find_max_distance(prev_disk, new_disk)
+    # plane_normal = null_space(np.array([prev_disk.normal, new_seg_dir, null_vec]))
+    new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
+        get_vertices(new_disk, prev_disk, normal = plane_normal)
+
+    # print("({},{}),".format(new_vert_1[0],new_vert_1[1]))
+    # print("({},{}),".format(new_vert_2[0],new_vert_2[1]))
+    # print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
+    # print("({},{}),".format(prev_vert_2[0],prev_vert_2[1]))
+
+    v1 = new_vert_1 - prev_vert_1
+    v2 = new_vert_2 - prev_vert_2
+    d1 = np.linalg.norm(v1)
+    d2 = np.linalg.norm(v2)
+
+    if d1 > d2:
+        new_vert_1 = prev_vert_1
+    else:
+        new_vert_1 = prev_vert_1 + normalize(v1) * opts.delta * 0.95
+    if d1 < d2:
+        new_vert_2 = prev_vert_2
+    else:
+        new_vert_2 = prev_vert_2 + normalize(v1) * opts.delta * 0.95
+
+    seg_dir = new_vert_2 - new_vert_1
+    new_disk_normal = null_space(np.array([plane_normal, seg_dir, null_vec]))
+    new_disk_normal *= np.sign(np.dot(prev_disk.normal, new_disk_normal))
+
+    new_disk = tunnel.fit_disk(new_disk_normal, (new_vert_2 + new_vert_1)/2.)
+    if disk_dist(prev_disk, new_disk) >= opts.delta:
+        new_disk = shift_new_disk(prev_disk, new_disk, tunnel, opts.delta)
+
+    # new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
+    #     get_vertices(new_disk, prev_disk)
+    # print "After"
+    # print("({},{}),".format(new_vert_1[0],new_vert_1[1]))
+    # print("({},{}),".format(new_vert_2[0],new_vert_2[1]))
+    # print("({},{}),".format(prev_vert_1[0],prev_vert_1[1]))
+    # print("({},{}),".format(prev_vert_2[0],prev_vert_2[1]))
+
+    # print("Distance:", disk_dist(prev_disk, new_disk))
+    assert disk_dist(prev_disk, new_disk) < opts.delta
+
     return new_disk

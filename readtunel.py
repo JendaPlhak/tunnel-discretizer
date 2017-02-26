@@ -28,13 +28,14 @@ from smoother import smoothen_tunnel, SmoothOpts
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     tunnel = Tunnel()
-    tunnel.load_from_file(arguments['<in-filename>'])
+    filename = arguments['<in-filename>']
+    tunnel.load_from_file(filename)
     tunnel.t = tunnel.t[:]
     draw_ARG = arguments["--draw"]
 
     delta = float(arguments["--delta"] or 0.1)
     disks = []
-    disks = dig_tunnel(tunnel, DigOpts(delta))
+    disks = dig_tunnel(tunnel, DigOpts(delta, filename))
     # disks = smoothen_tunnel(disks, SmoothOpts(delta))
 
     # draw disks
@@ -57,11 +58,11 @@ if __name__ == '__main__':
             # central line
             if (i < len(tunnel.t)-1):
                 s2 = tunnel.t[i+1]
-                # vVis = vs.arrow(pos=s.center - centScene,
-                #                 axis=(s2.center[0]-s.center[0],
-                #                         s2.center[1]-s.center[1],
-                #                         s2.center[2]-s.center[2]),
-                #                 color=(1,0,0), shaftwidth=1)
+                vVis = vs.arrow(pos=s.center - centScene,
+                                axis=(s2.center[0]-s.center[0],
+                                        s2.center[1]-s.center[1],
+                                        s2.center[2]-s.center[2]),
+                                color=(1,0,0), shaftwidth=0.3)
         for i, disk in enumerate(disks[:]):
             # if (i != 0):
             #     print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
