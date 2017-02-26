@@ -47,7 +47,7 @@ class Disk:
     def get_point(self, alpha):
         circle2D = Circle(self._plane.orthogonal_proj_param(self.center), self.radius)
         full_angle = 2 * math.pi
-        point = circle2D.get_point((alpha % (2 * math.pi)) / full_angle)
+        point = circle2D.get_point((alpha % full_angle) / full_angle)
         return self._plane.get_point_for_param(point[0], point[1])
 
     def intersection_segment(self, segment):

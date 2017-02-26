@@ -10,16 +10,16 @@ class TunnelCurve:
         self.centers = [s.center for s in tunnel.t]
         self.dirs = []
         self.delta = delta
-        dump_file = "tunnel/" + opts.filename.replace("/", "") + ".json"
+        dump_file = "/tmp/" + opts.filename.replace("/", "") + ".json"
         load_file = dump_file if os.path.exists(dump_file) else None
 
-        if load_file:
+        if None:
             with open(load_file) as infile:
                 self.dirs = [np.array(d) for d in json.load(infile)]
         else:
             self.dirs = self._compute_dirs(tunnel)
 
-        if dump_file:
+        if None:
             with open(dump_file, 'w') as outfile:
                 json.dump([list(d) for d in self.dirs], outfile)
 
@@ -100,6 +100,8 @@ class TunnelCurve:
 
         return dist
 
+    # Finds whether given `disk` is passed through by given curve in topological
+    # sense.
     def pass_through_disk(self, disk):
         first_pass_sgn = None
         last_pass_sgn = None

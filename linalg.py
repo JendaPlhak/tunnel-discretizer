@@ -93,8 +93,6 @@ def disk_dist(d1, d2, normal = None):
     else:
         # get radius vectors
         seg_dir1, seg_dir2 = get_radius_vectors(d1, d2, normal = normal)
-        # print "Radius vector 1:\n{}".format(seg_dir1)
-        # print "Radius vector 2:\n{}".format(seg_dir2)
 
         # for two sets of points calculate distances between pairs
         def distances(v_1, v_2):
@@ -102,10 +100,6 @@ def disk_dist(d1, d2, normal = None):
 
         seg_1_verts = [d1.center + seg_dir1, d1.center - seg_dir1]
         seg_2_verts = [d2.center + seg_dir2, d2.center - seg_dir2]
-        # print("Segment[({},{}), ({},{})],".format(seg_1_verts[0][0],seg_1_verts[0][1],
-        #     seg_1_verts[1][0],seg_1_verts[1][1]))
-        # print("Segment[({},{}), ({},{})],".format(seg_2_verts[0][0],seg_2_verts[0][1],
-        #     seg_2_verts[1][0],seg_2_verts[1][1]))
 
         dists_1 = distances(seg_1_verts, seg_2_verts)
         dists_2 = distances(list(reversed(seg_1_verts)), seg_2_verts)
