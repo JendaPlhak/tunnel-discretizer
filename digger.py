@@ -251,31 +251,17 @@ def shift_new_disk(prev_disk, new_disk, tunnel, delta):
     return new_disk
 
 def shift_to_bend(prev_disk, new_disk, tunnel, opts):
-
-    # For two disks calculate vector that realizes radius of segment that emerges by
-    # projecting disk into the plane determined by normals of disks d1 and d2.
+    # For two disks calculate normal of plane which gives maximum distance
+    # for disks d1, d2 in orthogonal projection.
     def find_max_distance(d1, d2):
         assert np.linalg.norm(d1.normal - d2.normal) < f_error
-        # Get normal vector of plane given by normal vectors of disks.
-        def dst(alpha):
-            radius_point = d1.get_point(alpha)
-            # print "Circle[({},{}), {}],".format(radius_point[0], radius_point[1], d1.radius)
-            plane_normal = radius_point - d1.center
-            # print(alpha, radius_point, disk_dist(d1, d2, normal = plane_normal))
-            # return disk_dist(d1, d2, normal = plane_normal), plane_normal
-            new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
-                get_vertices(d1, d2, normal = plane_normal)
-            dst1 = np.linalg.norm(new_vert_1 - prev_vert_1)
-            dst2 = np.linalg.norm(new_vert_2 - prev_vert_2)
-            return max(dst1, dst2) / min(dst1, dst2), plane_normal
 
-        return max(
-            (dst(a) for a in np.arange(0, math.pi, 0.1)),
-            key = lambda x: x[0]
-        )
+        v = normalize(d2.center - d1.center)
+        if (d1.normal == v).all():
+            v = null_space(np.array([d1.normal, null_vec, null_vec]))
+        return null_space(np.array([d1.normal, v, null_vec]))
 
-    dst, plane_normal = find_max_distance(prev_disk, new_disk)
-    # plane_normal = null_space(np.array([prev_disk.normal, new_seg_dir, null_vec]))
+    plane_normal = find_max_distance(prev_disk, new_disk)
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
         get_vertices(new_disk, prev_disk, normal = plane_normal)
 
