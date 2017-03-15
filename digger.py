@@ -48,6 +48,7 @@ def dig_tunnel(tunnel, opts):
             disk_plane = disks[-1].get_plane()
             inter = line.intersection_plane(disk_plane)
             size  = max(np.linalg.norm(inter - center) + opts.eps, size)
+            print size
             if size > centers_dist:
                 break
 
@@ -57,13 +58,13 @@ def dig_tunnel(tunnel, opts):
                 new_disk = tunnel.fit_disk(disks[-1].normal, disk_center)
                 ratio = (disks[-1].radius - new_disk.radius) / disks[-1].radius
                 if abs(ratio) > 0.4:
-                    # print("Curving!", ratio)
+                    print("Curving!", ratio)
                     new_normal = disks[-1].normal
 
                     new_disk = shift_to_bend(disks[-1], new_disk, tunnel, opts)
                     # print "new disk distance: ", disk_dist(disks[-1], new_disk)
                 else:
-                    # print("Moving!", ratio)
+                    print("Moving!", ratio)
                     disk_center = disks[-1].center + disks[-1].normal * opts.eps
                     new_normal  = curve.get_weighted_dir(i, size)
                     new_disk = tunnel.fit_disk(new_normal, disk_center)

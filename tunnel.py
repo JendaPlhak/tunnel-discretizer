@@ -1,6 +1,11 @@
 import minball
 import numpy as np
+import scipy
+import time
+import random
+from scipy import optimize
 from geometrical_objects import *
+from linalg import *
 
 class Tunnel:
 
@@ -100,23 +105,47 @@ class Tunnel:
         return Disk(new_center, normal, radius)
 
     def find_minimal_disk(self, point, init_normal, curve):
+        def get_axes(normal):
+            axis1 = null_space(np.array([normal, null_vec, null_vec]))
+            axis2 = null_space(np.array([normal, axis1, null_vec]))
+            return axis1, axis2
+
+        def get_rotated_disk(base_normal, theta, phi, axes):
+            axis1, axis2 = axes
+            v = np.dot(rotation_matrix(axis1, theta), base_normal)
+            v = np.dot(rotation_matrix(axis2, phi), v)
+            normal = normalize(v)
+
+            disk   = self.fit_disk(normal, point)
+            if curve.pass_through_disk(disk):
+                return disk
+            else:
+                return None
+
         best_disk = self.fit_disk(init_normal, point)
         init_radius = best_disk.radius
-
-        for i in xrange(12):
+        k = 0
+        for i in xrange(4):
+            theta = (math.pi / 4) / 4**i
             # print("Round %d" % i)
             found_better = True
             while found_better:
-                init_disk = best_disk
                 found_better = False
-                for alpha in np.arange(0, 2*math.pi, 0.1):
-                    radius_point = init_disk.get_point(alpha)
-                    new_norm = init_normal + 10. / 2**(i / 2. + 1) * normalize(radius_point - point)
-                    disk = self.fit_disk(new_norm, point)
+                base_normal  = best_disk.normal
+                axes         = get_axes(base_normal)
 
-                    if disk.radius < best_disk.radius and curve.pass_through_disk(disk):
+                for phi in np.arange(0, 2*math.pi, 0.1 * (i + 1)):
+                    # print theta, phi
+                    disk = get_rotated_disk(base_normal, theta, phi, axes)
+                    k += 1
+                    if disk and disk.radius < best_disk.radius:
                         best_disk = disk
+                        best_disk.normal *= np.sign(np.dot(best_disk.normal, init_normal))
                         found_better = True
                         # print "Found better!", best_disk.radius
-        print "Init radius {}, Final radius: {}".format(init_radius, best_disk.radius)
+
+        print k
+        print "Init radius {}, Optimized: {}".format(init_radius,
+            best_disk.radius)
+        assert np.dot(best_disk.normal, init_normal) > 0.
         return best_disk
