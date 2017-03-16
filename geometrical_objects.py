@@ -173,7 +173,7 @@ class Line:
     def intersection_plane(self, plane):
         # First get vectors for plane parametric form
         v1, v2 = plane.get_base_vectors()
-        if not is_3D_basis(plane.normal, v1, v2):
+        if not is_3D_basis(self.dir, v1, v2):
             # Line is either contained in plane or has no intersection
             return None
         assert is_perpendicular(v1, plane.normal)
