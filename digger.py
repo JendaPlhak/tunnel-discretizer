@@ -48,28 +48,24 @@ def dig_tunnel(tunnel, opts):
             disk_plane = disks[-1].get_plane()
             inter = line.intersection_plane(disk_plane)
             size  = max(np.linalg.norm(inter - center) + opts.eps, size)
-            print size
             if size > centers_dist:
                 break
 
-            disk_center = disks[-1].center + disks[-1].normal * opts.delta * 2.5
+            if is_sharp_curve(tunnel, disks[-1], curve, opts):
+                # print("Curving!")
+                disk_center = disks[-1].center + disks[-1].normal * opts.delta
+                new_normal  = disks[-1].normal
+                shift_fun   = shift_to_bend
+                # print "new disk distance: ", disk_dist(disks[-1], new_disk)
+            else:
+                # print("Moving!")
+                disk_center = disks[-1].center + disks[-1].normal * opts.eps
+                new_normal  = curve.get_weighted_dir(i, size)
+                shift_fun   = shift_new_disk
 
             try:
-                new_disk = tunnel.fit_disk(disks[-1].normal, disk_center)
-                ratio = (disks[-1].radius - new_disk.radius) / disks[-1].radius
-                if abs(ratio) > 0.4:
-                    print("Curving!", ratio)
-                    new_normal = disks[-1].normal
-
-                    new_disk = shift_to_bend(disks[-1], new_disk, tunnel, opts)
-                    # print "new disk distance: ", disk_dist(disks[-1], new_disk)
-                else:
-                    print("Moving!", ratio)
-                    disk_center = disks[-1].center + disks[-1].normal * opts.eps
-                    new_normal  = curve.get_weighted_dir(i, size)
-                    new_disk = tunnel.fit_disk(new_normal, disk_center)
-
-                    new_disk = shift_new_disk(disks[-1], new_disk, tunnel, opts.delta)
+                new_disk = tunnel.fit_disk(new_normal, disk_center)
+                new_disk = shift_fun(disks[-1], new_disk, tunnel, opts)
             except:
                 raise
                 return disks
@@ -160,12 +156,29 @@ def get_vertices(disk1, disk2, normal = None):
     assert disk2.contains(disk2_vert_2) and disk2.circle_contains(disk2_vert_2)
     return disk1_vert_1, disk1_vert_2, disk2_vert_1, disk2_vert_2
 
-def shift_new_disk(prev_disk, new_disk, tunnel, delta):
+def is_sharp_curve(tunnel, prev_disk, curve, opts):
+    disk_center = prev_disk.center + prev_disk.normal * opts.delta * 2
+    new_disk = tunnel.fit_disk(prev_disk.normal, disk_center)
+    ratio = (prev_disk.radius - new_disk.radius) / prev_disk.radius
+
+    new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 \
+        = get_vertices(new_disk, prev_disk)
+    v1 = new_vert_1 - prev_vert_1
+    v2 = new_vert_2 - prev_vert_2
+    d1 = np.linalg.norm(v1)
+    d2 = np.linalg.norm(v2)
+    # if min(d1, d2) / max(d1, d2) < 0.7:
+        # print d1, d2
+    # print ratio, min(d1, d2) / max(d1, d2)
+    return min(d1, d2) / max(d1, d2) < 0.65 and abs(ratio) > 0.25 or abs(ratio) > 0.5
+
+def shift_new_disk(prev_disk, new_disk, tunnel, opts):
     # print "\n\n"
     # print "Previous Disk:"
     # print prev_disk.to_geogebra()
     # print "New Disk:"
     # print new_disk.to_geogebra()
+    delta = opts.delta
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 \
         = get_vertices(new_disk, prev_disk)
 
@@ -226,7 +239,7 @@ def shift_new_disk(prev_disk, new_disk, tunnel, delta):
     # print "Disk distance: %f > %f\n" % (disk_dist(new_disk, prev_disk), delta)
 
     if disk_dist(new_disk, prev_disk) > delta or not is_follower(prev_disk, new_disk):
-        new_disk = shift_new_disk(prev_disk, new_disk, tunnel, delta)
+        new_disk = shift_new_disk(prev_disk, new_disk, tunnel, opts)
     assert is_follower(prev_disk, new_disk)
 
     # Check whether our function does what it is supposed to do.
@@ -291,7 +304,7 @@ def shift_to_bend(prev_disk, new_disk, tunnel, opts):
 
     new_disk = tunnel.fit_disk(new_disk_normal, (new_vert_2 + new_vert_1)/2.)
     if disk_dist(prev_disk, new_disk) >= opts.delta:
-        new_disk = shift_new_disk(prev_disk, new_disk, tunnel, opts.delta)
+        new_disk = shift_new_disk(prev_disk, new_disk, tunnel, opts)
 
     # new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
     #     get_vertices(new_disk, prev_disk)

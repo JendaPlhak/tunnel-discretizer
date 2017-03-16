@@ -19,7 +19,7 @@ class TunnelCurve:
         else:
             self.dirs = self._compute_dirs(tunnel)
 
-        if dump_file:
+        if None:
             with open(dump_file, 'w') as outfile:
                 json.dump([list(d) for d in self.dirs], outfile)
 
