@@ -225,6 +225,13 @@ Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$.
             \State $ d \gets \dis(plane \cap line, S_{i}^{center}) + \epsilon $
             \Statex
 
+            \If{$\operatorname{isSharpCurve}(disks[|disks|-1], curve)$}
+                \State $ disk\_center \gets S_{i}^{center} + normal * d $ \label{digTunnel:center}
+                \State $ new\_normal \gets \operatorname{getWeightedDir}(curve, i, d) $ \label{digTunnel:normal}
+            \Else
+            \EndIf
+
+
             \State $ disk\_center \gets S_{i}^{center} + normal * d $ \label{digTunnel:center}
             \State $ disk\_normal \gets \operatorname{getWeightedDir}(curve, i, d) $ \label{digTunnel:normal}
 
@@ -234,7 +241,7 @@ Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$.
 
             \If{$ |disks| \geq 2  \And \dst(disk, disks[|disks|-2]) < \delta $} \label{digTunnel:last_if}
                 \State $ \operatorname{pop}(disks)  $ \label{digTunnel:last_if_end}
-            \EndIf\
+            \EndIf
             \State $ \operatorname{append}(disks, disk) $
             \State $ d \gets d + \epsilon $ \label{digTunnel:incr_d}
         \EndWhile
