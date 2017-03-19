@@ -13,13 +13,13 @@ class TunnelCurve:
         dump_file = "/tmp/" + opts.filename.replace("/", "") + ".json"
         load_file = dump_file if os.path.exists(dump_file) else None
 
-        if None:
+        if load_file:
             with open(load_file) as infile:
                 self.dirs = [np.array(d) for d in json.load(infile)]
         else:
             self.dirs = self._compute_dirs(tunnel)
 
-        if None:
+        if dump_file:
             with open(dump_file, 'w') as outfile:
                 json.dump([list(d) for d in self.dirs], outfile)
 

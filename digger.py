@@ -27,12 +27,11 @@ def dig_tunnel(tunnel, opts):
 
 
     # Calculate disks position
-    for i, s in enumerate(tunnel.t):
+    for i, __ in enumerate(tunnel.t):
         if i == len(tunnel.t) - 1:
             break
 
         print("Processing ball NO. %d" % i)
-        normal       = normals[i]
         center       = centers[i]
         next_center  = centers[i + 1]
         centers_dist = np.linalg.norm(next_center - center)
@@ -47,15 +46,15 @@ def dig_tunnel(tunnel, opts):
             # Form initial disk center
             disk_plane = disks[-1].get_plane()
             inter = line.intersection_plane(disk_plane)
-            size  = max(np.linalg.norm(inter - center) + opts.eps, size)
+            size  = np.linalg.norm(inter - center) + opts.eps
             if size > centers_dist:
                 break
 
-            if is_sharp_curve(tunnel, disks[-1], curve, opts):
+            if is_sharp_turn(tunnel, disks[-1], curve, opts):
                 # print("Curving!")
                 disk_center = disks[-1].center + disks[-1].normal * opts.delta
                 new_normal  = disks[-1].normal
-                shift_fun   = shift_to_bend
+                shift_fun   = shift_sharp_turn
                 # print "new disk distance: ", disk_dist(disks[-1], new_disk)
             else:
                 # print("Moving!")
@@ -74,7 +73,6 @@ def dig_tunnel(tunnel, opts):
                 disks[-1] = new_disk
             else:
                 disks.append(new_disk)
-            # size += opts.eps
 
     return disks
 
@@ -156,7 +154,7 @@ def get_vertices(disk1, disk2, normal = None):
     assert disk2.contains(disk2_vert_2) and disk2.circle_contains(disk2_vert_2)
     return disk1_vert_1, disk1_vert_2, disk2_vert_1, disk2_vert_2
 
-def is_sharp_curve(tunnel, prev_disk, curve, opts):
+def is_sharp_turn(tunnel, prev_disk, curve, opts):
     disk_center = prev_disk.center + prev_disk.normal * opts.delta * 2
     new_disk = tunnel.fit_disk(prev_disk.normal, disk_center)
     ratio = (prev_disk.radius - new_disk.radius) / prev_disk.radius
@@ -264,7 +262,7 @@ def shift_new_disk(prev_disk, new_disk, tunnel, opts):
     # assert disk_dist(prev_disk, new_disk) < delta
     return new_disk
 
-def shift_to_bend(prev_disk, new_disk, tunnel, opts):
+def shift_sharp_turn(prev_disk, new_disk, tunnel, opts):
     # For two disks calculate normal of plane which gives maximum distance
     # for disks d1, d2 in orthogonal projection.
     def find_max_distance(d1, d2):
