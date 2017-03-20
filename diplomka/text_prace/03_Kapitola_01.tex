@@ -274,11 +274,10 @@ na řádku \ref{digTunnel:while_condition}, ve které porovnáváme
 proměnnou $ d $ se vzdáleností zmíněných středů. Proměnná $ d $ pak reprezentuje,
 o kolik jsme se již vzdálili od středu $ S_{i}^{center} $.
 
-V každém cyklu vždy nejprve nastavíme d na vzdálenost mezi $ S_{i}^{center} $ a
-průnikem roviny dané předchozím řezem a přímkou $ line $. Pokud je průnikem
-jednoprvková množina, pak nám podmínky \ref{cond:not_intersecting} a
-\ref{cond:going_forward} garantují, že se $ d $ zvětší nejméně o $ \epsilon $,
-čímž máme garantováno, že algoritmus bude konečný. V opačném případě je normála
+V každém cyklu vždy nejprve nastavíme $ d $ na vzdálenost mezi $ S_{i}^{center} $ a
+průnikem roviny dané předchozím řezem a přímkou $ line $. Proměnná $ d $ nám
+slouží jako indikátor toho, kde v tunelu se v současné chvíli nacházíme.
+Na tomto místě je ovšem vhodné rozebrat, co se stane ve chvíli kdy je normála
 posledního disku kolmá na přímku $ line $, což je situace, kterou bychom mohli
 vyřešit buďto rotací normály daného řezu libovolným směrem o velmi malý úhel,
 nebo jednoduše vyhlásit, že naše heuristika selhala, neboť za
@@ -307,16 +306,12 @@ zkontrolujeme zda nemůžeme vynechat předchozí řez a případně jej odstran
 Výsledný algoritmus tedy iterativně prochází tajektorii tunelu a postupně vytváří řezy,
 které pak v případě potřeby posune tak, aby byly zachovány námi požadované podmínky.
 
-Dříve než budeme pokračovat v dalším popisu, rozvedeme dva dříve neokomentované
-detaily kostry algoritmu. První věcí, které si čtenář mohl povšimnout, je použití přímky
-$ line $. Díky výpočtu průsečíku roviny určené předchozím řezem s touto přímkou, se
-vždy posuneme tunelem vpřed, a to před předchozí řez. Druhým detailem je použití
-konstanty $ \epsilon $. Ta udává s jakým krokem se budeme tunelem pohybovat.
+V předchozím textu si čtenář mohl povšimnout použití konstanty $ \epsilon $.
+Ta udává s jakým krokem se budeme tunelem pohybovat.
 Volíme ji tak, aby platilo  $ \epsilon < \delta $, byla dostatečně malá abychom
 předešli zaokrouhlovacím chybám, ale zároveň čím větší bude, tím rychleji se
 budeme tunelem pohybovat a tím rychleji také celý algoritmus doběhne. Experimentálně
-jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{9}{10} \delta $.
-
+jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{1}{10} \delta $.
 
 \subsection{Disk fitting} \label{subsec:disk_fit}
 Nyní se budeme věnovat funkci $ \operatorname{fitDiskTunnel} $ použité na řádku
