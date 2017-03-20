@@ -372,7 +372,10 @@ $ \mathcal{O}(d^2n) + e^{\mathcal{O}(\sqrt{d \log{d}})} $. V našem případě t
 $ d = 2 $ dostáváme velmi efektivní algoritmus. K dispozici je dokonce velice
 robustní C++ implementace dostupná z \cite{cpp_balls}, která podle uvedených informací
 zvládá řešit úlohy ve 3D o velikosti 1 milionu koulí v čase pod 1 sekundu. To
-je rozhodně velmi působivý výsledek.
+je rozhodně velmi působivý výsledek. Pro naše potřeby bylo nutné vytvořit
+binding této implementace pro jazyk Python. To se povedlo v poměrně obecné
+podobě pro prakticky libovolné dimenze. Binding je veřejně dostupný z reference
+uvedené v literatuře (\cite{python_balls}).
 
 Výše uvedené pak můžeme vyjádřit pomocí jednoduchého pseudokódu \ref{alg:fitDiskTunnel}.
 
