@@ -469,7 +469,7 @@ přesunout vrchol $ Q_1 $. Posun provedeme ve směru normály $ V_{normal} $ pol
 $ Q_1 = P_1 + \epsilon V_{normal} $, kde epsilon může být opět libovolné
 kladné číslo menší než $ \delta $, nicméně v rámci alespoň částečného zachování
 zamýšleného směrování tunelu je vhodné jej volit co nejmenší. Experimentálně
-jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{\delta}{5} $.
+jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{\delta}{100} $.
 
 V případě, že $ \langle V_{normal}, v_2\rangle < 0 $, postupujeme zcela analogicky
 pro vrcholy $ P_2 $, $ Q_2 $. Nakonec ještě v případě nutnosti přeoznačením
@@ -482,8 +482,13 @@ Teď když máme vrcholy na správné straně, můžeme provést úpravy, které
 korespondujících vrcholů spočítat $ w_i = Q_i - P_i $ a pokud platí
 $ \norm{w_i} > \delta $ provedeme posun
 $ Q_i = P_i + \tilde{\epsilon} \frac{w_i}{\norm{w_i}} $, kde
-$ 0 < \tilde{\epsilon} < \delta $. Proč za epsilon nezvolit přímo $ \delta $
-bude zřejmé z pozdějšího textu.
+$ 0 < \tilde{\epsilon} < \delta $.
+
+Experimentálně jsme ověřili, že vhodnou volbou pro $ \tilde{\epsilon} $ je
+$ \tilde{\epsilon} = \frac{95}{100} \delta$. Vzdálenost takto generovaných řezů
+byla dostatečně blízko k $ \delta $, ale zároveň byl počet rekurzivních zanoření
+minimální (nejvýše 2) a dopad na celkový výkon algoritmu nebyl vůbec měřitelný.
+Proč za epsilon nezvolit přímo $ \delta $ bude zřejmé z pozdějšího textu.
 
 Z výsledných bodů zrekonstruujeme řez jehož střed je určen vrcholy
 $ Q_1 $, $ Q_2 $ a normála $ \vec{n} $ bude vektor ležící v rovině $ \rho $
@@ -526,7 +531,7 @@ Uvedený postup shrnuje následující pseudokod:
     \State $ new\_disk \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $ \label{shiftDisk:fit}
     \Statex
 
-    \If {$ \dst(V, new\_disk) > \delta $}
+    \If {$ \dst(V, new\_disk) > \delta \: || \: \neg \operatorname{isFollower}(prev\_disk, new\_disk)$ }
         \State \Return $ \operatorname{shiftDisk}(V, new\_disk) $ \label{shiftDisk:recursion}
     \Else
         \State \Return $ new\_disk $
@@ -540,17 +545,36 @@ Poslední úprava na řádku \ref{shiftDisk:fit} by ještě v některých příp
 porušit podmínku na vzdálenost. Kvůli tomu zvolíme na řádcích
 \ref{shiftDisk:correction1} a \ref{shiftDisk:correction2} posun o něco
 menší než je $ \delta $. Pokud nový řez bude i tak porušovat podmínku (\ref{cond:distance}),
+případně podmínky (\ref{cond:not_intersecting}) a (\ref{cond:going_forward})
+(jejíž splnění kontroluje funkce $ \operatorname{isFollower} $),
 aplikujeme celý postup rekurzivním voláním na řádku \ref{shiftDisk:recursion} znovu.
 
-Algoritmus tak bude jistě korektní. Konečnost plyne z toho, že
-algoritmus $\operatorname{fitDiskTunnel} $ nemění normálový vektor řezu a proto
+Díky tomu algoritmus pro každý vstup vrátí správný výsledek, pokud zastaví.
+Jak je to tedy s konečnosti výpočtu? Algoritmus $\operatorname{fitDiskTunnel} $
+nemění normálový vektor řezu a proto
 rovina $ \rho $ zůstane během rekurze stále stejná. Díky tomu jistě úsečku
 $ \widetilde{W} $ při každém rekurzivním zanoření posuneme o kousek blíže k
 $ \widetilde{V} $. To společně se spojitostí a konečnými rozměry tunelu zajistí,
 že se po konečném počtu kroků dostaneme do vzdálenosti menší než $ \delta $.
 
-Experimentálně jsme ověřili, že vhodnou volbou pro $ \tilde{\epsilon} $ je
-$ \tilde{\epsilon} = \frac{99}{100} \delta$. Vzdálenost takto generovaných řezů
-byla dostatečně blízko k $ \delta $, ale zároveň byl počet rekurzivních zanoření
-minimální (nejvýše 2) a dopad na celkový výkon algoritmu nebyl vůbec měřitelný.
+Zevrubným testováním jsme zjistili, že problém může nastat ve chvíli, kdy
+z důvodu prudké změny poloměru nebo směru tunelu nemůžeme pokračovat vpřed aniž
+bychom porušili podmínky, které zajišťují to, že se tunelem pohybujeme stále vpřed.
+Tuto situaci dobře demonstruje obrázek \ref{fig:sharp_curve}. V této situaci
+téměř jakékoliv posunutí vpřed vyústí v prudké změny poloměru minimální kružnice
+obepínající tunel a algoritmus v tomto případě selže. V tuto chvíli se buďto
+můžeme spustit nějakou formu backtrackingu nebo se pokusíme pravděpodobnost
+této situace minimalizovat, což v našem případě bude znamenat, že zvolíme v případě
+detekce potenciálně velmi prudkého ohybu jinou strategii a funkci
+$ \operatorname{shiftDisk} $ spustíme jen když toto nebezpečí nebude hrozit.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{img/sharp_curve.png}
+    \caption{Prudké zatočení se změnou poloměru}
+  \centering
+  \label{fig:sharp_curve}
+\end{figure}
+
+
 
