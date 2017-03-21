@@ -200,7 +200,7 @@ Takto formulovaný algoritmus fungoval obecně poměrně dobře, ale v případ�
 které měly příliš prudké zatáčky nebo prudké změny v poloměru průřezu často
 selhával. Z tohoto důvodu jsme byli nuceni přidat ještě speciální proceduru
 $ \operatorname{shiftToBend} $, která se aktivuje právě v těchto extrémních
-případech případech. Podrobně se jí budeme věnovat v podkapitole \ref{subsec:shift_bend}.
+případech případech. Podrobně se jí budeme věnovat v podkapitole \ref{subsec:shift_sharp_turn}.
 
 Kostru naznačeného algoritmu zachycuje následující pseudokód \ref{alg:digTunnel}.
 Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$.
@@ -234,8 +234,9 @@ Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$.
             \Statex
 
             \If{$\operatorname{makesSharpTurn}(prev\_disk, curve)$}
-                \State $ disk\_center \gets prev\_disk^{center} + prev\_disk^{normal} * \delta $
-                \State $ disk\_normal \gets prev\_disk^{normal} $
+                \State $ disk\_center
+                    \gets prev\_disk^{center} + prev\_disk^{normal} * \delta $ \label{alg:shift_by_delta}
+                \State $ disk\_normal \gets prev\_disk^{normal} $   \label{alg:same_normal}
                 \State $ \operatorname{doShift} \gets \operatorname{shiftSharpTurn} $
             \Else
                 \State $ disk\_center \gets prev\_disk^{center} + prev\_disk^{normal} * \epsilon $
@@ -578,3 +579,20 @@ $ \operatorname{shiftDisk} $ spustíme jen když toto nebezpečí nebude hrozit.
 
 
 
+\subsection{Shift sharp turn} \label{subsec:shift_sharp_turn}
+Předchozí popsanou funkci doplňuje procedura $ \operatorname{shiftSharpTurn} $.
+Jejím účelem je implementovat prostřednictvím aktuálního řezu maximální možné
+zatočení při zachování všech podmínek.
+
+Hlavní myšlenkou této funkce je to, že v pokud detekujeme, že se blíží prudká
+zatáčka, tak vezmeme poslední umístěný řez a posuneme jej vpřed o $ \delta $ ve směru
+jeho normály. To se realizuje na řádcích \ref{alg:shift_by_delta} a
+\ref{alg:same_normal} v hlavním algoritmu. Na takto posunutý řez aplikujeme
+funkci $ \operatorname{fitDiskTunnel} $. Tímto způsobem získáme docela dobrou
+představu o tom, co se s tunelem v nejbližší době bude dít, na základě čehož
+můžeme implementovat případné korekce a
+
+Na vstupu funkce $ \operatorname{shiftSharpTurn} $ tedy budeme mít předchozí
+umístěný řez resp. aktuálně umisťovaný řez, které si označíme $ V $
+resp. $ W $. Stejně jako u předešlé funkce budeme chtít vešekeré výpočty provádět
+v projekci do nějaké roviny. budou mít stejný normálový vektor.
