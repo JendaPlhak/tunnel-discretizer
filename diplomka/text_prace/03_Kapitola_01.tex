@@ -590,9 +590,102 @@ jeho normály. To se realizuje na řádcích \ref{alg:shift_by_delta} a
 \ref{alg:same_normal} v hlavním algoritmu. Na takto posunutý řez aplikujeme
 funkci $ \operatorname{fitDiskTunnel} $. Tímto způsobem získáme docela dobrou
 představu o tom, co se s tunelem v nejbližší době bude dít, na základě čehož
-můžeme implementovat případné korekce a
+můžeme implementovat případné korekce a orientovat nový řez směrem, kterým
+tunel zatáčí.
 
 Na vstupu funkce $ \operatorname{shiftSharpTurn} $ tedy budeme mít předchozí
-umístěný řez resp. aktuálně umisťovaný řez, které si označíme $ V $
+umístěný řez resp. aktuálně umisťovaný řez s výše uvedenými vlastnostmi,
+které si označíme $ V $
 resp. $ W $. Stejně jako u předešlé funkce budeme chtít vešekeré výpočty provádět
-v projekci do nějaké roviny. budou mít stejný normálový vektor.
+v projekci do nějaké roviny. V tomto případě však budou mít oba řezy stejný
+normálový vektor, což nám dává možnost volby. Zamysleme se tedy nad tím,
+jak zvolit druhý vektor projekční roviny. Obrázek \ref{fig:sharp_curve_lookahead}
+dobře ilustruje, jak taková situace může vypadat. Z tohoto bočního pohledu je
+zřejmé, že bychom měli řez posunout v maximální možné míře dopředu v horní části
+tunelu a zafixovat pohyb řezu v jeho dolní části, jinak bychom se brzy dostali
+právě do vyborazené situace. Pro srovnání uvádíme pohled z jiného úhlu na stejnou
+situaci v podobě obrázku \ref{fig:sharp_curve_lookahead_from_up}.
+
+\begin{figure}[ht]
+\centering
+\begin{minipage}{.6\textwidth}
+  \centering
+        \includegraphics[width=75mm]{img/sharp_curve_lookahead.png}
+        \caption{Prudké zatočení pohled z boku}
+    \centering
+    \label{fig:sharp_curve_lookahead}
+\end{minipage}%
+\begin{minipage}{.4\textwidth}
+    \centering
+        \includegraphics[width=40mm]{img/sharp_curve_lookahead_up.png}
+        \caption{Prudké zatočení pohled shora}
+    \centering
+    \label{fig:sharp_curve_lookahead_from_up}
+\end{minipage}
+\end{figure}
+
+Je zřejmé, že na výběru druhého vektoru projekční roviny skutečně záleží, neboť
+například pohled shora nedává žádnou indicii o tom, jakým způosobem bychom
+se měli zachovat. Prakticky ale stačí vzít vektor, který je
+určen středy našich řezů, tedy vektor $ v = W^{center} - V^{center} $. Ze všech
+přípustných rovin pak takto vzniklá rovina bude maximalizovat vzdálenost mezi
+středy úseček vzniklých projekcí řezů do této roviny. Také díky tomu, že
+výsledná rovina bude obsahovat oba středy našich řezů, dostaneme v projekční
+rovině nedeformované úsečky o maximálních délkách - jejich průměr bude stejný
+jako průměr promítaných řezů.
+
+Teoreticky by se nám ještě mohlo stát, že by takto vzniklý vektor byl lineárně
+závislý vzhledem k normálnovému vektoru $ V^{normal} $. V taktovém případě k žádnému
+zatočení zřejmě nedochází. Popisovaný algoritmus bude i tak fungovat,
+a to pro libovolnou volbu vektoru lineárně nezávislého na $ V^{normal} $.
+
+Nyní když máme k dispozici projekční rovinu můžeme podobně jako v případě
+předchozí procedury $ \operatorname{shiftDisk} $ najít korespondující
+vrcholy $ P_1, P_2 $ resp. $ Q_1, Q_2 $. Pomocí nich následně zjistíme, která
+dvojice korespondujicích vrcholů je od sebe dál a tu pak ztotožníme. V případě
+druhé dvojice umístíme vrchol $Q_i $ do vzdálenosti menší než $\delta$ od vrcholu
+$ P_i $. Nakonec ještě na základě takto posunutých vrcholů vygenerujeme nový řez.
+
+Uvedený postup je zachycen následujícím pseudokódem.
+
+\begin{algorithmic}[1]
+\label{alg:shiftSharpTurn}
+
+\Function{shiftSharpTurn}{$ V, W$}
+    \State $ P_1, P_2, Q_1, Q_2 \gets $ Správná korespondence vrcholů
+    \State $ \vec{v_1} \gets Q_1 - V_{center} $
+    \State $ \vec{v_2} \gets Q_2 - V_{center} $
+    \Statex
+
+    \If {$ \langle V_{normal}, \vec{v_1} \rangle < 0 $}
+        \State $ Q_1 \gets P_1 + \epsilon V_{normal} $
+    \ElsIf {$ \langle V_{normal}, \vec{v_2} \rangle < 0 $}
+        \State $ Q_2 \gets P_2 + \epsilon V_{normal} $
+    \EndIf
+    \State $ P_1, P_2, Q_1, Q_2 \gets $ Správná korespondence vrcholů
+    \Statex
+
+    \State $ \vec{w_1} \gets Q_1 - P_1 $
+    \If {$ \norm{w_1} > \delta $}
+        $ Q_1 \gets P_1 + \tilde{\epsilon} \frac{w_1}{\norm{w_1}} $ \label{shiftSharpTurn:correction1}
+    \EndIf
+
+    \State $ \vec{w_2} \gets Q_2 - P_2 $
+    \If {$ \norm{w_2} > \delta $}
+        $ Q_2 \gets P_2 + \tilde{\epsilon} \frac{w_2}{\norm{w_2}} $ \label{shiftSharpTurn:correction2}
+    \EndIf
+    \Statex
+
+    \State $ Z \gets $ Construct disk from $ Q_1$, $Q_2$ perpendicular to $ \rho $
+    \State $ new\_disk \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $ \label{shiftSharpTurn:fit}
+    \Statex
+
+    \If {$ \dst(V, new\_disk) > \delta \: || \: \neg \operatorname{isFollower}(prev\_disk, new\_disk)$ }
+        \State \Return $ \operatorname{shiftSharpTurn}(V, new\_disk) $ \label{shiftSharpTurn:recursion}
+    \Else
+        \State \Return $ new\_disk $
+    \EndIf
+
+\EndFunction
+
+\end{algorithmic}
