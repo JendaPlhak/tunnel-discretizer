@@ -14,6 +14,7 @@ class DigOpts:
     def __init__(self, delta, filename):
         self.delta = delta
         self.eps   = delta * 0.1
+        self.look_ahead = 2 * delta
         self.filename = filename
 
 def dig_tunnel(tunnel, opts):
@@ -52,7 +53,7 @@ def dig_tunnel(tunnel, opts):
 
             if is_sharp_turn(tunnel, disks[-1], curve, opts):
                 # print("Curving!")
-                disk_center = disks[-1].center + disks[-1].normal * opts.delta
+                disk_center = disks[-1].center + disks[-1].normal * opts.look_ahead
                 new_normal  = disks[-1].normal
                 shift_fun   = shift_sharp_turn
                 # print "new disk distance: ", disk_dist(disks[-1], new_disk)
@@ -155,7 +156,7 @@ def get_vertices(disk1, disk2, normal = None):
     return disk1_vert_1, disk1_vert_2, disk2_vert_1, disk2_vert_2
 
 def is_sharp_turn(tunnel, prev_disk, curve, opts):
-    disk_center = prev_disk.center + prev_disk.normal * opts.delta * 2
+    disk_center = prev_disk.center + prev_disk.normal * opts.look_ahead
     new_disk = tunnel.fit_disk(prev_disk.normal, disk_center)
     ratio = (prev_disk.radius - new_disk.radius) / prev_disk.radius
 
@@ -296,14 +297,11 @@ def shift_sharp_turn(prev_disk, new_disk, tunnel, opts):
     else:
         new_vert_2 = prev_vert_2 + normalize(v1) * opts.delta * 0.95
 
-    seg_dir = new_vert_2 - new_vert_1
-    new_disk_normal = null_space(np.array([plane_normal, seg_dir, null_vec]))
-    new_disk_normal *= np.sign(np.dot(prev_disk.normal, new_disk_normal))
+    new_disk = get_new_disk_points(new_vert_1, new_vert_2, prev_disk.normal)
+    new_disk = tunnel.fit_disk(new_disk.normal, new_disk.center)
 
-    new_disk = tunnel.fit_disk(new_disk_normal, (new_vert_2 + new_vert_1)/2.)
     if disk_dist(prev_disk, new_disk) >= opts.delta:
         new_disk = shift_new_disk(prev_disk, new_disk, tunnel, opts)
-
     # new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
     #     get_vertices(new_disk, prev_disk)
     # print "After"
