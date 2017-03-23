@@ -504,7 +504,7 @@ Uvedený postup shrnuje následující pseudokod:
 \label{alg:shiftDisk}
 
 \Function{shiftDisk}{$ V, W$}
-    \State $ P_1, P_2, Q_1, Q_2 \gets $ Správná korespondence vrcholů
+    \State $ P_1, P_2, Q_1, Q_2 \gets $ Proper vertex correspondence
     \State $ \vec{v_1} \gets Q_1 - V_{center} $
     \State $ \vec{v_2} \gets Q_2 - V_{center} $
     \Statex
@@ -514,7 +514,7 @@ Uvedený postup shrnuje následující pseudokod:
     \ElsIf {$ \langle V_{normal}, \vec{v_2} \rangle < 0 $}
         \State $ Q_2 \gets P_2 + \epsilon V_{normal} $
     \EndIf
-    \State $ P_1, P_2, Q_1, Q_2 \gets $ Správná korespondence vrcholů
+    \State $ P_1, P_2, Q_1, Q_2 \gets $ Proper vertex correspondence
     \Statex
 
     \State $ \vec{w_1} \gets Q_1 - P_1 $
@@ -529,13 +529,13 @@ Uvedený postup shrnuje následující pseudokod:
     \Statex
 
     \State $ Z \gets $ Construct disk from $ Q_1$, $Q_2$ perpendicular to $ \rho $
-    \State $ new\_disk \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $ \label{shiftDisk:fit}
+    \State $ W \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $ \label{shiftDisk:fit}
     \Statex
 
-    \If {$ \dst(V, new\_disk) > \delta \: || \: \neg \operatorname{isFollower}(prev\_disk, new\_disk)$ }
-        \State \Return $ \operatorname{shiftDisk}(V, new\_disk) $ \label{shiftDisk:recursion}
+    \If {$ \dst(V, W) > \delta \: || \: \neg \operatorname{isFollower}(V, W)$ }
+        \State \Return $ \operatorname{shiftDisk}(V, W) $ \label{shiftDisk:recursion}
     \Else
-        \State \Return $ new\_disk $
+        \State \Return $ W $
     \EndIf
 
 \EndFunction
@@ -597,7 +597,8 @@ Na vstupu funkce $ \operatorname{shiftSharpTurn} $ tedy budeme mít předchozí
 umístěný řez resp. aktuálně umisťovaný řez s výše uvedenými vlastnostmi,
 které si označíme $ V $
 resp. $ W $. Stejně jako u předešlé funkce budeme chtít vešekeré výpočty provádět
-v projekci do nějaké roviny. V tomto případě však budou mít oba řezy stejný
+v projekci do nějaké roviny. Označme si tuto rovinu $ \rho $.
+V tomto případě však budou mít oba řezy stejný
 normálový vektor, což nám dává možnost volby. Zamysleme se tedy nad tím,
 jak zvolit druhý vektor projekční roviny. Obrázek \ref{fig:sharp_curve_lookahead}
 dobře ilustruje, jak taková situace může vypadat. Z tohoto bočního pohledu je
@@ -629,7 +630,7 @@ například pohled shora nedává žádnou indicii o tom, jakým způosobem bych
 se měli zachovat. Prakticky ale stačí vzít vektor, který je
 určen středy našich řezů, tedy vektor $ v = W^{center} - V^{center} $. Ze všech
 přípustných rovin pak takto vzniklá rovina bude maximalizovat vzdálenost mezi
-středy úseček vzniklých projekcí řezů do této roviny. Také díky tomu, že
+středy úseček vzniklých projekcí řezů do $ \rho $. Také díky tomu, že
 výsledná rovina bude obsahovat oba středy našich řezů, dostaneme v projekční
 rovině nedeformované úsečky o maximálních délkách - jejich průměr bude stejný
 jako průměr promítaných řezů.
@@ -652,38 +653,32 @@ Uvedený postup je zachycen následujícím pseudokódem.
 \label{alg:shiftSharpTurn}
 
 \Function{shiftSharpTurn}{$ V, W$}
-    \State $ P_1, P_2, Q_1, Q_2 \gets $ Správná korespondence vrcholů
-    \State $ \vec{v_1} \gets Q_1 - V_{center} $
-    \State $ \vec{v_2} \gets Q_2 - V_{center} $
+    \State $ \rho \gets $ Projection plane described in text
+    \State $ P_1, P_2, Q_1, Q_2 \gets $ Proper vertex correspondence
+    \State $ \vec{v_1} \gets Q_1 - P_1 $
+    \State $ \vec{v_2} \gets Q_2 - P_2 $
     \Statex
 
-    \If {$ \langle V_{normal}, \vec{v_1} \rangle < 0 $}
-        \State $ Q_1 \gets P_1 + \epsilon V_{normal} $
-    \ElsIf {$ \langle V_{normal}, \vec{v_2} \rangle < 0 $}
-        \State $ Q_2 \gets P_2 + \epsilon V_{normal} $
-    \EndIf
-    \State $ P_1, P_2, Q_1, Q_2 \gets $ Správná korespondence vrcholů
-    \Statex
-
-    \State $ \vec{w_1} \gets Q_1 - P_1 $
-    \If {$ \norm{w_1} > \delta $}
-        $ Q_1 \gets P_1 + \tilde{\epsilon} \frac{w_1}{\norm{w_1}} $ \label{shiftSharpTurn:correction1}
-    \EndIf
-
-    \State $ \vec{w_2} \gets Q_2 - P_2 $
-    \If {$ \norm{w_2} > \delta $}
-        $ Q_2 \gets P_2 + \tilde{\epsilon} \frac{w_2}{\norm{w_2}} $ \label{shiftSharpTurn:correction2}
-    \EndIf
-    \Statex
-
-    \State $ Z \gets $ Construct disk from $ Q_1$, $Q_2$ perpendicular to $ \rho $
-    \State $ new\_disk \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $ \label{shiftSharpTurn:fit}
-    \Statex
-
-    \If {$ \dst(V, new\_disk) > \delta \: || \: \neg \operatorname{isFollower}(prev\_disk, new\_disk)$ }
-        \State \Return $ \operatorname{shiftSharpTurn}(V, new\_disk) $ \label{shiftSharpTurn:recursion}
+    \If {$ \norm{\vec{v_1}} > \norm{\vec{v_2}} $}
+        \State $ Q_1 \gets P_1$
     \Else
-        \State \Return $ new\_disk $
+        \State $ Q_1 \gets P_1 + \operatorname{norm}(\vec{v_1}) * \delta * \frac{95}{100} $
+    \EndIf
+    \If {$ \norm{\vec{v_1}} < \norm{\vec{v_2}} $}
+        \State $ Q_2 \gets P_2$
+    \Else
+        \State $ Q_2 \gets P_2 + \operatorname{norm}(\vec{v_2}) * \delta * \frac{95}{100} $
+    \EndIf
+
+    \Statex
+    \State $ Z \gets $ Construct disk from $ Q_1$, $Q_2$ perpendicular to $ \rho $
+    \State $ W \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $ \label{shiftSharpTurn:fit}
+    \Statex
+
+    \If {$ \dst(V, W) > \delta \: || \: \neg \operatorname{isFollower}(V, W)$ }
+        \State \Return $ \operatorname{shiftDisk}(V, W) $ \label{shiftSharpTurn:shift_disk}
+    \Else
+        \State \Return $ W $
     \EndIf
 
 \EndFunction
