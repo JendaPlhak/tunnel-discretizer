@@ -375,8 +375,8 @@ robustní C++ implementace dostupná z \cite{cpp_balls}, která podle uvedených
 zvládá řešit úlohy ve 3D o velikosti 1 milionu koulí v čase pod 1 sekundu. To
 je rozhodně velmi působivý výsledek. Pro naše potřeby bylo nutné vytvořit
 binding této implementace pro jazyk Python. To se povedlo v poměrně obecné
-podobě pro prakticky libovolné dimenze. Binding je veřejně dostupný z reference
-uvedené v literatuře (\cite{python_balls}).
+podobě pro prakticky libovolné dimenze. Binding je veřejně dostupný na odkazu
+uvedeném v literatuře (\cite{python_balls}).
 
 Výše uvedené pak můžeme vyjádřit pomocí jednoduchého pseudokódu \ref{alg:fitDiskTunnel}.
 
@@ -659,7 +659,7 @@ Uvedený postup je zachycen následujícím pseudokódem.
     \State $ \vec{v_2} \gets Q_2 - P_2 $
     \Statex
 
-    \If {$ \norm{\vec{v_1}} > \norm{\vec{v_2}} $}
+    \If {$ \norm{\vec{v_1}} > \norm{\vec{v_2}} $} \label{shiftSharpTurn:begin_ifs}
         \State $ Q_1 \gets P_1$
     \Else
         \State $ Q_1 \gets P_1 + \operatorname{norm}(\vec{v_1}) * \delta * \frac{95}{100} $
@@ -667,12 +667,12 @@ Uvedený postup je zachycen následujícím pseudokódem.
     \If {$ \norm{\vec{v_1}} < \norm{\vec{v_2}} $}
         \State $ Q_2 \gets P_2$
     \Else
-        \State $ Q_2 \gets P_2 + \operatorname{norm}(\vec{v_2}) * \delta * \frac{95}{100} $
+        \State $ Q_2 \gets P_2 + \operatorname{norm}(\vec{v_2}) * \delta * \frac{95}{100} $ \label{shiftSharpTurn:end_ifs}
     \EndIf
 
     \Statex
     \State $ Z \gets $ Construct disk from $ Q_1$, $Q_2$ perpendicular to $ \rho $
-    \State $ W \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $ \label{shiftSharpTurn:fit}
+    \State $ W \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $
     \Statex
 
     \If {$ \dst(V, W) > \delta \: || \: \neg \operatorname{isFollower}(V, W)$ }
@@ -684,3 +684,20 @@ Uvedený postup je zachycen následujícím pseudokódem.
 \EndFunction
 
 \end{algorithmic}
+
+Rozeberme si ještě detailněji některé detaily uvedené procedury. Na řádcích
+\ref{shiftSharpTurn:begin_ifs} až \ref{shiftSharpTurn:end_ifs} můžeme vidět, že
+algoritmus každý z vrcholů posune buďto identicky na korespondující vrchol
+předchozího řezu nebo do vzdálenosti o něco menší než $ \delta $. Posun přímo
+o $ \delta $ opět záměrně nevolíme, abychom předešli zbytečným opravám. Zde si
+také můžeme všimnout, že pokud máme na vstupu řezy jejichž spojnice středů
+je lineárně závislá na jejich normálách, pak zřejmě bude platit
+$ \norm{\vec{v_1}} = \norm{\vec{v_2}} $. Tunel se tedy v tomto místě
+pravděpodobně ubírá přímo rovně. V souladu s tímto faktem se v obou případech
+větvení vydáme druhou větví a oba vrcholy umístíme do stejné vzdálenosti, čímž
+zajístíme přímý pohyb tunelem.
+
+Stejně jako v případě funkce $ \operatorname{shiftDisk} $ musíme ještě nakonec
+zkontrolovat splnění našich podmínek a v případě jejich porušení voláme ještě
+na řádku \ref{shiftSharpTurn:shift_disk} funkci $ \operatorname{shiftDisk} $,
+která umístění řezu dokončí.
