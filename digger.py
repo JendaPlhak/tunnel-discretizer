@@ -155,21 +155,31 @@ def get_vertices(disk1, disk2, normal = None):
     assert disk2.contains(disk2_vert_2) and disk2.circle_contains(disk2_vert_2)
     return disk1_vert_1, disk1_vert_2, disk2_vert_1, disk2_vert_2
 
+# For two disks calculate normal of plane which gives maximum distance
+# for disks d1, d2 in orthogonal projection.
+def find_max_distance(d1, d2):
+    assert np.linalg.norm(d1.normal - d2.normal) < f_error
+
+    v = normalize(d2.center - d1.center)
+    if (d1.normal == v).all():
+        v = null_space(np.array([d1.normal, null_vec, null_vec]))
+    return null_space(np.array([d1.normal, v, null_vec]))
+
 def is_sharp_turn(tunnel, prev_disk, curve, opts):
     disk_center = prev_disk.center + prev_disk.normal * opts.look_ahead
     new_disk = tunnel.fit_disk(prev_disk.normal, disk_center)
-    ratio = (prev_disk.radius - new_disk.radius) / prev_disk.radius
 
+    plane_normal = find_max_distance(prev_disk, new_disk)
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 \
-        = get_vertices(new_disk, prev_disk)
+        = get_vertices(new_disk, prev_disk, normal = plane_normal)
+
     v1 = new_vert_1 - prev_vert_1
     v2 = new_vert_2 - prev_vert_2
     d1 = np.linalg.norm(v1)
     d2 = np.linalg.norm(v2)
-    # if min(d1, d2) / max(d1, d2) < 0.7:
-        # print d1, d2
-    # print ratio, min(d1, d2) / max(d1, d2)
-    return min(d1, d2) / max(d1, d2) < 0.65 and abs(ratio) > 0.25 or abs(ratio) > 0.5
+
+    # print abs(d1 - d2) / d1
+    return abs(d1 - d2) / d1 > 0.35
 
 def shift_new_disk(prev_disk, new_disk, tunnel, opts):
     # print "\n\n"
@@ -264,16 +274,6 @@ def shift_new_disk(prev_disk, new_disk, tunnel, opts):
     return new_disk
 
 def shift_sharp_turn(prev_disk, new_disk, tunnel, opts):
-    # For two disks calculate normal of plane which gives maximum distance
-    # for disks d1, d2 in orthogonal projection.
-    def find_max_distance(d1, d2):
-        assert np.linalg.norm(d1.normal - d2.normal) < f_error
-
-        v = normalize(d2.center - d1.center)
-        if (d1.normal == v).all():
-            v = null_space(np.array([d1.normal, null_vec, null_vec]))
-        return null_space(np.array([d1.normal, v, null_vec]))
-
     plane_normal = find_max_distance(prev_disk, new_disk)
     new_vert_1, new_vert_2, prev_vert_1, prev_vert_2 = \
         get_vertices(new_disk, prev_disk, normal = plane_normal)
@@ -287,6 +287,10 @@ def shift_sharp_turn(prev_disk, new_disk, tunnel, opts):
     v2 = new_vert_2 - prev_vert_2
     d1 = np.linalg.norm(v1)
     d2 = np.linalg.norm(v2)
+
+    # Swap distance variables if we detect decrease in radius
+    if prev_disk.radius > new_disk.radius:
+        d1, d2 = d2, d1
 
     if d1 > d2:
         new_vert_1 = prev_vert_1

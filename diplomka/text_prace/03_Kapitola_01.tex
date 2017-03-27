@@ -235,11 +235,11 @@ Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$.
 
             \If{$\operatorname{makesSharpTurn}(prev\_disk, curve)$}
                 \State $ disk\_center
-                    \gets prev\_disk^{center} + prev\_disk^{normal} * \delta $ \label{alg:shift_by_delta}
+                    \gets prev\_disk^{center} + \Delta * prev\_disk^{normal} $ \label{alg:shift_by_delta}
                 \State $ disk\_normal \gets prev\_disk^{normal} $   \label{alg:same_normal}
                 \State $ \operatorname{doShift} \gets \operatorname{shiftSharpTurn} $
             \Else
-                \State $ disk\_center \gets prev\_disk^{center} + prev\_disk^{normal} * \epsilon $
+                \State $ disk\_center \gets prev\_disk^{center} + \epsilon * prev\_disk^{normal} $
                 \State $ disk\_normal \gets \operatorname{getWeightedDir}(curve, i, d) $
                 \State $ \operatorname{doShift} \gets \operatorname{shiftDisk} $
             \EndIf
@@ -313,6 +313,15 @@ Volíme ji tak, aby platilo  $ \epsilon < \delta $, byla dostatečně malá abyc
 předešli zaokrouhlovacím chybám, ale zároveň čím větší bude, tím rychleji se
 budeme tunelem pohybovat a tím rychleji také celý algoritmus doběhne. Experimentálně
 jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{1}{10} \delta $.
+
+Další použitou konstantou je $ \Delta $, která udává o jakou vzdálenost dopředu
+se díváme, když zjišťujeme, zda je potřeba začít implementovat prudkou zatáčku.
+V našich experimentech nejlépe vycházelo použití hodnoty $ \Delta = 2 \delta $.
+Poznamenejme, že stejnou konstantu používáme také při vyhodnocení funkce
+$ \operatorname{isSharpTurn} $, kterou rozvedeme v podkapitole \ref{subsec:is_sharp_turn}.
+
+
+
 
 \subsection{Disk fitting} \label{subsec:disk_fit}
 Nyní se budeme věnovat funkci $ \operatorname{fitDiskTunnel} $ použité na řádku
@@ -519,12 +528,12 @@ Uvedený postup shrnuje následující pseudokod:
 
     \State $ \vec{w_1} \gets Q_1 - P_1 $
     \If {$ \norm{w_1} > \delta $}
-        $ Q_1 \gets P_1 + \tilde{\epsilon} \frac{w_1}{\norm{w_1}} $ \label{shiftDisk:correction1}
+        $ Q_1 \gets P_1 + \tilde{\epsilon} \frac{\vec{v_1}}{\norm{w_1}} $ \label{shiftDisk:correction1}
     \EndIf
 
     \State $ \vec{w_2} \gets Q_2 - P_2 $
     \If {$ \norm{w_2} > \delta $}
-        $ Q_2 \gets P_2 + \tilde{\epsilon} \frac{w_2}{\norm{w_2}} $ \label{shiftDisk:correction2}
+        $ Q_2 \gets P_2 + \tilde{\epsilon} \frac{\vec{v_2}}{\norm{w_2}} $ \label{shiftDisk:correction2}
     \EndIf
     \Statex
 
@@ -579,13 +588,15 @@ $ \operatorname{shiftDisk} $ spustíme jen když toto nebezpečí nebude hrozit.
 
 
 
-\subsection{Shift sharp turn} \label{subsec:shift_sharp_turn}
+
+
+\subsection{shiftSharpTurn} \label{subsec:shift_sharp_turn}
 Předchozí popsanou funkci doplňuje procedura $ \operatorname{shiftSharpTurn} $.
 Jejím účelem je implementovat prostřednictvím aktuálního řezu maximální možné
 zatočení při zachování všech podmínek.
 
 Hlavní myšlenkou této funkce je to, že v pokud detekujeme, že se blíží prudká
-zatáčka, tak vezmeme poslední umístěný řez a posuneme jej vpřed o $ \delta $ ve směru
+zatáčka, tak vezmeme poslední umístěný řez a posuneme jej vpřed o $ \Delta $ ve směru
 jeho normály. To se realizuje na řádcích \ref{alg:shift_by_delta} a
 \ref{alg:same_normal} v hlavním algoritmu. Na takto posunutý řez aplikujeme
 funkci $ \operatorname{fitDiskTunnel} $. Tímto způsobem získáme docela dobrou
@@ -608,7 +619,7 @@ právě do vyborazené situace. Pro srovnání uvádíme pohled z jiného úhlu 
 situaci v podobě obrázku \ref{fig:sharp_curve_lookahead_from_up}.
 
 \begin{figure}[ht]
-\centering
+\centering1
 \begin{minipage}{.6\textwidth}
   \centering
         \includegraphics[width=75mm]{img/sharp_curve_lookahead.png}
@@ -640,14 +651,35 @@ závislý vzhledem k normálnovému vektoru $ V^{normal} $. V taktovém případ
 zatočení zřejmě nedochází. Popisovaný algoritmus bude i tak fungovat,
 a to pro libovolnou volbu vektoru lineárně nezávislého na $ V^{normal} $.
 
-Nyní když máme k dispozici projekční rovinu můžeme podobně jako v případě
-předchozí procedury $ \operatorname{shiftDisk} $ najít korespondující
-vrcholy $ P_1, P_2 $ resp. $ Q_1, Q_2 $. Pomocí nich následně zjistíme, která
+Když máme k dispozici projekční rovinu můžeme podobně jako v případě
+procedury $ \operatorname{shiftDisk} $ najít korespondující
+vrcholy $ P_1, P_2 $ resp. $ Q_1, Q_2 $. Nyní je potřeba rozlišit dva případy.
+
+Pokud $ W^{radius} \geq V^{radius} $, pak pomocí vrcholů úseček zjistíme, která
 dvojice korespondujicích vrcholů je od sebe dál a tu pak ztotožníme. V případě
 druhé dvojice umístíme vrchol $Q_i $ do vzdálenosti menší než $\delta$ od vrcholu
-$ P_i $. Nakonec ještě na základě takto posunutých vrcholů vygenerujeme nový řez.
+$ P_i $. Tuto situaci můžeme vidět na obrázku \ref{fig:sharp_curve_lookahead}.
 
-Uvedený postup je zachycen následujícím pseudokódem.
+Jestliže platí $ V^{radius} > W^{radius} $, ztotožníme naopak dvojici vrcholů,
+která má k sobě blíže a do vzdálenosti menší než $\delta$ posuneme druhou dvojici.
+Ilustrativní příklad je znázorněn na obrázku \ref{fig:sharp_curve_lookahead_decrease}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{img/sharp_curve_lookahead_decrease.png}
+    \caption{Prudké zmenšení poloměru}
+  \centering
+  \label{fig:sharp_curve_lookahead_decrease}
+\end{figure}
+
+Intuitivně toto rozdělení můžeme chápat tak, že pokud průměr tunelu v daném směru
+neklesá, pak naše počínání v místě ostrého zatočení zvětší úhel, který v daném
+místě svírá řez se stěnou tunelu (v rovině $ \rho $ ). Abychom tento úhel zvětšili
+i v případě poklesu poloměru, musíme naopak ztotožnit body, které k sobě mají
+blíže.
+
+Nakonec na základě takto posunutých vrcholů vygenerujeme nový řez. Uvedený
+postup je zachycen následujícím pseudokódem.
 
 \begin{algorithmic}[1]
 \label{alg:shiftSharpTurn}
@@ -657,14 +689,21 @@ Uvedený postup je zachycen následujícím pseudokódem.
     \State $ P_1, P_2, Q_1, Q_2 \gets $ Proper vertex correspondence
     \State $ \vec{v_1} \gets Q_1 - P_1 $
     \State $ \vec{v_2} \gets Q_2 - P_2 $
-    \Statex
+    \State $ d_1 \gets \norm{v_1} $
+    \State $ d_2 \gets \norm{v_2} $
 
-    \If {$ \norm{\vec{v_1}} > \norm{\vec{v_2}} $} \label{shiftSharpTurn:begin_ifs}
+    \Statex
+    \If {$ V^{radius} > W^{radius} $}
+        \State $ \operatorname{\mathbf{Swap}}(d_1, d_2) $
+    \EndIf
+
+    \Statex
+    \If {$ d_1 > d_2 $} \label{shiftSharpTurn:begin_ifs}
         \State $ Q_1 \gets P_1$
     \Else
         \State $ Q_1 \gets P_1 + \operatorname{norm}(\vec{v_1}) * \delta * \frac{95}{100} $
     \EndIf
-    \If {$ \norm{\vec{v_1}} < \norm{\vec{v_2}} $}
+    \If {$ d_1 < d_2 $}
         \State $ Q_2 \gets P_2$
     \Else
         \State $ Q_2 \gets P_2 + \operatorname{norm}(\vec{v_2}) * \delta * \frac{95}{100} $ \label{shiftSharpTurn:end_ifs}
@@ -685,7 +724,7 @@ Uvedený postup je zachycen následujícím pseudokódem.
 
 \end{algorithmic}
 
-Rozeberme si ještě detailněji některé detaily uvedené procedury. Na řádcích
+Rozeberme si ještě některé detaily uvedené procedury. Na řádcích
 \ref{shiftSharpTurn:begin_ifs} až \ref{shiftSharpTurn:end_ifs} můžeme vidět, že
 algoritmus každý z vrcholů posune buďto identicky na korespondující vrchol
 předchozího řezu nebo do vzdálenosti o něco menší než $ \delta $. Posun přímo
@@ -697,7 +736,13 @@ pravděpodobně ubírá přímo rovně. V souladu s tímto faktem se v obou př�
 větvení vydáme druhou větví a oba vrcholy umístíme do stejné vzdálenosti, čímž
 zajístíme přímý pohyb tunelem.
 
-Stejně jako v případě funkce $ \operatorname{shiftDisk} $ musíme ještě nakonec
+Stejně jako v případě funkce $ \operatorname{shiftDisk} $ musíme nakonec
 zkontrolovat splnění našich podmínek a v případě jejich porušení voláme ještě
 na řádku \ref{shiftSharpTurn:shift_disk} funkci $ \operatorname{shiftDisk} $,
 která umístění řezu dokončí.
+
+
+\subsection{isSharpTurn} \label{subsec:is_sharp_turn}
+To zda použijeme funkci $ \operatorname{shiftDisk} $ nebo radikálnější
+$ \operatorname{shiftSharpTurn} $ rozhodujeme na základě návratové hodnoty
+funkce $ \operatorname{isSharpTurn} $.
