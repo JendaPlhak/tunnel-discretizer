@@ -247,7 +247,7 @@ Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$.
             \State $ disk \gets \operatorname{fitDiskTunnel}(disk\_normal, disk\_center) $ \label{alg:fit_disk}
             \State $ disk \gets \operatorname{doShift}(prev\_disk, disk) $ \label{alg:shift_disk}
 
-            \If{$ |disks| \geq 2  \And \dst(disk, disks[|disks|-2]) < \delta $} \label{digTunnel:last_if}
+            \If{$ |disks| \geq 2  \wedge \dst(disk, disks[|disks|-2]) < \delta $} \label{digTunnel:last_if}
                 \State $ \operatorname{pop}(disks)  $ \label{digTunnel:last_if_end}
             \EndIf
             \State $ \operatorname{append}(disks, disk) $
@@ -541,7 +541,7 @@ Uvedený postup shrnuje následující pseudokod:
     \State $ W \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $ \label{shiftDisk:fit}
     \Statex
 
-    \If {$ \dst(V, W) > \delta \: || \: \neg \operatorname{isFollower}(V, W)$ }
+    \If {$ \dst(V, W) > \delta \vee \neg \operatorname{isFollower}(V, W)$ }
         \State \Return $ \operatorname{shiftDisk}(V, W) $ \label{shiftDisk:recursion}
     \Else
         \State \Return $ W $
@@ -689,8 +689,8 @@ postup je zachycen následujícím pseudokódem.
     \State $ P_1, P_2, Q_1, Q_2 \gets $ Proper vertex correspondence
     \State $ \vec{v_1} \gets Q_1 - P_1 $
     \State $ \vec{v_2} \gets Q_2 - P_2 $
-    \State $ d_1 \gets \norm{v_1} $
-    \State $ d_2 \gets \norm{v_2} $
+    \State $ d_1 \gets \norm{\vec{v_1}} $
+    \State $ d_2 \gets \norm{\vec{v_2}} $
 
     \Statex
     \If {$ V^{radius} > W^{radius} $}
@@ -714,7 +714,7 @@ postup je zachycen následujícím pseudokódem.
     \State $ W \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $
     \Statex
 
-    \If {$ \dst(V, W) > \delta \: || \: \neg \operatorname{isFollower}(V, W)$ }
+    \If {$ \dst(V, W) > \delta \vee \neg \operatorname{isFollower}(V, W)$ }
         \State \Return $ \operatorname{shiftDisk}(V, W) $ \label{shiftSharpTurn:shift_disk}
     \Else
         \State \Return $ W $
@@ -742,7 +742,37 @@ na řádku \ref{shiftSharpTurn:shift_disk} funkci $ \operatorname{shiftDisk} $,
 která umístění řezu dokončí.
 
 
+
+
+
 \subsection{isSharpTurn} \label{subsec:is_sharp_turn}
 To zda použijeme funkci $ \operatorname{shiftDisk} $ nebo radikálnější
 $ \operatorname{shiftSharpTurn} $ rozhodujeme na základě návratové hodnoty
-funkce $ \operatorname{isSharpTurn} $.
+funkce $ \operatorname{isSharpTurn} $. Ta podobně jako v těle hlavního
+algoritmu \ref{alg:digTunnel} posune poslední umístěný řez o konstantu
+$ \Delta $ ve směru jeho normály. Sečnou rovinu zkonstruujeme stejně jako v
+případě funkce $ \operatorname{shiftSharpTurn} $ a v ní najdeme korespondující
+vrcholy $ P_1$, $P_2$, $Q_1$ a $ Q_2 $. Následně zjistíme percentuální rozdíl
+mezi vzdálenostmi vrcholů. Ostrou zatáčku pak implementujeme ve chvíli, kdy se
+vzdálenosti liší o více než 35\%. Tato hranice nepoměru se nám v praxi osvědčila
+velmi dobře. Výpočet je zachycen pseudokódem \ref{alg:isSharpTurn}.
+
+\begin{algorithmic}[1]
+\label{alg:isSharpTurn}
+
+\Function{isSharpTurn}{$ V, W$}
+    \State $ \rho \gets $ Projection plane described in chapter \ref{subsec:shift_sharp_turn}
+    \State $ P_1, P_2, Q_1, Q_2 \gets $ Proper vertex correspondence
+    \State $ \vec{v_1} \gets Q_1 - P_1 $
+    \State $ \vec{v_2} \gets Q_2 - P_2 $
+    \State \Return $ \frac{\left| \norm{\vec{v_1}} - \norm{\vec{v_2}} \right|}
+                          {\frac{\norm{\vec{v_1}} + \norm{\vec{v_2}}}{2}} > 0.35$
+\EndFunction
+
+\end{algorithmic}
+
+
+
+
+
+\subsection{isSharpTurn} \label{subsec:is_sharp_turn}

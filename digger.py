@@ -51,7 +51,7 @@ def dig_tunnel(tunnel, opts):
             if size > centers_dist:
                 break
 
-            if is_sharp_turn(tunnel, disks[-1], curve, opts):
+            if is_sharp_turn(tunnel, disks[-1], opts):
                 # print("Curving!")
                 disk_center = disks[-1].center + disks[-1].normal * opts.look_ahead
                 new_normal  = disks[-1].normal
@@ -165,7 +165,7 @@ def find_max_distance(d1, d2):
         v = null_space(np.array([d1.normal, null_vec, null_vec]))
     return null_space(np.array([d1.normal, v, null_vec]))
 
-def is_sharp_turn(tunnel, prev_disk, curve, opts):
+def is_sharp_turn(tunnel, prev_disk, opts):
     disk_center = prev_disk.center + prev_disk.normal * opts.look_ahead
     new_disk = tunnel.fit_disk(prev_disk.normal, disk_center)
 
@@ -179,7 +179,7 @@ def is_sharp_turn(tunnel, prev_disk, curve, opts):
     d2 = np.linalg.norm(v2)
 
     # print abs(d1 - d2) / d1
-    return abs(d1 - d2) / d1 > 0.35
+    return abs(d1 - d2) / ((d1 + d2) / 2.) > 0.35
 
 def shift_new_disk(prev_disk, new_disk, tunnel, opts):
     # print "\n\n"
