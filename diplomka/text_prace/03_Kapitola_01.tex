@@ -302,7 +302,7 @@ středu a vhodnou volbou poloměru vygeneruje řez. Ten ale ještě nemusí být
 konformaci, proto aplikujeme příslušnou transformaci uloženou v $ \operatorname{doShift} $
 abychom skutečně dostali řez, který splňuje všechny naše podmínky.
 
-Nakonec na řádcích \ref{digTunnel:last_if} až \ref{digTunnel:last_if_end}n
+Nakonec na řádcích \ref{digTunnel:last_if} až \ref{digTunnel:last_if_end}
 zkontrolujeme zda nemůžeme vynechat předchozí řez a případně jej odstraníme.
 Výsledný algoritmus tedy iterativně prochází tajektorii tunelu a postupně vytváří řezy,
 které pak v případě potřeby posune tak, aby byly zachovány námi požadované podmínky.
@@ -775,4 +775,32 @@ velmi dobře. Výpočet je zachycen pseudokódem \ref{alg:isSharpTurn}.
 
 
 
-\subsection{isSharpTurn} \label{subsec:is_sharp_turn}
+\subsection{Směrování tunelu} \label{subsec:tunnel_dir}
+Jak už jsme dříve rozebírali, pro správnou funkci algoritmu je nezbytné, abychom
+v libovolném místě tunelu měli k dispozici informaci o tom, kterým směrem bychom
+se měli dále pohybovat. Pro potřeby formálního popisu potřebujeme
+po částech konstantní křivku $ \gamma(t) \colon [0, l] \to \Rbb^3$
+parametrizovanou obloukem, která bude
+určena posloupností bodů ležících uvnitř tunelu. Tyto body budeme značit
+$ C_i $ a pro začátek je definujeme jakožto středy koulí našeho tunelu:
+$ \{C_i = S_i^{center}\}_{i=0}^{n} $.
+
+Podél křivky $ \gamma(t) $ se můžeme tunelem pohybovat a přirozeně bychom pro
+směrování našeho algoritmu chtěli použít směr pohybu - derivaci
+$ \frac{d\gamma}{dt}(t_0) $. Narazíme však na to, že pro $ t_0 $ taková, že
+$ \gamma(t_0) = C_i $ pro nějaké $ 0 < i < n $ derivace neexistuje. To můžeme
+napravit tak, že namísto $ \frac{d\gamma}{dt}(t_0) $ definujeme vektorové
+pole $ \Upsilon(t) \colon [0, l] \to \Rbb^3 $.
+
+, avšak pro každý bod
+Uvažme nyní libovolný bod $ \gamma(t_0)$, $ t_0 \in [0, l] $. Takto definovaná křivka $ \gamma(t) $ prochází tunelem a mohli
+
+
+
+Díky tomu, že v tunelu vždy víme mezi středy kterých dvou
+koulí se nacházíme, tak bychom mohli brát vážený průměr směrových vektorů,
+které vychází ze středů koulí $ S_i $ a $ S_{i + 1} $, mezi kterými se aktuálně
+nacházíme a které jsou posloupností středů koulí $ S_i $, $ S_{i + 1} $ a
+$ S_{i + 2} $. Jak jsme ale mohli vidět na obrázku \ref{fig:naive_cuts}, takto
+generované směrové vektory se mohou chovat dosti divoce a ani lokální vyhlazení
+není dostatečné aby problém eliminovalo.
