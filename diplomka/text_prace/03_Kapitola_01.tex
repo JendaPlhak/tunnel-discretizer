@@ -789,18 +789,30 @@ Podél křivky $ \gamma(t) $ se můžeme tunelem pohybovat a přirozeně bychom 
 směrování našeho algoritmu chtěli použít směr pohybu - derivaci
 $ \frac{d\gamma}{dt}(t_0) $. Narazíme však na to, že pro $ t_0 $ taková, že
 $ \gamma(t_0) = C_i $ pro nějaké $ 0 < i < n $ derivace neexistuje. To můžeme
-napravit tak, že namísto $ \frac{d\gamma}{dt}(t_0) $ definujeme vektorové
-pole $ \Upsilon(t) \colon [0, l] \to \Rbb^3 $.
+napravit tak, že namísto $ \frac{d\gamma}{dt}(t_0) $ budeme definovat vektorové
+pole $ \Omega(t) \colon [0, l] \to \Rbb^3 $. Pro libovolné $ t_0 \in [0, l] $
+můžeme najít body $ C_i $ a $ C_{i + 1} $ na křivce $ \gamma $, mezi kterými
+se nachází bod $ \gamma(t_0) $. Vektorové pole v bodě $ t_0 $ pak definujeme
+jakožto
 
-, avšak pro každý bod
-Uvažme nyní libovolný bod $ \gamma(t_0)$, $ t_0 \in [0, l] $. Takto definovaná křivka $ \gamma(t) $ prochází tunelem a mohli
+\begin{align}
+    \Omega(t_0) =
+        \frac{
+            \frac{\operatorname{norm}(C_{i + 1} - C_i)}{\norm{\gamma(t_0) - C_i}}
+            +
+            \frac{\operatorname{norm}(C_{i + 2} - C_{i + 1})}{\norm{C_{i + 1} - \gamma(t_0)}}
+        }{
+            \norm{C_{i + 1} - C_i}
+        },
+\end{align}
+pokud $ i + 2 \leq n $, jinak
+\begin{align}
+    \Omega(t_0) = \operatorname{norm}(C_{i + 1} - C_i).
+\end{align}
 
+Prakticky se jedná o jednoduchý vážený průměr, který postupně mezi jednotlivými středy
+$ C_i $ spojitě transformuje jeden směrový vektor na druhý.
 
-
-Díky tomu, že v tunelu vždy víme mezi středy kterých dvou
-koulí se nacházíme, tak bychom mohli brát vážený průměr směrových vektorů,
-které vychází ze středů koulí $ S_i $ a $ S_{i + 1} $, mezi kterými se aktuálně
-nacházíme a které jsou posloupností středů koulí $ S_i $, $ S_{i + 1} $ a
-$ S_{i + 2} $. Jak jsme ale mohli vidět na obrázku \ref{fig:naive_cuts}, takto
+Jak jsme ale mohli vidět na obrázku \ref{fig:naive_cuts}, takto
 generované směrové vektory se mohou chovat dosti divoce a ani lokální vyhlazení
 není dostatečné aby problém eliminovalo.
