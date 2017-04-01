@@ -797,13 +797,14 @@ jakožto
 
 \begin{align}
     \Omega(t_0) =
-        \frac{
-            \frac{\operatorname{norm}(C_{i + 1} - C_i)}{\norm{\gamma(t_0) - C_i}}
+            (1 - \lambda) \operatorname{norm}(C_{i + 1} - C_i)
             +
-            \frac{\operatorname{norm}(C_{i + 2} - C_{i + 1})}{\norm{C_{i + 1} - \gamma(t_0)}}
-        }{
-            \norm{C_{i + 1} - C_i}
-        },
+            \lambda \operatorname{norm}(C_{i + 2} - C_{i + 1})
+        ,
+\end{align}
+kde
+\begin{align}
+    \lambda = \frac{\norm{\gamma(t_0) - C_i}}{\norm{C_{i + 1} - C_i}}
 \end{align}
 pokud $ i + 2 \leq n $, jinak
 \begin{align}
@@ -813,6 +814,75 @@ pokud $ i + 2 \leq n $, jinak
 Prakticky se jedná o jednoduchý vážený průměr, který postupně mezi jednotlivými středy
 $ C_i $ spojitě transformuje jeden směrový vektor na druhý.
 
-Jak jsme ale mohli vidět na obrázku \ref{fig:naive_cuts}, takto
-generované směrové vektory se mohou chovat dosti divoce a ani lokální vyhlazení
-není dostatečné aby problém eliminovalo.
+Jak jsme ale mohli vidět na obrázku \ref{fig:naive_cuts}, takto definované
+směrové vektory se mohou chovat dost divoce a tak je potřeba vektorové pole
+$ \Omega $ ještě dále vyhladit.
+
+Uvažme tedy opět libovolný bod $ t_0 \in [0, l] $ pro který chceme získat vektor,
+který co nejlépe vystihuje směr tunelu v daném bodě. Nechceme pro tyto účely použít
+přímo vektorové pole $ \Omega $, protože to by se mohlo chovat příliš divoce
+a nemuselo by dobře reflektovat globální směr tunelu. Co můžeme udělat je spočítat
+jak se v průměru chová $ \Omega $ na okolí bodu $ t_0 $. Formálně budeme
+definovat nové vektorové pole $ \Phi \colon [0, l] \to \Rbb^3 $,
+
+\begin{align}
+    \Phi(t_0) = \int_{t_1 = \max\{t_0 - \Delta, 0\}}^{t_2 = \min\{t_0 + \Delta, l\}}
+        \Omega(t) (\Delta - \left| t_0 - t \right| )^2 dt.
+\end{align}
+
+Uvedený integrál budeme v průběhu výpočtu potřebovat prakticky vyhodnocovat,
+musíme jej proto vypočítat. Pro začátek předpokládejme, křivka $ \gamma $ na
+intervalu $ [t_1, t_2] $ prochází alespoň jedním bodem $ C_i $. To znamená, že
+existuje neprázdná posloupnost středů $ P = \{C_k, \dots, C_{k + m} \}$ taková, že
+$ C \in P \Rightarrow \gamma^{-1}(C) \in [t_1, t_2]$. Označme
+$ f(t) = \Omega(t) (\Delta - \left| t_0 - t \right| )^2 $. Potom $ \Phi $ můžeme zapsat
+následujícím způsobem.
+
+\begin{align}
+    \Phi(t_0) = \int_{t_1}^{\gamma^{-1}(C_k)} f(t) dt
+        + \sum_{j=0}^{m - 1} \int_{\gamma^{-1}(C_{k + j})}^{\gamma^{-1}(C_{k + j + 1})} f(t) dt
+        + \int_{\gamma^{-1}(C_{k + m})}^{t_2} f(t) dt
+\end{align}
+
+Sčítance uprostřed uvedeného výrazu odpovídají integraci po úsečce vždy mezi
+dvěma po sobě jdoucími středy $ C_i $, $C_{i+1} $. Toho využijeme a nejprve ukážeme,
+jak počítat integrály tohoto typu. Díky tomu, že je křivka $ \gamma $ parametrizovaná
+obloukem, dostaneme substitucí
+$ s(t) = \frac{t - \gamma^{-1}(C_i)}{\norm{C_{i + 1} - C_i}} $ vztah
+
+\begin{align*}
+    \int_{\gamma^{-1}(C_{i})}^{\gamma^{-1}(C_{i + 1})} f(t) dt
+    &= \bigg\rvert
+        ^{s(t) = \frac{t - \gamma^{-1}(C_i)}{\norm{C_{i + 1} - C_i}}}
+        _{s'(t) = \norm{C_{i + 1} - C_i}^{-1}} \bigg\lvert \\
+    &= \int_{0}^{1}
+        \frac{\widehat{\Omega}(s)
+            \left[\Delta - \left| t_0 - (s \norm{C_{i + 1} - C_i} + \gamma^{-1}(C_i)) \right| \right]^2}
+        {\norm{C_{i + 1} - C_i}} ds
+    = (*),
+\end{align*}
+přičemž
+\begin{align*}
+    \widehat{\Omega}(s) = (1 - s) \operatorname{norm}(C_{i + 1} - C_i)
+            + s \operatorname{norm}(C_{i + 2} - C_{i + 1}).
+\end{align*}
+To protože $ \lambda = s(t) $, což platí díky tomu, že $ \gamma $ je parametrizovaná
+obloukem.
+
+Abychom byli schopni integrál skutečně dopočítat, potřebujeme se zbavit absolutní
+hodnoty. Předpokládejme proto, že $ \gamma^{-1}(C_{i + 1}) \leq t_0$ díky čemuž
+
+\begin{align*}
+    (*) &= \int_{0}^{1}
+        \frac{1}{\norm{C_{i + 1} - C_i}}
+        \widehat{\Omega}(s)
+            \left[\Delta - (t_0 - (s \norm{C_{i + 1} - C_i} + \gamma^{-1}(C_i)) ) \right]^2
+         ds \\
+    &= \frac{1}{12} \left(
+        \frac{6 d_2^2 (v_1+v_2 )}{d_1}
+        + 4 d_2 (v_1+2 v_2 )
+        + d_1 (v_1+3 v_2 ) \right),
+\end{align*}
+kde $ d_1 = \norm{C_{i + 1} - C_i} $, $ d_2 = \Delta - t_0 + \gamma^{-1}(C_i) $,
+$ v_1 = \operatorname{norm}(C_{i + 1} - C_i) $ a
+$ v_2 = \operatorname{norm}(C_{i + 2} - C_{i + 1})$.
