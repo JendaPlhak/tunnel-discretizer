@@ -838,7 +838,7 @@ $ C \in P \Rightarrow \gamma^{-1}(C) \in [t_1, t_2]$. Označme
 $ f(t) = \Omega(t) (\Delta - \left| t_0 - t \right| )^2 $. Potom $ \Phi $ můžeme zapsat
 následujícím způsobem.
 
-\begin{align}
+\begin{align} \label{eq:integral_sum}
     \Phi(t_0) = \int_{t_1}^{\gamma^{-1}(C_k)} f(t) dt
         + \sum_{j=0}^{m - 1} \int_{\gamma^{-1}(C_{k + j})}^{\gamma^{-1}(C_{k + j + 1})} f(t) dt
         + \int_{\gamma^{-1}(C_{k + m})}^{t_2} f(t) dt
@@ -846,19 +846,20 @@ následujícím způsobem.
 
 Sčítance uprostřed uvedeného výrazu odpovídají integraci po úsečce vždy mezi
 dvěma po sobě jdoucími středy $ C_i $, $C_{i+1} $. Toho využijeme a nejprve ukážeme,
-jak počítat integrály tohoto typu. Díky tomu, že je křivka $ \gamma $ parametrizovaná
+jak počítat integrály tohoto typu. Označmě $\delta = \norm{C_{i + 1} - C_i}$.
+Díky tomu, že je křivka $ \gamma $ parametrizovaná
 obloukem, dostaneme substitucí
-$ s(t) = \frac{t - \gamma^{-1}(C_i)}{\norm{C_{i + 1} - C_i}} $ vztah
+$ s(t) = \frac{t - \gamma^{-1}(C_i)}{\delta} $ vztah
 
 \begin{align*}
     \int_{\gamma^{-1}(C_{i})}^{\gamma^{-1}(C_{i + 1})} f(t) dt
     &= \bigg\rvert
-        ^{s(t) = \frac{t - \gamma^{-1}(C_i)}{\norm{C_{i + 1} - C_i}}}
-        _{s'(t) = \norm{C_{i + 1} - C_i}^{-1}} \bigg\lvert \\
+        ^{s(t) = \frac{t - \gamma^{-1}(C_i)}{\delta}}
+        _{s'(t) = \delta^{-1}} \bigg\lvert \\
     &= \int_{0}^{1}
         \frac{\widehat{\Omega}(s)
-            \left[\Delta - \left| t_0 - (s \norm{C_{i + 1} - C_i} + \gamma^{-1}(C_i)) \right| \right]^2}
-        {\norm{C_{i + 1} - C_i}} ds
+            \left[\Delta - \left| t_0 - (s \delta + \gamma^{-1}(C_i)) \right| \right]^2}
+        {\delta} ds
     = (*),
 \end{align*}
 přičemž
@@ -866,23 +867,61 @@ přičemž
     \widehat{\Omega}(s) = (1 - s) \operatorname{norm}(C_{i + 1} - C_i)
             + s \operatorname{norm}(C_{i + 2} - C_{i + 1}).
 \end{align*}
-To protože $ \lambda = s(t) $, což platí díky tomu, že $ \gamma $ je parametrizovaná
-obloukem.
+To protože $ \lambda = s(t) $, což platí opět díky tomu, že $ \gamma $ je
+parametrizovaná obloukem.
 
 Abychom byli schopni integrál skutečně dopočítat, potřebujeme se zbavit absolutní
 hodnoty. Předpokládejme proto, že $ \gamma^{-1}(C_{i + 1}) \leq t_0$ díky čemuž
 
-\begin{align*}
+\begin{align}
     (*) &= \int_{0}^{1}
-        \frac{1}{\norm{C_{i + 1} - C_i}}
-        \widehat{\Omega}(s)
-            \left[\Delta - (t_0 - (s \norm{C_{i + 1} - C_i} + \gamma^{-1}(C_i)) ) \right]^2
+        \frac{\widehat{\Omega}(s)
+            \left[\Delta - (t_0 - (s \delta + \gamma^{-1}(C_i)) ) \right]^2}
+        {\delta}
          ds \\
     &= \frac{1}{12} \left(
-        \frac{6 d_2^2 (v_1+v_2 )}{d_1}
-        + 4 d_2 (v_1+2 v_2 )
-        + d_1 (v_1+3 v_2 ) \right),
-\end{align*}
-kde $ d_1 = \norm{C_{i + 1} - C_i} $, $ d_2 = \Delta - t_0 + \gamma^{-1}(C_i) $,
+        \frac{6 d^2 (v_1+v_2 )}{\delta}
+        + 4 d (v_1+2 v_2 )
+        + \delta (v_1+3 v_2 ) \right), \label{eq:result_1}
+\end{align}
+kde $ d = \Delta - t_0 + \gamma^{-1}(C_i) $,
 $ v_1 = \operatorname{norm}(C_{i + 1} - C_i) $ a
 $ v_2 = \operatorname{norm}(C_{i + 2} - C_{i + 1})$.
+
+Podobně za předpokladu že $ \gamma^{-1}(C_i) \geq t_0$ dostáváme
+\begin{align}
+    (*) &= \int_{0}^{1}
+        \frac{\widehat{\Omega}(s)
+            \left[\Delta + (t_0 - (s \delta + \gamma^{-1}(C_i)) ) \right]^2}
+        {\delta}
+         ds \\
+    &= \frac{1}{12} \left(
+        \frac{6 d^2 (v_1+v_2 )}{\delta}
+        - 4 d (v_1+2 v_2 )
+        + \delta (v_1+3 v_2 ) \right), \label{eq:result_2}
+\end{align}
+přičemž $ d = \Delta + t_0 - \gamma^{-1}(C_i) $.
+
+Tímto způsobem jsme schopni vypočítat hodnotu integrálu mezi dvěma po sobě jdoucími
+body $ C_i $ a $ C_{i + 1} $. Kvůli odstranění absolutní hodnoty jsme se ale
+museli omezit na úsečky na kterých neleží bod $ \gamma(t_0) $. Integrál jehož
+integrační interval obsahuje $ t_0 $ rozdělíme na součet dvou
+integrálů
+
+\begin{align*}
+    \int_{a}^{b} f(t) dt = \int_{a}^{t_0} f(t) dt + \int_{t_0}^{b} f(t) dt.
+\end{align*}
+
+Tyto dva integrály společně s krajními integrály v součtu (\ref{eq:integral_sum})
+jsou z definice posloupnosti $ P $ intergrály na intervalu, na kterém je křivka
+$ \gamma(t) $ konstantní. Označme si meze takovéhoto integrálu $ c $ a $ d $.
+Pak ale existují vrcholy $ C_i $ a $ C_{i + 1} $ křivky $ \gamma $ takové, že
+$ [c, d] \subseteq [\gamma^{-1}(C_i), \gamma^{-1}(C_{i + 1})] $. Díky tomu stačí
+k výpočtu použít vzorečky (\ref{eq:result_1}) nebo (\ref{eq:result_2}), podle
+toho zda jsme před nebo za bodem $ t_0 $, s tím že
+namísto integračního intervalu $ [0, 1] $ zvolíme interval
+$ \left[ \frac{c - \gamma^{-1}(C_i)}{\gamma^{-1}(C_{i + 1}) - \gamma^{-1}(C_i)},
+ \frac{d - \gamma^{-1}(C_i)}{\gamma^{-1}(C_{i + 1}) - \gamma^{-1}(C_i)} \right] $.
+
+Nakonec ještě řekněme, že pokud by $ P $ byla náhodou prázdná, budeme postupovat
+analogicky podle výše uvedeného postupu.
