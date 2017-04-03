@@ -925,3 +925,22 @@ $ \left[ \frac{c - \gamma^{-1}(C_i)}{\gamma^{-1}(C_{i + 1}) - \gamma^{-1}(C_i)},
 
 Nakonec ještě řekněme, že pokud by $ P $ byla náhodou prázdná, budeme postupovat
 analogicky podle výše uvedeného postupu.
+
+Doposud jsme tedy definovali křivku $ \gamma $ určenou středy koulí určujících
+tunel. Podél křivky $ \gamma $ jsme definovali vektorové pole $ \Omega $, které
+jsme dále ještě vyhladili pomocí integrace po křivce do podoby vektorového
+pole $ \Phi $. Tento přístup sám o sobě nám dává poměrně spolehlivou informaci
+o tom, jakým směrem se v daném místě tunelu orientovat. Potíž ovšem
+může být volba výchozí křivky $ \gamma $. Konkrétně jde o volbu řídících bodů,
+které křivku udávají. Některé koule tunelu mohou do jeho povrchu a celkového
+tvaru přispívat jen velmi málo nebo dokonce vůbec a jiné naopak hodně, avšak na tvar
+křivky $ \gamma $ mají vliv prakticky stejný. V případě některých tunelů
+toto může způsobovat nemalé problémy a algoritmus pak může být směrován úplně
+špatným směrem, což může vést k mnohem delšímu běhu, nižší kvalitě řezů nebo
+úplnému selhání algoritmu. Abychom tyto obtíže překonali, musíme volit
+řídící body křivky $ \gamma $ tak, aby co nejlépe vystihovaly střed objemu
+tunelu v jeho zadané části. Prakticky budeme pro každý střed $ C_i $ hledat řez,
+ve kterém tento bod leží a který má zároveň co nejmenší poloměr. Jak takový
+řez najít je obsahem následující podkapitoly.
+
+\subsection{Hledání minimálního řezu} \label{subsec:min_cut}
