@@ -929,7 +929,10 @@ $ \left[ \frac{c - \gamma^{-1}(C_i)}{\gamma^{-1}(C_{i + 1}) - \gamma^{-1}(C_i)},
  \frac{d - \gamma^{-1}(C_i)}{\gamma^{-1}(C_{i + 1}) - \gamma^{-1}(C_i)} \right] $.
 
 Pokud by $ P $ byla náhodou prázdná, budeme postupovat
-analogicky podle výše uvedeného postupu.
+analogicky podle výše uvedeného postupu. Poznamenejme, že ač je to velmi
+nepravděpodobné, teoreticky by se mohlo dojít k tomu, že bychom po vypočtení
+hodnoty $ \Phi(t_0) $ dostali nulový vektor. V takové situaci bychom jednoduše
+namísto $ \Phi $ použili aktuální směr trajektorie tunelu v daném místě.
 
 Doposud jsme tedy definovali křivku $ \gamma $ určenou středy koulí určujících
 tunel. Podél křivky $ \gamma $ jsme definovali vektorové pole $ \Omega $, které
@@ -989,10 +992,10 @@ následující pseudokód.
         \While {$found\_better$}
             \State $ found\_better \gets $ False
             \State $ \vec{v} \gets V^{normal} $
-            \For{$ \varphi \in \{ k \frac{i + 1}{10} \mid k \frac{i + 1}{10} < 2 \pi, k \in \Nbb \}$}
-                \State $ \vec{w} \gets$ Vector $\vec{v} $ rotated by $ \theta $ and $\varphi $
+            \For{$ \varphi \in \{ k \frac{i + 1}{10} \mid k \frac{i + 1}{10} < 2 \pi, k \in \Nbb \}$} \label{alg:findMinimalDisk:inner_for}
+                \State $ \vec{w} \gets$ Vector $\vec{v} $ rotated by $ \theta $ and $\varphi $ \label{alg:findMinimalDisk:rotate}
                 \State $ W \gets \operatorname{fitDiskTunnel}(\vec{v}, P) $
-                \If{$ W^{radius} < V^{radius} \wedge $ Tunnel trajectory threads through $ W $}
+                \If{$ W^{radius} < V^{radius} \wedge $ Tunnel trajectory threads through $ W $}  \label{alg:findMinimalDisk:if}
                     \State $ V \gets W $
                     \State $ found\_better \gets $ True
                 \EndIf
@@ -1003,3 +1006,56 @@ následující pseudokód.
 \EndFunction
 
 \end{algorithmic}
+
+Uvedený algoritmus funguje tak, že pro aktuálně nejlepší nalezený řez vždy nejprve
+zkusí prohledat kruhové okolí kolem jeho normály, na kterém buďto najde normálu,
+pro kterou dostaneme řez o menším poloměru nebo nenajde lepší řez a v tu chvíli
+zmenšíme úhel odklonu $ \theta $ od aktuální normály a celý proces zopakujeme.
+Vnější cyklus uvedeného algoritmu tedy ovlivňuje, jak široké okolí budeme ve vnitřních
+cyklech prohledávat a s jakým krokem budeme na řádku \ref{alg:findMinimalDisk:inner_for}
+zvětšovat úhel $\varphi $. Rotací na řádku \ref{alg:findMinimalDisk:rotate} rozumíme to,
+že vektor $\vec{v} $ nejprve odkloníme o úhel $ \theta $ a následně jej orotujeme
+kolem osy určené původním $\vec{v} $. Tento proces je znázorněn na obrázku
+\ref{fig:vector_rotate} s tím, že osa z v našem případě odpovídá směru vektoru
+$\vec{v} $.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=40mm]{img/vector_rotate.jpg}
+    \caption{Rotace vektoru}
+  \centering
+  \label{fig:vector_rotate}
+\end{figure}
+
+Posledním detailem tohoto algoritmu je druhá podmínka na řádku \ref{alg:findMinimalDisk:if},
+která omezuje množinu přípustných řezů a je obecně potřeba ať už použijeme
+jakoukoliv optimalizační metodu. V podstatě touto podmínkou zajišťujeme že daný řez
+bude skutečně řezem, konkrétně že bude dělit tunel na dvě části. Teoreticky by se nám
+totiž mohlo stát, že bychom našli minimální řez, který by tunel řezal jen bokem.
+Tuto situaci můžeme vidět na obrázku \ref{fig:side_cut}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=65mm]{img/side_cut.png}
+    \caption{Řez bokem tunelu}
+  \centering
+  \label{fig:side_cut}
+\end{figure}
+
+Prakticky algoritmus na tomto místě zjišťuje, zda trajektorie tunelu tvořená středy
+koulí reálně prochází našim řezem. Vzhledem k tomu, že je trajektorie po částech
+konstantní křivka, dá se toto ověření poměrně snadno naimplementovat.
+
+Příklad výsledných minimálních řezů, které jsme spočítali tímto algoritmem,
+můžeme vidět na obrázku \ref{fig:min_cuts}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=65mm]{img/min_cuts.png}
+    \caption{Minimální řezy}
+  \centering
+  \label{fig:min_cuts}
+\end{figure}
+
+Středy výsledných řezů nakonec vezmeme a zkonstruujeme pomocí nich křivku
+$ \gamma $ z předchozí kapitoly, se kterou pak počítám jak bylo popsáno.
