@@ -830,6 +830,11 @@ definovat nové vektorové pole $ \Phi \colon [0, l] \to \Rbb^3 $,
         \Omega(t) (\Delta - \left| t_0 - t \right| )^2 dt.
 \end{align}
 
+Zjednodušeně řečeno funkce $ \Phi $ realizuje součet vektorů vektorového pole
+$ \Omega $ jejichž váha kvadraticky klesá se zvyšující se vzdáleností od bodu
+$ t_0 $ a to až do maximální vzdálenosti $ \Delta $ (v praxi se nám osvědčilo
+nastavení $ \Delta = 5$ angstrémů.
+
 Uvedený integrál budeme v průběhu výpočtu potřebovat prakticky vyhodnocovat,
 musíme jej proto vypočítat. Pro začátek předpokládejme, křivka $ \gamma $ na
 intervalu $ [t_1, t_2] $ prochází alespoň jedním bodem $ C_i $. To znamená, že
@@ -923,7 +928,7 @@ namísto integračního intervalu $ [0, 1] $ zvolíme interval
 $ \left[ \frac{c - \gamma^{-1}(C_i)}{\gamma^{-1}(C_{i + 1}) - \gamma^{-1}(C_i)},
  \frac{d - \gamma^{-1}(C_i)}{\gamma^{-1}(C_{i + 1}) - \gamma^{-1}(C_i)} \right] $.
 
-Nakonec ještě řekněme, že pokud by $ P $ byla náhodou prázdná, budeme postupovat
+Pokud by $ P $ byla náhodou prázdná, budeme postupovat
 analogicky podle výše uvedeného postupu.
 
 Doposud jsme tedy definovali křivku $ \gamma $ určenou středy koulí určujících
@@ -943,4 +948,58 @@ tunelu v jeho zadané části. Prakticky budeme pro každý střed $ C_i $ hleda
 ve kterém tento bod leží a který má zároveň co nejmenší poloměr. Jak takový
 řez najít je obsahem následující podkapitoly.
 
+
+
+
+
+
 \subsection{Hledání minimálního řezu} \label{subsec:min_cut}
+Úlohu nalezení minimálního řezu můžeme formulovat jako úlohu nalezení minima
+funkce $ \operatorname{fitDiskTunnel} $ (minimum bráno podle průměru umístěného řezu)
+nad množinou vektorů daných jednotkovou sférou (ve skutečnosti stačí brát
+jen polovinu - hemisféru - díky symetrii).
+
+Na tento problém jsme se pokusili aplikovat řadu metod implementovaných v Python
+knihovně SciPy, namátkou uveďme například simulované žíhání, Nelder–Meadovu metodu
+nebo Broyden-Fletcher-Goldfarb-Shannův algoritmus. Vedle těchto metod jsme zároveň
+ještě implementovali vlastní, poměrně naivní prohledávání. Výsledky byly poměrně
+překvapivé. Obecné metody byly zpravidla schopny globální minimum mnohem přesněji
+lokalizovat a obvykle nacházely řešení, které bylo oproti našemu vlastnímu
+algoritmu o jednotky procent lepší, avšak v případě některých komplikovanejších
+tunelů se stávalo, že uvázly v lokálním minimu, které se od globálního lišilo
+o desítky procent, kdežto náš naivní přístup tímto způsobem neselhal ani jednou.
+Je ale nutno podotknout, že uvedené obecné metody by potenciálně mohly fungovat
+dobře, pokud by autor při implementaci věnoval více času ladění jejich parametrů,
+případně adaptaci vstupní úlohy aby lépe odpovídala typickým úlohám, které tyto
+algoritmy řeší dobře.
+
+V našem případě jsme ovšem dali přednost naší naivní metodě, která
+fungovala velmi spolehlivě s dostatečnou přesností. Zmiňovaný přístup popisuje
+následující pseudokód.
+
+
+\begin{algorithmic}[1]
+\label{alg:findMinimalDisk}
+
+\Function{findMinimalDisk}{$ P, \vec{n}$}
+    \State $ V  \gets \operatorname{fitDiskTunnel}(\vec{n}, P) $
+    \For{$ i = 0, \dots, 4 $}
+        \State $ \theta \gets \frac{\pi / 3}{4^i} $
+        \State $ found\_better \gets $ True
+        \While {$found\_better$}
+            \State $ found\_better \gets $ False
+            \State $ \vec{v} \gets V^{normal} $
+            \For{$ \varphi \in \{ k \frac{i + 1}{10} \mid k \frac{i + 1}{10} < 2 \pi, k \in \Nbb \}$}
+                \State $ \vec{w} \gets$ Vector $\vec{v} $ rotated by $ \theta $ and $\varphi $
+                \State $ W \gets \operatorname{fitDiskTunnel}(\vec{v}, P) $
+                \If{$ W^{radius} < V^{radius} \wedge $ Tunnel trajectory threads through $ W $}
+                    \State $ V \gets W $
+                    \State $ found\_better \gets $ True
+                \EndIf
+            \EndFor
+        \EndWhile
+    \EndFor
+    \State \Return $V$
+\EndFunction
+
+\end{algorithmic}
