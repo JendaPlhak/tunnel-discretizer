@@ -1,3 +1,7 @@
+\chapter{Diskretizace tunelu}
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
 Tunel $ \Tau $ v molekule je v našem případě modelován posloupností koulí o různých
 poloměrech umístěných v prostoru. Pro posloupnost koulí $ \Tau = \{S_i\}_{i=0}^{n} $
 musí platit
@@ -118,7 +122,7 @@ složitost následného dockingu je přímo úměrná počtu řezů, budeme od a
 aby počet řezů byl při splnění uvedených kritérií pokud možno co nejmenší.
 
 
-\subsection{Algoritmus}
+\section{Algoritmus}
 
 Celý algoritmus se sestává z celé řady funkcí řešících více či méně důležité podproblémy.
 Domníváme se, že vyčerpávající popis všech komponent by byl zbytečně technický,
@@ -323,7 +327,7 @@ $ \operatorname{isSharpTurn} $, kterou rozvedeme v podkapitole \ref{subsec:is_sh
 
 
 
-\subsection{Disk fitting} \label{subsec:disk_fit}
+\section{Disk fitting} \label{subsec:disk_fit}
 Nyní se budeme věnovat funkci $ \operatorname{fitDiskTunnel} $ použité na řádku
 \ref{alg:fit_disk}. Na tomto místě již víme jaký normálový vektor by měl řez mít a
 zároveň máme k dispozici referenční bod $ P $, který nám společně s normálou
@@ -413,7 +417,7 @@ roviny $ \rho $ do souřadného systému původního prostoru.
 
 
 
-\subsection{Disk shifting} \label{subsec:disk_shift}
+\section{Disk shifting} \label{subsec:disk_shift}
 Druhou popisovanou funkcí bude $ \operatorname{shiftDisk} $, kterou jsme použili
 na řádku \ref{alg:shift_disk}. Jejím úkolem je posunout aktuální řez tak, aby
 byly splněny podmínky (\ref{cond:not_intersecting}), (\ref{cond:distance})
@@ -590,7 +594,7 @@ $ \operatorname{shiftDisk} $ spustíme jen když toto nebezpečí nebude hrozit.
 
 
 
-\subsection{shiftSharpTurn} \label{subsec:shift_sharp_turn}
+\section{shiftSharpTurn} \label{subsec:shift_sharp_turn}
 Předchozí popsanou funkci doplňuje procedura $ \operatorname{shiftSharpTurn} $.
 Jejím účelem je implementovat prostřednictvím aktuálního řezu maximální možné
 zatočení při zachování všech podmínek.
@@ -745,7 +749,7 @@ která umístění řezu dokončí.
 
 
 
-\subsection{isSharpTurn} \label{subsec:is_sharp_turn}
+\section{isSharpTurn} \label{subsec:is_sharp_turn}
 To zda použijeme funkci $ \operatorname{shiftDisk} $ nebo radikálnější
 $ \operatorname{shiftSharpTurn} $ rozhodujeme na základě návratové hodnoty
 funkce $ \operatorname{isSharpTurn} $. Ta podobně jako v těle hlavního
@@ -775,7 +779,7 @@ velmi dobře. Výpočet je zachycen pseudokódem \ref{alg:isSharpTurn}.
 
 
 
-\subsection{Směrování tunelu} \label{subsec:tunnel_dir}
+\section{Směrování tunelu} \label{subsec:tunnel_dir}
 Jak už jsme dříve rozebírali, pro správnou funkci algoritmu je nezbytné, abychom
 v libovolném místě tunelu měli k dispozici informaci o tom, kterým směrem bychom
 se měli dále pohybovat. Pro potřeby formálního popisu potřebujeme
@@ -956,7 +960,7 @@ ve kterém tento bod leží a který má zároveň co nejmenší poloměr. Jak t
 
 
 
-\subsection{Hledání minimálního řezu} \label{subsec:min_cut}
+\section{Hledání minimálního řezu} \label{subsec:min_cut}
 Úlohu nalezení minimálního řezu můžeme formulovat jako úlohu nalezení minima
 funkce $ \operatorname{fitDiskTunnel} $ (minimum bráno podle průměru umístěného řezu)
 nad množinou vektorů daných jednotkovou sférou (ve skutečnosti stačí brát
@@ -1051,7 +1055,7 @@ můžeme vidět na obrázku \ref{fig:min_cuts}.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=65mm]{img/min_cuts.png}
+    \includegraphics[width=100mm]{img/min_cuts.png}
     \caption{Minimální řezy}
   \centering
   \label{fig:min_cuts}
