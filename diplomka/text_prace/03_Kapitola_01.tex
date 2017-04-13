@@ -72,7 +72,7 @@ Mějme řezy $ x = (A, u, r_1), y = (B, v, r_2) \in \Theta $. Vzdálenost řezů
 měřit v jejich projekci do roviny $ \rho = (A, u, w) $, určenou středem $ A $,
 vektorem $ u $ a druhým vektorem $ w $, který definujeme následovně:
     \begin{enumerate}[label={(\arabic*)}]
-        \item Pokud jsou vektory $ u $, $ v $ a $ A - B $ lineárně závislé (LZ), vezmeme
+        \item Pokud jsou vektory $ u $, $ v $ a $ A - B $ po dvou lineárně závislé (LZ), vezmeme
             za $ w $ libovolný vektor lineárně nezávislý (LN) na $ u $.
         \item V případě, že $ u $, $ v $ jsou LZ ale $ u $ a $ A - B $ jsou LN,
             definujeme $ w = A - B $.
@@ -118,7 +118,7 @@ Nyní můžeme přistoupit k popisu samotného algoritmu, který má na vstupu t
 a nějaké pevně zadané $ \delta > 0$, které určuje maximální vzdálenost, kterou
 od sebe dva po sobě jdoucí řezy mohou mít. Na výstupu pak budeme očkávat řezy pokrývající
 celý tunel a budou splňovat uvedené omezení na vzdálenost. Vzhledem k tomu, že výsledná
-složitost následného dockingu je přímo úměrná počtu řezů, budeme od algoritmu také chtít,
+složitost následného dockingu je přímo úměrná počtu řezů, budeme od algoritmu chtít,
 aby počet řezů byl při splnění uvedených kritérií pokud možno co nejmenší.
 
 
@@ -204,10 +204,12 @@ Takto formulovaný algoritmus fungoval obecně poměrně dobře, ale v případ�
 které měly příliš prudké zatáčky nebo prudké změny v poloměru průřezu často
 selhával. Z tohoto důvodu jsme byli nuceni přidat ještě speciální proceduru
 $ \operatorname{shiftToBend} $, která se aktivuje právě v těchto extrémních
-případech případech. Podrobně se jí budeme věnovat v podkapitole \ref{subsec:shift_sharp_turn}.
+případech. Podrobně se jí budeme věnovat v podkapitole \ref{subsec:shift_sharp_turn}.
 
 Kostru naznačeného algoritmu zachycuje následující pseudokód \ref{alg:digTunnel}.
-Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$.
+Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$ a
+výrazy \textit{pop} resp. \textit{append} budeme používat pro odstranění posledního prvku z listu resp.
+přidání prvku na konec listu.
 
 \begin{algorithmic}[1]
 \label{alg:digTunnel}
@@ -219,18 +221,15 @@ Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$.
     \State $ curve \gets \operatorname{TunnelCurve}(centers) $ \label{digTunnel:last_init}
     \Statex
 
-    \For{$ S_i \in \Tau $}
-        \If{$ i = |T| - 1 $}
-            \Break
-        \EndIf
+    \For{$ S_i \gets S_0, \dots, S_{|T| - 2} $}
         \State $ dir \gets S_{i + 1}^{center} - S_{i}^{center} $
-        \State $ line \gets \operatorname{Line}(S_{i}^{center}, dir) $
+        \State $ line \gets \{ S_{i}^{center} + t\cdot dir \mid t \in \Rbb \} $
         \Statex
 
         \State $ d \gets 0 $
         \While {True}
             \State $ prev\_disk \gets disks[|disks|-1] $
-            \State $ plane \gets \operatorname{getPlane}(prev\_disk) $
+            \State $ plane \gets \operatorname{getPlane}(prev\_disk) $ \Comment{Konstrukce roviny ve které řez leží}
             \State $ d \gets \dis(plane \cap line, S_{i}^{center}) + \epsilon  $
             \If {$ d > \norm{dir} $} \label{digTunnel:while_condition}
                 \Break
@@ -287,7 +286,8 @@ posledního disku kolmá na přímku $ line $, což je situace, kterou bychom mo
 vyřešit buďto rotací normály daného řezu libovolným směrem o velmi malý úhel,
 nebo jednoduše vyhlásit, že naše heuristika selhala, neboť za
 takovéto situace by algoritmus pravděpodobně vygeneroval řezy nízké kvality.
-Poznamenejme ale, že ačkoliv k tomuto problému může teoreticky dojít, je to
+V našem případě jsme se rozhodli pro druhou variantu.
+Poznamenejme, že ačkoliv k tomuto problému může teoreticky dojít, je to
 velmi nepravděpodobné a při experimentech s dostupnými tunely tato patologická
 situace nenastala ani jednou.
 
@@ -303,8 +303,9 @@ aktuálnímu směrování tunelu.
 
 Následně zavoláme funkci $ \operatorname{fitDiskTunnel} $, která posunem iniciálního
 středu a vhodnou volbou poloměru vygeneruje řez. Ten ale ještě nemusí být ve vhodné
-konformaci, proto aplikujeme příslušnou transformaci uloženou v $ \operatorname{doShift} $
-abychom skutečně dostali řez, který splňuje všechny naše podmínky.
+konformaci, proto aplikujeme příslušnou transformaci (funkci) uloženou v proměnné
+$ \operatorname{doShift} $, abychom skutečně dostali řez, který splňuje všechny
+naše podmínky.
 
 Nakonec na řádcích \ref{digTunnel:last_if} až \ref{digTunnel:last_if_end}
 zkontrolujeme zda nemůžeme vynechat předchozí řez a případně jej odstraníme.
@@ -388,8 +389,8 @@ robustní C++ implementace dostupná z \cite{cpp_balls}, která podle uvedených
 zvládá řešit úlohy ve 3D o velikosti 1 milionu koulí v čase pod 1 sekundu. To
 je rozhodně velmi působivý výsledek. Pro naše potřeby bylo nutné vytvořit
 binding této implementace pro jazyk Python. To se povedlo v poměrně obecné
-podobě pro prakticky libovolné dimenze. Binding je veřejně dostupný na odkazu
-uvedeném v literatuře (\cite{python_balls}).
+podobě pro prakticky libovolné dimenze. Binding je veřejně dostupný z odkazu
+\cite{python_balls}.
 
 Výše uvedené pak můžeme vyjádřit pomocí jednoduchého pseudokódu \ref{alg:fitDiskTunnel}.
 
@@ -401,8 +402,6 @@ Výše uvedené pak můžeme vyjádřit pomocí jednoduchého pseudokódu \ref{a
     \State $ C \gets \{S_i \in \Tau \mid P \in S_i \} $
     \State $ O \gets \operatorname{findNeighbors}(C$, $\rho)$
     \State $ circles \gets \{ \operatorname{Circle}_{\rho}(S \cap \rho) \mid S \in O \} $
-    \State
-
     \State $ Q, radius \gets \operatorname{getMinCircle}(circles) $
     \State \Return $ \operatorname{Disk}(\vec{n}, \rho(Q), radius) $
 \EndFunction
@@ -436,8 +435,8 @@ Správný posun řezu v trojrozměrném prostoru se na první pohled může zdá
 poměrně obtížný úkol, avšak vzhledem k tomu, jak máme definovanou vzdálenost $ \dst $,
 stačí tento posun řešit v rovině $ \rho $ kolmé na řezy $ V $ a $ W $. Při hledání této
 roviny mohou nastat dva případy. Buďto jsou normálové vektory $ V $ a $ W $ lineárně
-nezávislé, pak je $ \rho $ určena bodem $ V_{center} $ a vektorovým součinem
-$ V_{normal} \times W_{normal} $, který udává normálový vektor. V opačném případě
+nezávislé, pak je $ \rho $ určena bodem $ V^{center} $ a vektorovým součinem
+$ V^{normal} \times W^{normal} $, který udává normálový vektor. V opačném případě
 prakticky není co řešit, neboť díky uvedenému předpokladu mohou řezy být buďto
 v konfiguraci, která je v souladu s našimi požadavky, nebo splývají a v tom
 případě stačí nový řez posunout o libovolné $ 0 < \epsilon < \delta $ ve směru
@@ -474,20 +473,20 @@ budeme nazývat správnou korespondencí. Naši situaci pak ilustruje obrázek
 Nyní už ale k samotnému posunu. Prvně zajistíme, aby oba dva vrcholy ležely ve
 správné polorovině. K tomu nám poslouží vektory
 \begin{align*}
-    v_1 = Q_1 - V_{center} \qquad\text{a}\qquad v_2 = Q_2 - V_{center}.
+    v_1 = Q_1 - V^{center} \qquad\text{a}\qquad v_2 = Q_2 - V^{center}.
 \end{align*}
 
 Díky podmínce \ref{cond:halfspace} nastane vždy nejvýše jedna
-ze dvou možností. Buďto $ \langle V_{normal}, v_1\rangle < 0 $ a je potřeba
-přesunout vrchol $ Q_1 $. Posun provedeme ve směru normály $ V_{normal} $ položením
-$ Q_1 = P_1 + \epsilon V_{normal} $, kde epsilon může být opět libovolné
+ze dvou možností. Buďto $ \langle V^{normal}, v_1\rangle < 0 $ a je potřeba
+přesunout vrchol $ Q_1 $. Posun provedeme ve směru normály $ V^{normal} $ položením
+$ Q_1 = P_1 + \epsilon V^{normal} $, kde epsilon může být opět libovolné
 kladné číslo menší než $ \delta $, nicméně v rámci alespoň částečného zachování
 zamýšleného směrování tunelu je vhodné jej volit co nejmenší. Experimentálně
 jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{\delta}{100} $.
 
-V případě, že $ \langle V_{normal}, v_2\rangle < 0 $, postupujeme zcela analogicky
+V případě, že $ \langle V^{normal}, v_2\rangle < 0 $, postupujeme zcela analogicky
 pro vrcholy $ P_2 $, $ Q_2 $. Nakonec ještě v případě nutnosti přeoznačením
-zajistíme správnou korespondenci, neboť ta by se mohla v některých patalogoických
+zajistíme správnou korespondenci, neboť ta by se mohla v některých patologických
 případech našimi úpravami porušit. Tím jsou vyřešeny podmínky
 (\ref{cond:not_intersecting}) a (\ref{cond:going_forward}).
 
@@ -501,13 +500,15 @@ $ 0 < \tilde{\epsilon} < \delta $.
 Experimentálně jsme ověřili, že vhodnou volbou pro $ \tilde{\epsilon} $ je
 $ \tilde{\epsilon} = \frac{95}{100} \delta$. Vzdálenost takto generovaných řezů
 byla dostatečně blízko k $ \delta $, ale zároveň byl počet rekurzivních zanoření
-minimální (nejvýše 2) a dopad na celkový výkon algoritmu nebyl vůbec měřitelný.
-Proč za epsilon nezvolit přímo $ \delta $ bude zřejmé z pozdějšího textu.
+minimální (nejvýše 2) a dopad na celkový výkon algoritmu nebyl vůbec měřitelný
+(rekurzivní volání se realizuje na řádku \ref{shiftDisk:recursion} a jeho důvody
+ještě rozebereme). Proč za epsilon nezvolit přímo $ \delta $ bude zřejmé z
+pozdějšího textu.
 
 Z výsledných bodů zrekonstruujeme řez jehož střed je určen vrcholy
 $ Q_1 $, $ Q_2 $ a normála $ \vec{n} $ bude vektor ležící v rovině $ \rho $
 kolmý na vektor $ \overrightarrow{Q_1 Q_2} $, který orientujeme tak, že bude platit
-$ \langle V_{normal}, \vec{n} \rangle \geq 0 $, tedy vyžadujeme souhlasnou
+$ \langle V^{normal}, \vec{n} \rangle \geq 0 $, tedy vyžadujeme souhlasnou
 orientaci jakou má předchozí řez. Nakonec zavolámě funkci
 $ \operatorname{fitDiskTunnel} $, která zajistí správně zvolený poloměr.
 Uvedený postup shrnuje následující pseudokod:
@@ -518,14 +519,14 @@ Uvedený postup shrnuje následující pseudokod:
 
 \Function{shiftDisk}{$ V, W$}
     \State $ P_1, P_2, Q_1, Q_2 \gets $ Proper vertex correspondence
-    \State $ \vec{v_1} \gets Q_1 - V_{center} $
-    \State $ \vec{v_2} \gets Q_2 - V_{center} $
+    \State $ \vec{v_1} \gets Q_1 - V^{center} $
+    \State $ \vec{v_2} \gets Q_2 - V^{center} $
     \Statex
 
-    \If {$ \langle V_{normal}, \vec{v_1} \rangle < 0 $}
-        \State $ Q_1 \gets P_1 + \epsilon V_{normal} $
-    \ElsIf {$ \langle V_{normal}, \vec{v_2} \rangle < 0 $}
-        \State $ Q_2 \gets P_2 + \epsilon V_{normal} $
+    \If {$ \langle V^{normal}, \vec{v_1} \rangle < 0 $}
+        \State $ Q_1 \gets P_1 + \epsilon V^{normal} $
+    \ElsIf {$ \langle V^{normal}, \vec{v_2} \rangle < 0 $}
+        \State $ Q_2 \gets P_2 + \epsilon V^{normal} $
     \EndIf
     \State $ P_1, P_2, Q_1, Q_2 \gets $ Proper vertex correspondence
     \Statex
@@ -542,7 +543,7 @@ Uvedený postup shrnuje následující pseudokod:
     \Statex
 
     \State $ Z \gets $ Construct disk from $ Q_1$, $Q_2$ perpendicular to $ \rho $
-    \State $ W \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $ \label{shiftDisk:fit}
+    \State $ W \gets \operatorname{fitDiskTunnel}(Z^{normal}, Z^{center}) $ \label{shiftDisk:fit}
     \Statex
 
     \If {$ \dst(V, W) > \delta \vee \neg \operatorname{isFollower}(V, W)$ }
@@ -573,7 +574,7 @@ $ \widetilde{V} $. To společně se spojitostí a konečnými rozměry tunelu za
 
 Zevrubným testováním jsme zjistili, že problém může nastat ve chvíli, kdy
 z důvodu prudké změny poloměru nebo směru tunelu nemůžeme pokračovat vpřed aniž
-bychom porušili podmínky, které zajišťují to, že se tunelem pohybujeme stále vpřed.
+bychom porušili některou z našich podmínek kladených na posloupnost řezů.
 Tuto situaci dobře demonstruje obrázek \ref{fig:sharp_curve}. V této situaci
 téměř jakékoliv posunutí vpřed vyústí v prudké změny poloměru minimální kružnice
 obepínající tunel a algoritmus v tomto případě selže. V tuto chvíli se buďto
@@ -619,7 +620,7 @@ jak zvolit druhý vektor projekční roviny. Obrázek \ref{fig:sharp_curve_looka
 dobře ilustruje, jak taková situace může vypadat. Z tohoto bočního pohledu je
 zřejmé, že bychom měli řez posunout v maximální možné míře dopředu v horní části
 tunelu a zafixovat pohyb řezu v jeho dolní části, jinak bychom se brzy dostali
-právě do vyborazené situace. Pro srovnání uvádíme pohled z jiného úhlu na stejnou
+právě do vyobrazené situace. Pro srovnání uvádíme pohled z jiného úhlu na stejnou
 situaci v podobě obrázku \ref{fig:sharp_curve_lookahead_from_up}.
 
 \begin{figure}[ht]
@@ -715,7 +716,7 @@ postup je zachycen následujícím pseudokódem.
 
     \Statex
     \State $ Z \gets $ Construct disk from $ Q_1$, $Q_2$ perpendicular to $ \rho $
-    \State $ W \gets \operatorname{fitDiskTunnel}(Z_{normal}, Z_{center}) $
+    \State $ W \gets \operatorname{fitDiskTunnel}(Z^{normal}, Z^{center}) $
     \Statex
 
     \If {$ \dst(V, W) > \delta \vee \neg \operatorname{isFollower}(V, W)$ }
@@ -741,7 +742,8 @@ větvení vydáme druhou větví a oba vrcholy umístíme do stejné vzdálenost
 zajístíme přímý pohyb tunelem.
 
 Stejně jako v případě funkce $ \operatorname{shiftDisk} $ musíme nakonec
-zkontrolovat splnění našich podmínek a v případě jejich porušení voláme ještě
+zkontrolovat splnění našich podmínek ze stejných důvodů jako u funkce
+\ref{alg:shiftDisk} a v případě jejich porušení voláme ještě
 na řádku \ref{shiftSharpTurn:shift_disk} funkci $ \operatorname{shiftDisk} $,
 která umístění řezu dokončí.
 
@@ -818,13 +820,13 @@ pokud $ i + 2 \leq n $, jinak
 Prakticky se jedná o jednoduchý vážený průměr, který postupně mezi jednotlivými středy
 $ C_i $ spojitě transformuje jeden směrový vektor na druhý.
 
-Jak jsme ale mohli vidět na obrázku \ref{fig:naive_cuts}, takto definované
-směrové vektory se mohou chovat dost divoce a tak je potřeba vektorové pole
-$ \Omega $ ještě dále vyhladit.
+Jak jsme ale mohli vidět na obrázku \ref{fig:naive_cuts}, použití takto definovaných
+směrových vektorů jakožto normál řezů vyústí v silně volatilní posloupnost
+a tak je potřeba vektorové pole $ \Omega $ ještě dále vyhladit.
 
 Uvažme tedy opět libovolný bod $ t_0 \in [0, l] $ pro který chceme získat vektor,
 který co nejlépe vystihuje směr tunelu v daném bodě. Nechceme pro tyto účely použít
-přímo vektorové pole $ \Omega $, protože to by se mohlo chovat příliš divoce
+přímo vektorové pole $ \Omega $, protože to by mohlo být příliš volatilní
 a nemuselo by dobře reflektovat globální směr tunelu. Co můžeme udělat je spočítat
 jak se v průměru chová $ \Omega $ na okolí bodu $ t_0 $. Formálně budeme
 definovat nové vektorové pole $ \Phi \colon [0, l] \to \Rbb^3 $,
@@ -836,11 +838,12 @@ definovat nové vektorové pole $ \Phi \colon [0, l] \to \Rbb^3 $,
 
 Zjednodušeně řečeno funkce $ \Phi $ realizuje součet vektorů vektorového pole
 $ \Omega $ jejichž váha kvadraticky klesá se zvyšující se vzdáleností od bodu
-$ t_0 $ a to až do maximální vzdálenosti $ \Delta $ (v praxi se nám osvědčilo
-nastavení $ \Delta = 5$ angstrémů.
+$ t_0 $ a to až do maximální vzdálenosti $ \Delta $. (V praxi se nám osvědčilo
+nastavení $ \Delta = 5 Å $, kde Å je značkou pro jednotku délky angstrom běžně
+používanou v chemii. Hodnota jednoho angstromu je rovna 0.1 nm.)
 
 Uvedený integrál budeme v průběhu výpočtu potřebovat prakticky vyhodnocovat,
-musíme jej proto vypočítat. Pro začátek předpokládejme, křivka $ \gamma $ na
+musíme jej proto vypočítat. Pro začátek předpokládejme, že křivka $ \gamma $ na
 intervalu $ [t_1, t_2] $ prochází alespoň jedním bodem $ C_i $. To znamená, že
 existuje neprázdná posloupnost středů $ P = \{C_k, \dots, C_{k + m} \}$ taková, že
 $ C \in P \Rightarrow \gamma^{-1}(C) \in [t_1, t_2]$. Označme
@@ -991,14 +994,14 @@ následující pseudokód.
 \Function{findMinimalDisk}{$ P, \vec{n}$}
     \State $ V  \gets \operatorname{fitDiskTunnel}(\vec{n}, P) $
     \For{$ i = 0, \dots, 4 $}
-        \State $ \theta \gets \frac{\pi / 3}{4^i} $
+        \State $ \theta \gets \frac{\pi / 3}{4^i} $ \label{alg:findMinimalDisk:dec_angle}
         \State $ found\_better \gets $ True
         \While {$found\_better$}
             \State $ found\_better \gets $ False
             \State $ \vec{v} \gets V^{normal} $
             \For{$ \varphi \in \{ k \frac{i + 1}{10} \mid k \frac{i + 1}{10} < 2 \pi, k \in \Nbb \}$} \label{alg:findMinimalDisk:inner_for}
                 \State $ \vec{w} \gets$ Vector $\vec{v} $ rotated by $ \theta $ and $\varphi $ \label{alg:findMinimalDisk:rotate}
-                \State $ W \gets \operatorname{fitDiskTunnel}(\vec{v}, P) $
+                \State $ W \gets \operatorname{fitDiskTunnel}(\vec{w}, P) $
                 \If{$ W^{radius} < V^{radius} \wedge $ Tunnel trajectory threads through $ W $}  \label{alg:findMinimalDisk:if}
                     \State $ V \gets W $
                     \State $ found\_better \gets $ True
@@ -1014,7 +1017,8 @@ následující pseudokód.
 Uvedený algoritmus funguje tak, že pro aktuálně nejlepší nalezený řez vždy nejprve
 zkusí prohledat kruhové okolí kolem jeho normály, na kterém buďto najde normálu,
 pro kterou dostaneme řez o menším poloměru nebo nenajde lepší řez a v tu chvíli
-zmenšíme úhel odklonu $ \theta $ od aktuální normály a celý proces zopakujeme.
+na řádku \ref{alg:findMinimalDisk:dec_angle} zmenšíme úhel odklonu $ \theta $
+od aktuální normály a celý proces zopakujeme.
 Vnější cyklus uvedeného algoritmu tedy ovlivňuje, jak široké okolí budeme ve vnitřních
 cyklech prohledávat a s jakým krokem budeme na řádku \ref{alg:findMinimalDisk:inner_for}
 zvětšovat úhel $\varphi $. Rotací na řádku \ref{alg:findMinimalDisk:rotate} rozumíme to,
@@ -1041,7 +1045,8 @@ Tuto situaci můžeme vidět na obrázku \ref{fig:side_cut}.
 \begin{figure}[ht]
     \centering
     \includegraphics[width=65mm]{img/side_cut.png}
-    \caption{Řez bokem tunelu}
+    \caption{Na obrázku můžeme vidět situaci, ve které v některých případech dojde
+        k řezu bokem tunelu.}
   \centering
   \label{fig:side_cut}
 \end{figure}
