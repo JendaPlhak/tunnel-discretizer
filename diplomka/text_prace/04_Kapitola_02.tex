@@ -21,7 +21,7 @@ Této situaci budeme říkat \textit{jednoduchá konvergence}.
 \centering
 \includegraphics[width=.5\hsize]{img/backtracking_simple.png}
 \caption{Jednoduchá konvergence. Dopředná trajektorie je vyznačena tečkovaně,
-backtracking plnou čarou.
+backtracking plnou čárou.
 }
 \label{fig:simple_convergence}
 \end{figure}
@@ -32,9 +32,78 @@ Při dopředném pohybu jsme uvázli v úzkém hrdle, ze kterého jsme s vhodně
 konformací spustili backtracking, který po několika iteracích na disku č. 4
 samovolně zkonvergoval do pozice, téměř identické s pozicí dopředné trajektorie.
 V tuto chvíli by byl backtracking ukončen a dále bychom pokračovali z disku č. 7.
+Poznamenejme, že uvedený obrázek je čistě schématický a konvergenční proces
+by v praxi zabral více kroků kvůli požadavkům na spojitost.
 
 Jednoduchá konvergence může dobu výpočtu zkrátit, nicméně v praxi se často stává,
-že ligand při backtrackingu zkonverguje do konformace, které je velmi podobná
+že ligand při backtrackingu zkonverguje do konformace, která je velmi podobná
 konformaci dopředné trajektorie, ale liší se například rotací. Obě pozice tak
 mohou mít velice podobnou energii, ale z mělkého lokálního minima se autonomě
 nedostanou a backtracking by mohl dospět až k ústí tunelu.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.5\hsize]{img/backtracking_bad.png}
+\caption{Obrázek zachycuje situaci, ve které při backtrackingu dojde k opačné
+rotaci ligandu, která v důsledku znemožní aplikaci jednoduché konvergence.
+Dopředná trajektorie je vyznačena tečkovaně, backtracking plnou čárou.
+}
+\label{fig:backtracking_bad}
+\end{figure}
+
+Schéma č. \ref{fig:backtracking_bad} je ukázkou takové konstelace, ve které
+oproti předchozímu příkladu při backtrackingu došlo k opačné rotaci ligandu
+a algoritmus se tím dostal do jiného lokálního energetického minima. Obě situace
+mouhou nastat se srovnatelnou pravděpodobností, neboť dokovací algoritmus je
+náhodnostní a můžeme z něj ve stejné situaci na disku č. 6 dostat různý iniciální
+krok backtrackingu.
+
+Aby náš algoritmus v situaci, ke které dojde na řezu č. 4, mohl využít již spočítanou
+dopřednou trajektorii, musíme zjistit, zda mezi pozicemi ligandu z backtracking trajektorie
+$ \tilde{\lambda}^4 $ a dopředné trajektorie $ \lambda^4 $ neexistuje nějaká silná
+energetická bariéra, která by v reálném systému činila pravděpodobnost přechodu
+mezi těmito pozicemi nulovou. To podobně, jako u v úvodu zmíněné optimalizace
+energie ligandu, budeme realizovat vypočtením dílčí spojité trajektorie.
+V tomto případě ale půjde o spojitou trajektorii mezi pozicí $ \lambda^i $ dopředné
+trajektorie a pozicí $ \tilde{\lambda}^i $ z backtracking algoritmu. Takový
+výpočet je o něco obtížnější, neboť vedle aplikace omezujícího vzoru (kvůli
+požadavku na spojitost) musíme ještě nějakým způsobem zajistit, abychom v průběhu
+výpočtu atomy výchozího ligandu $ \tilde{a}_c \in \tilde{\lambda}^i $ tlačili
+směrem ke korespondujícím atomům cílového ligandu $ a_c \in \lambda^i $.
+Tento proces budeme nazývat aplikace \textit{slabého omezujícího vzoru} (nebo
+zkráceně \textit{slabého vzoru}) a jeho implementaci si nastíníme v následující
+sekci, na kterou navážeme podkapitolou věnovanou samotnému konvergenčnímu algoritmu.
+
+
+
+
+\section{Slabý omezující vzor} \label{subsec:weak_pattern}
+Implementace omezujících vzorů, tak aby fungovaly v souladu s našimi požadavky,
+je poměrně komplikovaná a proto zde popíšeme jen ty části, které jsou nezbytné
+pro pochopení konvergenčního algoritmu. Omezující vzory v principu fungují tak,
+že atomům ligandu, které jsou mimo pozici požadovanou vzorem, přiřazují
+penalizační vektor, jehož velikost roste se vzdáleností od ideální pozice
+a je orientován ve směru od současné $ \tilde{a}_c $ k ideální pozici daného
+atomu $ \tilde{a}_c $. Přesněji řečeno penalizační vektor $ \vec{p_c} $ pro
+atom $ c $ definujeme jako
+\begin{align*}
+    \vec{p_c} = \vec{v} \cdot \max\left\{ 0, 1 - \frac{\delta}{\norm{\vec{v}}} \right\},
+\end{align*}
+kde $ \vec{v} $ je směrový vektor daný korespondujícími atomy, tedy
+$ \vec{v} = a_c - \tilde{a}_c $, a $ \delta $ je parametr spojitosti z úvodní
+kapitoly. Jak vidno, vektor je buďto nulový, pokud je aktuální pozice atomu vzdálena
+o méně nebo rovno $ \delta $, nebo do něj v opačném případě přiřadíme vektor
+realizující rozdíl mezi atomy ponížený o $ \delta $.
+
+Vektory $ p_c $ můžeme chápat jakožto evaluaci silového pole daného omezujícím
+vzorem. Suma $ E = \sum \norm{p_c} $ reprezentuje potenciální energii
+ligandu v dané pozici vzhledem k silovému poli omezujícího vzoru. Energii $ E $
+a vektory $ p_c $ pak použijeme v dokovacím algoritmu jako informace o jednom
+ze silových polí působících na ligand. Tento algoritmus se snaží minimalizovat sumu
+potenciálních energií přes všechna silová pole a vektory $ p_c $ využívá pro
+směřování výpočtu.
+
+V případě silného omezujícího vzoru, který zajišťuje spojitost, bereme za
+ideální pozici atomů tu výchozí, čímž budeme silně penalizovat atomy, které se
+z původní pozice vzdálí o více než $ \delta $. Slabý omezující vzor bude naopak
+atomy z výchozí pozice přitahovat k atomům backtracking trajektorie.

@@ -1,3 +1,4 @@
 Kapitola 1
     - Dokázat ekvivalenci definice vzdálenosti s klasickou vzdáleností.
+    - Definice vzdálenosti - vyřešit kolmost.
     - Intuice za tou minimalizační metodou...
