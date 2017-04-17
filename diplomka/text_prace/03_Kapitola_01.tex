@@ -206,13 +206,15 @@ selhával. Z tohoto důvodu jsme byli nuceni přidat ještě speciální procedu
 $ \operatorname{shiftToBend} $, která se aktivuje právě v těchto extrémních
 případech. Podrobně se jí budeme věnovat v podkapitole \ref{subsec:shift_sharp_turn}.
 
-Kostru naznačeného algoritmu zachycuje následující pseudokód \ref{alg:digTunnel}.
+Kostru naznačeného algoritmu zachycuje pseudokód č. \ref{alg:digTunnel}.
 Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$ a
 výrazy \textit{pop} resp. \textit{append} budeme používat pro odstranění posledního prvku z listu resp.
 přidání prvku na konec listu.
 
-\begin{algorithmic}[1]
+\begin{algorithm}
+\caption{Algoritmus pro výpočet diskretizace tunelu}
 \label{alg:digTunnel}
+\begin{algorithmic}[1]
 
 \Function{digTunnel}{$\Tau, \delta$}
     \State $ centers \gets [ S^{center} \mid S \in \Tau ] $ \label{digTunnel:first_init}
@@ -224,7 +226,6 @@ přidání prvku na konec listu.
     \For{$ S_i \gets S_0, \dots, S_{|T| - 2} $}
         \State $ dir \gets S_{i + 1}^{center} - S_{i}^{center} $
         \State $ line \gets \{ S_{i}^{center} + t\cdot dir \mid t \in \Rbb \} $
-        \Statex
 
         \State $ d \gets 0 $
         \While {True}
@@ -260,6 +261,7 @@ přidání prvku na konec listu.
 \EndFunction
 
 \end{algorithmic}
+\end{algorithm}
 
 Na řádcích \ref{digTunnel:first_init} až \ref{digTunnel:last_init} provedeme
 inicializaci potřebných datových struktur. Do pole $ disks $ budeme
@@ -343,10 +345,13 @@ koule které mají neprázdný průnik s rovinou $ \rho $ a některou z koulí z
 Celkem dostáváme
 $ N = \{ S_i \in \Tau \mid S_i \cap \rho \neq \emptyset \wedge \exists S \in C \colon S \cap S_i \neq \emptyset  \}$.
 Tímto způsobem můžeme postupovat rekurzivně. Algoritmický rekurzivní postup
-popisuje následující jednoduchá funkce $ findNeighbors $.
+popisuje jednoduchá funkce $ findNeighbors $, která je zachycena pseudokódem
+č. \ref{alg:findNeighbors}.
 
-\begin{algorithmic}[1]
+\begin{algorithm}
+\caption{Hledání sousedních disků}
 \label{alg:findNeighbors}
+\begin{algorithmic}[1]
 
 \Function{findNeighbors}{$C$, $\rho$}
     \State $ N \gets \{ S_i \in \Tau \mid S_i \cap \rho \neq \emptyset
@@ -359,6 +364,7 @@ popisuje následující jednoduchá funkce $ findNeighbors $.
 \EndFunction
 
 \end{algorithmic}
+\end{algorithm}
 
 Výpočet bude zřejmě pro libovolný vstup konečný neboť tunel je tvořen jen konečným
 počtem koulí.
@@ -394,8 +400,10 @@ podobě pro prakticky libovolné dimenze. Binding je veřejně dostupný z odkaz
 
 Výše uvedené pak můžeme vyjádřit pomocí jednoduchého pseudokódu \ref{alg:fitDiskTunnel}.
 
-\begin{algorithmic}[1]
+\begin{algorithm}
+\caption{Hledání minimálního obalujícího řezu}
 \label{alg:fitDiskTunnel}
+\begin{algorithmic}[1]
 
 \Function{fitDiskTunnel}{$ \vec{n}, P$}
     \State $ \rho \gets Plane(\vec{n}, P) $
@@ -407,7 +415,7 @@ Výše uvedené pak můžeme vyjádřit pomocí jednoduchého pseudokódu \ref{a
 \EndFunction
 
 \end{algorithmic}
-
+\end{algorithm}
 Poznamenejme, že $ \operatorname{Circle}_{\rho} $ značí konstrukci 2D kružnice
 v parametrizaci roviny $ \rho $, $ \operatorname{getMinCircle} $ je některý z
 uvedených algoritmů pro nalezení minimální kružnice (vrací střed a poloměr)
@@ -511,11 +519,13 @@ kolmý na vektor $ \overrightarrow{Q_1 Q_2} $, který orientujeme tak, že bude 
 $ \langle V^{normal}, \vec{n} \rangle \geq 0 $, tedy vyžadujeme souhlasnou
 orientaci jakou má předchozí řez. Nakonec zavolámě funkci
 $ \operatorname{fitDiskTunnel} $, která zajistí správně zvolený poloměr.
-Uvedený postup shrnuje následující pseudokod:
+Uvedený postup shrnuje pseudokód č. \ref{alg:shiftDisk}:
 
 
-\begin{algorithmic}[1]
+\begin{algorithm}
+\caption{Posun řezu}
 \label{alg:shiftDisk}
+\begin{algorithmic}[1]
 
 \Function{shiftDisk}{$ V, W$}
     \State $ P_1, P_2, Q_1, Q_2 \gets $ Proper vertex correspondence
@@ -555,6 +565,7 @@ Uvedený postup shrnuje následující pseudokod:
 \EndFunction
 
 \end{algorithmic}
+\end{algorithm}
 
 Poslední úprava na řádku \ref{shiftDisk:fit} by ještě v některých případech mohla
 porušit podmínku na vzdálenost. Kvůli tomu zvolíme na řádcích
@@ -684,10 +695,12 @@ i v případě poklesu poloměru, musíme naopak ztotožnit body, které k sobě
 blíže.
 
 Nakonec na základě takto posunutých vrcholů vygenerujeme nový řez. Uvedený
-postup je zachycen následujícím pseudokódem.
+postup je zachycen pseudokódem č. \ref{alg:shiftSharpTurn}.
 
-\begin{algorithmic}[1]
+\begin{algorithm}
+\caption{Posun řezu pro ostré zatáčky}
 \label{alg:shiftSharpTurn}
+\begin{algorithmic}[1]
 
 \Function{shiftSharpTurn}{$ V, W$}
     \State $ \rho \gets $ Projection plane described in text
@@ -728,6 +741,7 @@ postup je zachycen následujícím pseudokódem.
 \EndFunction
 
 \end{algorithmic}
+\end{algorithm}
 
 Rozeberme si ještě některé detaily uvedené procedury. Na řádcích
 \ref{shiftSharpTurn:begin_ifs} až \ref{shiftSharpTurn:end_ifs} můžeme vidět, že
@@ -761,10 +775,12 @@ případě funkce $ \operatorname{shiftSharpTurn} $ a v ní najdeme koresponduj�
 vrcholy $ P_1$, $P_2$, $Q_1$ a $ Q_2 $. Následně zjistíme percentuální rozdíl
 mezi vzdálenostmi vrcholů. Ostrou zatáčku pak implementujeme ve chvíli, kdy se
 vzdálenosti liší o více než 35\%. Tato hranice nepoměru se nám v praxi osvědčila
-velmi dobře. Výpočet je zachycen pseudokódem \ref{alg:isSharpTurn}.
+velmi dobře. Výpočet je zachycen pseudokódem č. \ref{alg:isSharpTurn}.
 
-\begin{algorithmic}[1]
+\begin{algorithm}
+\caption{Detekce ostré zatáčky}
 \label{alg:isSharpTurn}
+\begin{algorithmic}[1]
 
 \Function{isSharpTurn}{$ V, W$}
     \State $ \rho \gets $ Projection plane described in chapter \ref{subsec:shift_sharp_turn}
@@ -776,6 +792,7 @@ velmi dobře. Výpočet je zachycen pseudokódem \ref{alg:isSharpTurn}.
 \EndFunction
 
 \end{algorithmic}
+\end{algorithm}
 
 
 
@@ -985,11 +1002,14 @@ algoritmy řeší dobře.
 
 V našem případě jsme ovšem dali přednost naší naivní metodě, která
 fungovala velmi spolehlivě s dostatečnou přesností. Zmiňovaný přístup popisuje
-následující pseudokód.
+pseudokód č. \ref{alg:findMinimalDisk}.
 
 
-\begin{algorithmic}[1]
+\begin{algorithm}
+\caption{Algoritmus pro hledání orientace, ve které bude mít řez minimální poloměr}
 \label{alg:findMinimalDisk}
+\begin{algorithmic}[1]
+
 
 \Function{findMinimalDisk}{$ P, \vec{n}$}
     \State $ V  \gets \operatorname{fitDiskTunnel}(\vec{n}, P) $
@@ -1013,6 +1033,7 @@ následující pseudokód.
 \EndFunction
 
 \end{algorithmic}
+\end{algorithm}
 
 Uvedený algoritmus funguje tak, že pro aktuálně nejlepší nalezený řez vždy nejprve
 zkusí prohledat kruhové okolí kolem jeho normály, na kterém buďto najde normálu,

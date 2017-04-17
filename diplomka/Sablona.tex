@@ -201,6 +201,7 @@ zdrojů, které jsou v práci citovány.}
 \DeclareMathOperator{\dis}{distance}
 
 % Pseudocode stuff
+\renewcommand{\thealgorithm}{\arabic{chapter}.\arabic{algorithm}} 
 \newcommand{\Break}{\State \textbf{break} }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -317,6 +318,9 @@ zdrojů, které jsou v práci citovány.}
 \newtheorem{pozn}[vet]{Poznámka} % definition numbers are dependent on theorem numbers
 \newtheorem{pri}[vet]{Příklad} % same for example numbers
 
+\makeatletter
+\@addtoreset{algorithm}{chapter}% algorithm counter resets every chapter
+\makeatother
 
 \HlavickaUvod
 \pdfbookmark{Úvod}{Uvod}

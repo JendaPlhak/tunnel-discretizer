@@ -106,4 +106,61 @@ směřování výpočtu.
 V případě silného omezujícího vzoru, který zajišťuje spojitost, bereme za
 ideální pozici atomů tu výchozí, čímž budeme silně penalizovat atomy, které se
 z původní pozice vzdálí o více než $ \delta $. Slabý omezující vzor bude naopak
-atomy z výchozí pozice přitahovat k atomům backtracking trajektorie.
+atomy z výchozí pozice přitahovat k atomům backtracking trajektorie. Tato konfigurace
+potřebuje ještě jednu drobnou úpravu, aby její funkcionalita odpovídala našemu
+původnímu záměru, což byla implementace spojitého přesunu od dopředné trajektorie
+k backtracking trajektorii. Chceme totiž primárně respektovat silný omezující
+vzor, aby ligandy atomu nemohly přeskočit nějakou energetickou bariéru, a posun
+ligandu je až sekundární optimalizační cíl. Tento požadavek zajistíme tím, že
+potenciální energii ligandu v silovém poli slabého vzoru budeme v dokovacím
+algoritmu započítávat s nižší váhou.
+
+
+
+
+
+\section{Konvergenční algoritmus} \label{subsec:convergence_algorithm}
+S použitím slabého vzoru je samotný algoritmus pro výpočet konvergenční
+trajektorie poměrně přímočará záležitost a zachycuje jej pseudokód č.
+\ref{alg:convergence}. Algoritmus v každé iteraci nejprve na řádku
+\ref{alg:convergence:docking} zavolá dokovací proceduru se silným omezujícím
+vzorem $ \alpha(\lambda) $ a slabým vzorem $ \beta(\tilde{\lambda})$. Dokovací
+procedura vrátí jednu nebo více nových konformací, přes které v dalším kroku
+přeiterujeme a vybereme tu, jejíž průměrná vzdálenost od pozice $ \tilde{\lambda} $
+je nižší než z aktuální pozice a zároveň se žádný atom neposunul o více než $ \delta $.
+Pokud se nám nějakou konformaci podaří vybrat, prohlásíme ji za novou aktuální
+konformaci $ \lambda $ a pokračujeme do další iterace. V opačném případě
+vyhlásíme, že konvergence selhala a je potřeba ji spustit z jiné pozice
+backtracking trajektorie.
+
+
+\begin{algorithm}
+\caption{Výpočet konvergenční trajektorie}
+\label{alg:convergence}
+\begin{algorithmic}[1]
+
+\Function{convergence}{$ \lambda, \tilde{\lambda} $}
+    \State $ d \gets \operatorname{AvgDst}(\lambda, \tilde{\lambda}) $
+    \While {$\lambda \not\in \Delta\tilde{\lambda}$}
+        \State $ L \gets $ Conformations found by docking algorithm using $ \alpha(\lambda) $
+            and $ \beta(\tilde{\lambda})$ \label{alg:convergence:docking}
+        \State $ d' \gets d $
+        \For{$ \lambda' \in L $}
+            \If {$ E(\lambda') \leq E_{max} $}
+                \If {$ \lambda' \in \Delta\lambda
+                        \wedge \operatorname{AvgDst}(\lambda', \tilde{\lambda}) < d $}
+                    \State $ \lambda \gets \lambda' $
+                    \State $ d \gets \operatorname{AvgDst}(\lambda, \tilde{\lambda}) $
+                \EndIf
+            \EndIf
+        \EndFor
+        \If {$ d = d' $}
+            \Return \textbf{Failed}
+        \EndIf
+    \EndWhile
+    \Return Convergence trajectory
+\EndFunction
+
+
+\end{algorithmic}
+\end{algorithm}
