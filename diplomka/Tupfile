@@ -1,0 +1,6 @@
+CC     =inkscape
+CFLAGS =--export-area-drawing --without-gui
+
+!c_inkscape = |> $(CC) --file=%f $(CFLAGS) --export-pdf=%o |>
+
+: foreach img/*.svg |> !c_inkscape |> img/%B.pdf
