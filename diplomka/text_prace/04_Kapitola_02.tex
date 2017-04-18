@@ -30,7 +30,7 @@ backtracking plnou čárou.
 Příklad takové situace můžeme vidět na obrázku č. \ref{fig:simple_convergence}.
 Při dopředném pohybu jsme uvázli v úzkém hrdle, ze kterého jsme s vhodnější
 konformací spustili backtracking, který po několika iteracích na disku č. 4
-samovolně zkonvergoval do pozice, téměř identické s pozicí dopředné trajektorie.
+samovolně zkonvergoval do pozice téměř identické s pozicí dopředné trajektorie.
 V tuto chvíli by byl backtracking ukončen a dále bychom pokračovali z disku č. 7.
 Poznamenejme, že uvedený obrázek je čistě schématický a konvergenční proces
 by v praxi zabral více kroků kvůli požadavkům na spojitost.
@@ -38,7 +38,7 @@ by v praxi zabral více kroků kvůli požadavkům na spojitost.
 Jednoduchá konvergence může dobu výpočtu zkrátit, nicméně v praxi se často stává,
 že ligand při backtrackingu zkonverguje do konformace, která je velmi podobná
 konformaci dopředné trajektorie, ale liší se například rotací. Obě pozice tak
-mohou mít velice podobnou energii, ale z mělkého lokálního minima se autonomě
+mohou mít velice podobnou energii, ale z mělkého lokálního minima se bez pomoci
 nedostanou a backtracking by mohl dospět až k ústí tunelu.
 
 \begin{figure}[ht]
@@ -62,24 +62,25 @@ Aby náš algoritmus v situaci, ke které dojde na řezu č. 4, mohl využít ji
 dopřednou trajektorii, musíme zjistit, zda mezi pozicemi ligandu z backtracking trajektorie
 $ \tilde{\lambda}^4 $ a dopředné trajektorie $ \lambda^4 $ neexistuje nějaká silná
 energetická bariéra, která by v reálném systému činila pravděpodobnost přechodu
-mezi těmito pozicemi nulovou. To podobně, jako u v úvodu zmíněné optimalizace
-energie ligandu, budeme realizovat vypočtením dílčí spojité trajektorie.
+mezi těmito pozicemi nulovou. To podobně jako u v úvodu zmíněné optimalizace
+energie ligandu budeme realizovat vypočtením dílčí spojité trajektorie.
 V tomto případě ale půjde o spojitou trajektorii mezi pozicí $ \lambda^i $ dopředné
 trajektorie a pozicí $ \tilde{\lambda}^i $ z backtracking algoritmu. Takový
 výpočet je o něco obtížnější, neboť vedle aplikace omezujícího vzoru (kvůli
 požadavku na spojitost) musíme ještě nějakým způsobem zajistit, abychom v průběhu
-výpočtu atomy výchozího ligandu $ \tilde{a}_c \in \tilde{\lambda}^i $ tlačili
-směrem ke korespondujícím atomům cílového ligandu $ a_c \in \lambda^i $.
+výpočtu atomy výchozího ligandu $ a_c \in \lambda^i $ tlačili
+směrem ke korespondujícím atomům cílového ligandu $ \tilde{a}_c \in \tilde{\lambda}^i $.
 Tento proces budeme nazývat aplikace \textit{slabého omezujícího vzoru} (nebo
 zkráceně \textit{slabého vzoru}) a jeho implementaci si nastíníme v následující
-sekci, na kterou navážeme podkapitolou věnovanou samotnému konvergenčnímu algoritmu.
+sekci \ref{subsec:weak_pattern}, na kterou navážeme podkapitolou
+\ref{subsec:convergence_algorithm} věnovanou samotnému konvergenčnímu algoritmu.
 
 
 
 
 \section{Slabý omezující vzor} \label{subsec:weak_pattern}
 Implementace omezujících vzorů, tak aby fungovaly v souladu s našimi požadavky,
-je poměrně komplikovaná a proto zde popíšeme jen ty části, které jsou nezbytné
+je poměrně komplikovaná, a proto zde popíšeme jen ty části, které jsou nezbytné
 pro pochopení konvergenčního algoritmu. Omezující vzory v principu fungují tak,
 že atomům ligandu, které jsou mimo pozici požadovanou vzorem, přiřazují
 penalizační vektor, jehož velikost roste se vzdáleností od ideální pozice
@@ -128,7 +129,7 @@ vzorem $ \alpha(\lambda) $ a slabým vzorem $ \beta(\tilde{\lambda})$. Dokovací
 procedura vrátí jednu nebo více nových konformací, ze kterých vybereme
 tu nejlepší přípustnou variantu, pokud nějaká existuje.
 
-Aby byla pozice přípustná
+Aby byla pozice přípustná,
 musí v první řadě splňovat podmínku spojitosti $ \lambda' \in \Delta\lambda $.
 Spojitost je potřeba kontrolovat proto, že pomocí omezujících vzorů dokovací algoritmus
 pouze nějakým způsobem směrujeme, avšak v praxi se může stát, že se atomy ligandu
