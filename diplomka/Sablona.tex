@@ -71,12 +71,14 @@
 \usepackage{amsmath}
 \usepackage{enumitem}
 \usepackage{dirtytalk}
+\usepackage{lastpage}
 \usepackage{siunitx}
 \usepackage{algorithmicx}
 \usepackage{algorithm}
 \usepackage{relsize}
 \usepackage[noend]{algpseudocode}
 \usepackage{xcolor}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% NASTAVENI POVINNYCH CASTI DLE SMERNICE DEKANA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -85,7 +87,7 @@
 %% NASTAVTE KONKRETNI ADAJE
 %%%%%%%%%%%%
 
-\usepackage[Bc,Barevne]{sci.muni.thesis}
+\usepackage[Mgr,Barevne]{sci.muni.thesis}
 %% Mozne volby:
 %% Bc - pro bakalarskou praci
 %% Mgr - pro diplomovou praci
@@ -93,15 +95,19 @@
 %% Barevne - pro dokument s barevnymi odkazy
 %% Tisk - pro dokument v cernobile barve
 
-\NazevUstavu{Název ústavu}{Department of ...}
+\NazevUstavu{Ústav matematiky a statistiky}{Department of Mathematics and Statistics}
 
-\RokOdevzdaniPrace{rok}
+\RokOdevzdaniPrace{2017}
 
-\AkademickyRok{rok/rok}
+\AkademickyRok{2016/2017}
 
-\Autor{Jméno Příjmení}{Plné jméno autora}
+\Autor{Jan Plhák}{Bc. Jan Plhák}
 
-\NazevPrace{Název práce na titulní list}{Název práce}{Title of Thesis}
+\NazevPrace{
+    Automatický doking ligandu do tunelu v proteinu } {
+    Automatický doking ligandu do tunelu v proteinu } {
+    Automatic docking of a ligand into a tunnel in a protein
+}
 %% Pokud nazev prace obsahuje nejake matematicke formule, tak je kvuli velikosti fontu pouzit prikaz \scalebox a nazev
 %% zalamat rucne - toto plati pouze pro nazev prace na titulni list
 %% {Rozbor řešení rovnice \scalebox{1.15}{${y''=f(x)\,x^{\scalebox{0.4}2}}$} s~počátečními podmínkami
@@ -114,11 +120,11 @@
 %% viz take http://orgmode.org/worg/org-symbols.html
 %%
 
-\VedouciPraceSTituly{Plné jméno včetně titulů} %% Neni potreba pro rigorozni prace
+\VedouciPraceSTituly{prof. RNDr. Luděk Matyska, CSc.} %% Neni potreba pro rigorozni prace
 
-\StudijniProgram{Studijní program}{Degree programme}
+\StudijniProgram{Matematika}{Mathematics}
 
-\StudijniObor{Studijní obor}{Field of Study}
+\StudijniObor{Matematika s informatikou}{Mathematics with Informatics}
 
 \PocetStran{??\,$+$\,??}
 
@@ -134,10 +140,10 @@ Keyword; Keyword}
 {Na tomto místě bych chtěl(-a) poděkovat ...}
 
 \TextProhlaseni%
-{Prohlašuji, že jsem svoji bakalářskou/diplomovou/rigorózní práci vypracoval(-a) samostatně s~využitím informačních
+{Prohlašuji, že jsem svoji diplomovou práci vypracoval samostatně s~využitím informačních
 zdrojů, které jsou v práci citovány.}
 
-\DatumProhlaseni{xx. měsíce 20xx}
+\DatumProhlaseni{15. května 2017}
 
 %%%%%%%%%%%%
 %% Konkrétní příklad
@@ -202,7 +208,7 @@ zdrojů, které jsou v práci citovány.}
 \DeclareMathOperator{\dis}{distance}
 
 % Pseudocode stuff
-\renewcommand{\thealgorithm}{\arabic{chapter}.\arabic{algorithm}} 
+\renewcommand{\thealgorithm}{\arabic{chapter}.\arabic{algorithm}}
 \newcommand{\Break}{\State \textbf{break} }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
