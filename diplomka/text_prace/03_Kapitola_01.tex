@@ -384,7 +384,7 @@ Pro tyto body pak můžeme použít například Welzlův náhodnostní algoritmu
 \cite{WelzlRandom}, jehož očekávaná doba běhu je v $ \mathcal{O}(n) $. Tento
 přístup byl první, který jsme zkusili, protože implementace níže uvedeného algoritmu
 existuje (alespoň pokud je nám známo) pouze v C++ a naším výchozím jazykem byl
-Python. O tomto budeme ještě hovořit později.
+Python. O tom ještě budeme hovořit později.
 
 Složitější, ale přesnější způsob popisuje již zmíněná práce Kaspara Fishera
 \cite{FisherBalls}. Zde je problém řešen v plné obecnosti libovolné dimenze $ d $.
@@ -395,7 +395,7 @@ robustní C++ implementace dostupná z \cite{cpp_balls}, která podle uvedených
 zvládá řešit úlohy ve 3D o velikosti 1 milionu koulí v čase pod 1 sekundu. To
 je rozhodně velmi působivý výsledek. Pro naše potřeby bylo nutné vytvořit
 binding této implementace pro jazyk Python. To se povedlo v poměrně obecné
-podobě pro prakticky libovolné dimenze. Binding je veřejně dostupný z odkazu
+podobě pro prakticky libovolné dimenze. Binding je veřejně dostupný na GitHubu
 \cite{python_balls}.
 
 Výše uvedené pak můžeme vyjádřit pomocí jednoduchého pseudokódu \ref{alg:fitDiskTunnel}.
@@ -1089,3 +1089,30 @@ můžeme vidět na obrázku \ref{fig:min_cuts}.
 
 Středy výsledných řezů nakonec vezmeme a zkonstruujeme pomocí nich křivku
 $ \gamma $ z předchozí kapitoly, se kterou pak počítáme jak již bylo popsáno.
+
+\section{Implementace} \label{subsec:implementation}
+Algoritmus pro diskretizaci tunelu byl v popsané podobě implementován v
+jazyce Python. Tento jazyk jsme zvolili zejména proto, že jsme neočekávali, že
+by bylo potřeba diskretizaci tunelu optimalizovat na rychlost výpočtu. V takové
+situaci je Python poměrně jasná volba jednak díky množství kvalitních
+knihoven jako je NumPy a SciPy a druhak pro rychlost s jakou lze v Pythonu
+implementovat prototypy. Rychlost vývoje byla velmi důležitým faktorem, neboť
+jsme očekávali, že v průběhu vývoje budeme s přibývajícími poznatky často
+přepisovat velké množství kódu. To se ukázalo být jako správný předpoklad
+a ve výsledku dobrá volba.
+
+Algoritmus jsme implementovali konkrétně v Pythonu 2.7. Verzi 3 jsme nezvolili
+zejména proto, že knihovna vPython použitá pro vizualizaci tunelu v současnosti
+nejde snadno kombinovat s Pythonem 3. Nicméně v případě potřeby by přechod na
+Python 3 byl velmi jednoduchou záležitostí za předpokladu odstranění knihovny
+vPython, která pro samotný výpočet není nutná.
+
+Důvodem proč rychlost výpočtu není v tomto případě příliš důležitá je to, že
+(jak uvidíme v evaluační podkapitole \ref{subsec:evaluation}) výpočet diskretizace
+včetně hledání minimálních disků z podkapitoly \ref{subsec:min_cut} trvá řádově
+jednotky minut, kdežto algoritmus pro výpočet spojité trajektorie ligandu skrze
+tunel může zabrat jednotky až desítky hodin výpočetního času.
+
+Implementace je veřejně dostupná na GitHubu \cite{discretizer}.
+
+\section{Evaluace} \label{subsec:evaluation}
