@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-"""Tunnel generator.
+"""Molecule tunnel discretization tool.
 
 Usage:
-  readtunel.py -f | --file <in-filename> [-d] [--delta <delta>] [-o <out-filename>]
+  discretizer.py -f | --file <in-filename> [-d] [--delta <delta>] [-o <out-filename>]
 
 Options:
-  -h --help                         Show this screen.
-  -f --file                         File containing information about tunnel in molecule.
+  -h --help                         Show this help.
+  -f --file                         File containing information about tunnel in molecule in PDB format.
   -d --draw                         Draw scenario into picture using vpython
   -o --output-file <out-filename>   Dump disks to file in dsd format.
   --delta <delta>                   Maximal distance between disks.
@@ -22,7 +22,6 @@ import visual as vs
 from docopt import docopt
 from digger import *
 from visual import *
-from smoother import smoothen_tunnel, SmoothOpts
 
 
 if __name__ == '__main__':
@@ -36,7 +35,6 @@ if __name__ == '__main__':
     delta = float(arguments["--delta"] or 0.1)
     disks = []
     disks = dig_tunnel(tunnel, DigOpts(delta, filename))
-    # disks = smoothen_tunnel(disks, SmoothOpts(delta))
 
     # draw disks
     if draw_ARG:
