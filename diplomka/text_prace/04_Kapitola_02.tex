@@ -1,14 +1,30 @@
 \chapter{Konvergence trajektorií}
 Jak již bylo naznačeno v úvodní kapitole, v některých případech používáme ke
-zlepšení energie aktuální trajektorie backtracking. Nicméně implementovat
-backtracking trajektorii až úplně zpět k ústí tunelu by bylo velice nákladné
+zlepšení energie aktuální trajektorie backtracking. Nicméně realizovat
+backtracking trajektorii až úplně zpět k ústí tunelu by bylo výpočetně velmi náročné
 a neefektivní, proto chceme nějakým způsobem backtracking napojit na již
-spočítanou trajektorii, čímž si často můžeme ušetřit značné množství práce.
+spočítanou trajektorii, čímž si často můžeme ušetřit značné množství práce a hlavně
+takto dokážeme snížit energii trajektorie například v případě, že máme více úzkých
+hrdel těsně po sobě. To ilustruje obrázek č. \ref{fig:two_bottlenecks}, na kterém
+můžeme vidět, že se algoritmus nejprve dostane na řez č. 2 z pozice řezu č. 1
+a musí spustit backtracking z konformace ligandu, která je vyobrazena na řezu č. 2.
+S touto konformací pak pokračuje dále, avšak pokud během průchodu prostorem
+mezi řezy 2 a 3 nedojde k rotaci, bude na řezu č. 3 opět potřeba spouštět
+backtracking s opačnou rotací, avšak ten ve chvíli, kdy dospěje na řez č.2,
+pravděpodobně selže.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.5\hsize]{img/two_bottlenecks.pdf}
+\caption{Schématický 2D pohled na situaci se dvěma úzkými hrdly.}
+\label{fig:two_bottlenecks}
+\end{figure}
+
 Uvažme tedy, že máme pozici backtracking trajektorie $ \tilde{\lambda}^i $
 na řezu $ \theta_i $ a pozici dopředné trajektorie $ \lambda^i $ na tomtéž řezu.
 Nejjednodušším přístupem v takové situaci je zkontrolovat, zda platí
 $ \tilde{\lambda}^i \in \Delta \lambda^i $. Tuto kontrolu můžeme provádět v každé
-iteraci backtrackingu neboť při ní stačí lineárně projít všechny atomy ligandu
+iteraci backtrackingu, neboť při ní stačí lineárně projít všechny atomy ligandu
 a zkontrolovat jejich vzdálenosti oproti ligandu dopředné trajektorie. Ligandy
 navíc typicky mívají velmi malý počet atomů, takže se skutečně jedná o nenáročný
 výpočet. Tento přístup bude fungovat ve chvíli, kdy molekula ligandu po opuštění
@@ -54,9 +70,8 @@ Dopředná trajektorie je vyznačena tečkovaně, backtracking plnou čárou.
 Schéma č. \ref{fig:backtracking_bad} je ukázkou takové konstelace, ve které
 oproti předchozímu příkladu při backtrackingu došlo k opačné rotaci ligandu
 a algoritmus se tím dostal do jiného lokálního energetického minima. Obě situace
-mouhou nastat se srovnatelnou pravděpodobností, neboť dokovací algoritmus je
-náhodnostní a můžeme z něj ve stejné situaci na disku č. 6 dostat různý iniciální
-krok backtrackingu.
+mouhou nastat, neboť dokovací algoritmus je náhodnostní a můžeme z něj ve stejné
+situaci na disku č. 6 dostat různý iniciální krok backtrackingu.
 
 Aby náš algoritmus v situaci, ke které dojde na řezu č. 4, mohl využít již spočítanou
 dopřednou trajektorii, musíme zjistit, zda mezi pozicemi ligandu z backtracking trajektorie
@@ -79,11 +94,11 @@ sekci \ref{subsec:weak_pattern}, na kterou navážeme podkapitolou
 
 
 \section{Slabý omezující vzor} \label{subsec:weak_pattern}
-Implementace omezujících vzorů, tak aby fungovaly v souladu s našimi požadavky,
+Implementace omezujících vzorů tak, aby fungovaly v souladu s našimi požadavky,
 je poměrně komplikovaná, a proto zde popíšeme jen ty části, které jsou nezbytné
 pro pochopení konvergenčního algoritmu. Omezující vzory v principu fungují tak,
 že atomům ligandu, které jsou mimo pozici požadovanou vzorem, přiřazují
-penalizační vektor, jehož velikost roste se vzdáleností od ideální pozice
+penalizační silový vektor, jehož velikost roste se vzdáleností od ideální pozice
 a je orientován ve směru od současné $ \tilde{a}_c $ k ideální pozici daného
 atomu $ \tilde{a}_c $. Přesněji řečeno penalizační vektor $ \vec{p_c} $ pro
 atom $ c $ definujeme jako
@@ -102,10 +117,16 @@ ligandu v dané pozici vzhledem k silovému poli omezujícího vzoru. Energii $ 
 a vektory $ p_c $ pak použijeme v dokovacím algoritmu jako informace o jednom
 ze silových polí působících na ligand. Tento algoritmus se snaží minimalizovat sumu
 potenciálních energií přes všechna silová pole a vektory $ p_c $ využívá pro
-směřování výpočtu.
+směřování výpočtu. Na tomto místě musíme poznamenat, že v praxi při výpočtu
+je sice výpočet energie přesně takový, jak jsme jej popsali, nicméně při práci
+se silovým vektorem omezujeme fixním způsobem jeho velikost, abychom do systému
+velkými čísly nezanášeli numerickou nepřesnost. Při praktickém počítání se totiž
+ukazuje, že velikost silového vektoru od určité hranice není relevantní a
+je lepší ji omezit ve prospěch numerické přesnosti.
+
 
 V případě silného omezujícího vzoru, který zajišťuje spojitost, bereme za
-ideální pozici atomů tu výchozí, čímž budeme silně penalizovat atomy, které se
+ideální pozici atomů výchozí pozici $ \lambda^i $, čímž budeme silně penalizovat atomy, které se
 z původní pozice vzdálí o více než $ \delta $. Slabý omezující vzor bude naopak
 atomy z výchozí pozice přitahovat k atomům backtracking trajektorie. Tato konfigurace
 potřebuje ještě jednu drobnou úpravu, aby její funkcionalita odpovídala našemu
@@ -113,7 +134,7 @@ původnímu záměru, což byla implementace spojitého přesunu od dopředné t
 k backtracking trajektorii. Chceme totiž primárně respektovat silný omezující
 vzor, aby ligandy atomu nemohly přeskočit nějakou energetickou bariéru, a posun
 ligandu je až sekundární optimalizační cíl. Tento požadavek zajistíme tím, že
-potenciální energii ligandu v silovém poli slabého vzoru budeme v dokovacím
+potenciální energii i sílu ligandu v silovém poli slabého vzoru budeme v dokovacím
 algoritmu započítávat s nižší váhou.
 
 
@@ -148,7 +169,8 @@ transportní energii na daném řezu. Kontrolu přípustnosti implementujeme na 
 \centering
 \includegraphics[width=.5\hsize]{img/narrow_tunnel.pdf}
 \caption{Schématický 2D obrázek ve kterém konvergenční algoritmus narazí na
-silnou energetickou bariéru.}
+silnou energetickou bariéru, za předpokladu, že ligand není flexibilní (úhel
+svíraný jeho atomy mezi sebou se nemůže změnit)}
 \label{fig:narrow_tunnel}
 \end{figure}
 

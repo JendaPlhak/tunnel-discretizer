@@ -112,13 +112,13 @@ což nám umožňuje simulovat proces navázání ligandu nebo naopak jeho uvoln
 
 \subsection{Diskretizace tunelu}
 K tomu abychom mohli s ligandem tunelem iterativně procházet, potřebujeme nějakým
-způsobem omezit prostor, ve kterém může být ligand v každé iteraci umístěn.
+způsobem omezit prostor, ve kterém může být ligand umístěn.
 Omezení se v našem případě realizuje pomocí posloupnosti koulí, které aproximují
 geometrii tunelu. Takovouto aproximaci můžeme získat například pomocí nástroje
 Caver \cite{Caver}. Na vstupu algoritmu tedy máme zmíněnou posloupnost
 koulí, kterou náš algoritmus transformuje na posloupnost $ n $ řezů - kruhů
 $ \theta_1, \dots, \theta_n $. Tyto řezy generujeme tak, abychom tunel rozdělili
-na pláty, které mají shora omezenou tloušťku(to proto abychom nevynucovali
+na pláty, které mají shora omezenou tloušťku (to proto abychom nevynucovali
 příliš velké změny v pozici ligandu mezi jednotlivými kroky výpočtu). Prakticky
 se jedná o 2D kruhy, které omezují prostor, na který můžeme ligand zadokovat.
 Cestu ligandu tunelem pak definujeme jako posloupnost umístění vybraného atomu
@@ -141,7 +141,7 @@ důsledku čehož nedetekujeme úzké a potenciálně neprůchodné hrdlo tunelu
 
 \subsection{Doking s omezujícími podmínkami}
 Konformace ligandu $ \lambda $ je definována pozicí atomů
-$ \lambda = {a_i}^m_{i = 1} $ v klasické kartézské souřadné soustavě. Maje
+$ \lambda = {a}^m_{i = 1} $ v klasické kartézské souřadné soustavě. Maje
 k dispozici diskretizaci tunelu, můžeme vybrat atom ligandu $ a_c \in \lambda $,
 a poté iterativně provádět doking ligandu na disky $ \theta_1, \dots, \theta_n $,
 přičemž budeme požadovat, aby výsledná konformace ligandu po dockingu na
@@ -149,7 +149,7 @@ $ i $-tý disk splňovala $ a_c \in \theta_i $. Tímto způsobem ligand přinut�
 k tomu, aby prošel celým tunelem.
 
 Trajektorie ligandu vygenerovaná tímto způsobem navzorkuje profil tunelu bez
-velkých mezer (to znamená, že ligand nebude schopen překonat (přeskočit) případná
+výraznějších mezer (to znamená, že ligand nebude schopen překonat (přeskočit) například
 uzká hrdla tunelu), nicméně problémem je, že nemusí být spojitá (ligand se
 může mezi sousedními řezy volně rotovat). Tuto nespojitou trajektorii budeme
 používat jakožto dolní odhad na transportní energii. Příklad takové trajektorie
