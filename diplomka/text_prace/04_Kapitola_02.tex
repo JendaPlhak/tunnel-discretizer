@@ -29,7 +29,7 @@ a zkontrolovat jejich vzdálenosti oproti ligandu dopředné trajektorie. Ligand
 navíc typicky mívají velmi malý počet atomů, takže se skutečně jedná o nenáročný
 výpočet. Tento přístup bude fungovat ve chvíli, kdy molekula ligandu po opuštění
 úzkého hrdla zkonverguje do původní konformace, kterou zaujímá ligand v dopředné
-trajektorii, k čemuž dojde zejména v situaci, kdy existuje lokální eneretické
+trajektorii, k čemuž dojde zejména v situaci, kdy existuje lokální energetické
 minimum, do kterého se z backtracking konformace můžeme dostat gradientním sestupem.
 Této situaci budeme říkat \textit{jednoduchá konvergence}.
 
@@ -70,7 +70,7 @@ Dopředná trajektorie je vyznačena tečkovaně, backtracking plnou čárou.
 Schéma č. \ref{fig:backtracking_bad} je ukázkou takové konstelace, ve které
 oproti předchozímu příkladu při backtrackingu došlo k opačné rotaci ligandu
 a algoritmus se tím dostal do jiného lokálního energetického minima. Obě situace
-mouhou nastat, neboť dokovací algoritmus je náhodnostní a můžeme z něj ve stejné
+mohou nastat, neboť dokovací algoritmus je náhodnostní a můžeme z něj ve stejné
 situaci na disku č. 6 dostat různý iniciální krok backtrackingu.
 
 Aby náš algoritmus v situaci, ke které dojde na řezu č. 4, mohl využít již spočítanou

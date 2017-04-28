@@ -9,14 +9,14 @@ k enzymové reakci. Příkladem může být inhibice aktivního místa proteinu,
 jinak umožňuje viru napadnout buňku. Simulace navázání ligandu (ligand vstoupí
 do aktivního místa a vznikne stabilní vazba mezi ligandem a proteinem) a jeho
 uvolnění (uvolnění ligandu ze stabilního komplexu) je užitečná v mnoha praktických
-aplikacích, neboť nám umožňuje indetifikovat ligandy, které se budou navazovat
+aplikacích, neboť nám umožňuje identifikovat ligandy, které se budou navazovat
 v daném proteinu nejrychleji, případně získané informace můžeme použít k úpravě
 ligandu tak aby se navazoval rychleji nebo modifikovat samotný protein aby k
 navázání docházelo snáz nebo hůř podle toho jaké chování je žádoucí. Aktivní
 centrum proteinu je mnohdy ukryto hluboko uvnitř molekuly, takže aby se ligand
 mohl navázat, musí nejprve projít tzv. tunelem, který vede z povrchu proteinu
 k jeho aktivnímu centru. V takovém případě je potřeba analyzovat, zda je
-pravděpodobné, aby se ligand do aktivního centra skze tunel dostal.
+pravděpodobné, aby se ligand do aktivního centra skrze tunel dostal.
 
 Chemické systémy, jakým je protein interagující s ligandem, se řídí druhým
 termodynamickým zákonem a mají proto tendenci minimalizovat jejich
@@ -64,8 +64,8 @@ do jeho aktivního centra skrze jeho tunel.
 
 V této práci popíšeme některé části nové metody pro výpočet potenciální energie
 trajektorie ligandu, která umožňuje studovat proces navázání i uvolnění ligandu
-včetně jeho cesty skrze tunel k aktivnímu centru. Naše metode je založena na
-algirtmu molekulárního dokingu, který používá tak, že iterativně dokuje ligand
+včetně jeho cesty skrze tunel k aktivnímu centru. Naše metoda je založena na
+algoritmu molekulárního dokingu, který používá tak, že iterativně dokuje ligand
 podél trajektorie tunelu a vyhodnocuje jeho potenciální energii. Náš doking
 pracuje s hybridními silovými poli - jedná se o kombinaci chemického silového
 pole, které se používá k výpočtu potenciální energie komplexu protein-ligand,
@@ -129,7 +129,7 @@ pro všechny řezy). Popis algoritmu pro diskretizaci tunelu je obsahem první k
 \centering
 \includegraphics[width=.8\hsize]{img/tun.pdf}
 \caption{Schématický 2D pohled na průchod tunelem. Vybraný atom ligandu je
-postupně umisťován na po sobě jdoucí disky. Tím že nazajišťujeme spojitý pohyb
+postupně umisťován na po sobě jdoucí disky. Tím že nezajišťujeme spojitý pohyb
 ligandu, můžeme vidět, že mezi řezy $\theta_6$ a $\theta_7$ dochází k prudké rotaci, v
 důsledku čehož nedetekujeme úzké a potenciálně neprůchodné hrdlo tunelu.}
 \label{fig:lower-bound}
@@ -144,13 +144,13 @@ Konformace ligandu $ \lambda $ je definována pozicí atomů
 $ \lambda = {a}^m_{i = 1} $ v klasické kartézské souřadné soustavě. Maje
 k dispozici diskretizaci tunelu, můžeme vybrat atom ligandu $ a_c \in \lambda $,
 a poté iterativně provádět doking ligandu na disky $ \theta_1, \dots, \theta_n $,
-přičemž budeme požadovat, aby výsledná konformace ligandu po dockingu na
+přičemž budeme požadovat, aby výsledná konformace ligandu po dokingu na
 $ i $-tý disk splňovala $ a_c \in \theta_i $. Tímto způsobem ligand přinutíme
 k tomu, aby prošel celým tunelem.
 
 Trajektorie ligandu vygenerovaná tímto způsobem navzorkuje profil tunelu bez
 výraznějších mezer (to znamená, že ligand nebude schopen překonat (přeskočit) například
-uzká hrdla tunelu), nicméně problémem je, že nemusí být spojitá (ligand se
+úzká hrdla tunelu), nicméně problémem je, že nemusí být spojitá (ligand se
 může mezi sousedními řezy volně rotovat). Tuto nespojitou trajektorii budeme
 používat jakožto dolní odhad na transportní energii. Příklad takové trajektorie
 je vykreslen na obrázku č. \ref{fig:lower-bound}. Jak můžeme vidět, atom $ a_c $
@@ -191,7 +191,7 @@ výše uvedený postup dával smysl, musí platit, že každé dva po sobě jdou
 od sebe vzdáleny o vzdálenost menší než $ \delta $. Demonstraci použití
 omezujícího vzoru můžeme vidět na obrázku č. \ref{fig:continuous_transition}. Jak
 můžeme vidět, omezující vzor nedovolí ligandu rotaci jakou jsme mohli pozorovat
-v přechozím případě (obrázek č. \ref{fig:lower-bound}), což nám umožní detekovat
+v předchozím případě (obrázek č. \ref{fig:lower-bound}), což nám umožní detekovat
 úzké geometrické hrdlo.
 
 
@@ -210,7 +210,7 @@ trajektorii (spojitou transformaci ligandu) $ \lambda^i_{j+1} \in \Delta \lambda
 \lambda^i_{j+2} \in \Delta \lambda^i_{j+1}, \dots $, která ve výsledku
 zlepší potenciální energii ligandu oproti jeho výchozí konformaci $ \lambda^i_j $.
 Tyto kroky budeme nazývat optimalizační kroky, neboť umožňují ligandu transformaci
-do nízkoenrgetické konformace, která ihned po přechodu z $ \theta_{i - 1} $
+do nízkoenergetické konformace, která ihned po přechodu z $ \theta_{i - 1} $
 na $ \theta_i $ nemusí být dosažitelná.
 
 \begin{figure}[t]
@@ -232,10 +232,10 @@ vyskytuje v tunelu někde dále. Uvažme například situaci na obrázku
 může, ale také nemusí překonat. Kvůli tomu musíme začít uvažovat vícero potenciálních
 trajektorií.
 
-Počet všech možných spojitích trajektorií je velmi vysoký - roste exponenciálně vzhledem
+Počet všech možných spojitých trajektorií je velmi vysoký - roste exponenciálně vzhledem
 k počtu řezů: přechod na následující disk může změnit pozici ligandu, orientaci
-nebo konformaci (relativní pozici atomů v rámci ligandu). Vyčerpávajcí zkoušení
-všech možných trajektorií tedy nepřipadá v úvaru vzhledem k tomu, že čas
+nebo konformaci (relativní pozici atomů v rámci ligandu). Vyčerpávající zkoušení
+všech možných trajektorií tedy nepřipadá v úvahu vzhledem k tomu, že čas
 potřebný k zadokování ligandu s omezeními se obvykle pohybuje mezi stovkami
 milisekund až sekundami. Kvůli tomu jsme byli nuceni zavést jednoduchou heuristiku:
 pokud je potenciální energie pozice $ \lambda^i_j $ významně větší než potenciální

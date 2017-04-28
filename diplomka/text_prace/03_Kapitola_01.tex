@@ -31,7 +31,7 @@ Mějme tunel $ \Tau $. Trajektorií tunelu $ \Tau $ budeme rozumět křivku tvo�
 $ S_{i+1}^{center} $.
 \end{defi}
 
-Abychom mohli provádět docking ligandu, musíme nejprve takto definovaný tunel nařezat na
+Abychom mohli provádět doking ligandu, musíme nejprve takto definovaný tunel nařezat na
 jemné plátky - kruhy, na které pak v průběhu výpočtu budeme dokovat průběžné konformace ligandu.
 Popišme si nyní, jak by takové řezy měly vypadat.
 
@@ -57,7 +57,7 @@ Pro ilustraci, jak takové řezy mohou vypadat, přikládáme obrázek č. \ref{
 
 S takto definovanými řezy můžeme začít uvažovat o tom, jak tunel nařezat jako celek.
 Mějme $ \Theta = \{\theta_i\}_{i=0}^{k}$ posloupnost řezů tunelu $ \Tau $. Pro potřeby správného
-dockingu bude nezbytné, aby platilo
+dokingu bude nezbytné, aby platilo
 
 \begin{align}
 x, y \in \Theta \Rightarrow |x \cap y| \leq 1, \label{cond:not_intersecting}
@@ -116,9 +116,9 @@ $ w = S_2^{center} - S_1^{center} $.
 
 Nyní můžeme přistoupit k popisu samotného algoritmu, který má na vstupu tunel $ \Tau $
 a nějaké pevně zadané $ \delta > 0$, které určuje maximální vzdálenost, kterou
-od sebe dva po sobě jdoucí řezy mohou mít. Na výstupu pak budeme očkávat řezy pokrývající
+od sebe dva po sobě jdoucí řezy mohou mít. Na výstupu pak budeme očekávat řezy pokrývající
 celý tunel a budou splňovat uvedené omezení na vzdálenost. Vzhledem k tomu, že výsledná
-složitost následného dockingu je přímo úměrná počtu řezů, budeme od algoritmu chtít,
+složitost následného dokingu je přímo úměrná počtu řezů, budeme od algoritmu chtít,
 aby počet řezů byl při splnění uvedených kritérií pokud možno co nejmenší.
 
 
@@ -147,7 +147,7 @@ Pro ilustraci uvádíme obrázek \ref{fig:naive_cuts}.
   \label{fig:naive_cuts}
 \end{figure}
 
-K problémům docházi proto, že takto bereme v potaz pouze velmi lokální informace o vlastnostech
+K problémům dochází proto, že takto bereme v potaz pouze velmi lokální informace o vlastnostech
 tunelu a zřejmě zcela ignorujeme dříve uvedené požadavky na řezy. Tento postup ale
 můžeme zdokonalit. Prvním problémem je, že když takto postupně generujeme nové řezy,
 může se stát, že od sebe budou příliš daleko nebo se budou protínat. Potřebujeme proto
@@ -473,7 +473,7 @@ budeme nazývat správnou korespondencí. Naši situaci pak ilustruje obrázek
 \begin{figure}[ht]
     \centering
     \includegraphics{img/segments_basic.png}
-    \caption{Řezy v roviě $ \rho $}
+    \caption{Řezy v rovině $ \rho $}
   \centering
   \label{fig:segments_basic}
 \end{figure}
@@ -493,7 +493,7 @@ zamýšleného směrování tunelu je vhodné jej volit co nejmenší. Experimen
 jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{\delta}{100} $.
 
 V případě, že $ \langle V^{normal}, v_2\rangle < 0 $, postupujeme zcela analogicky
-pro vrcholy $ P_2 $, $ Q_2 $. Nakonec ještě v případě nutnosti přeoznačením
+pro vrcholy $ P_2 $, $ Q_2 $. Nakonec ještě v případě nutnosti přeznačením
 zajistíme správnou korespondenci, neboť ta by se mohla v některých patologických
 případech našimi úpravami porušit. Tím jsou vyřešeny podmínky
 (\ref{cond:not_intersecting}) a (\ref{cond:going_forward}).
@@ -517,7 +517,7 @@ Z výsledných bodů zrekonstruujeme řez jehož střed je určen vrcholy
 $ Q_1 $, $ Q_2 $ a normála $ \vec{n} $ bude vektor ležící v rovině $ \rho $
 kolmý na vektor $ \overrightarrow{Q_1 Q_2} $, který orientujeme tak, že bude platit
 $ \langle V^{normal}, \vec{n} \rangle \geq 0 $, tedy vyžadujeme souhlasnou
-orientaci jakou má předchozí řez. Nakonec zavolámě funkci
+orientaci jakou má předchozí řez. Nakonec zavoláme funkci
 $ \operatorname{fitDiskTunnel} $, která zajistí správně zvolený poloměr.
 Uvedený postup shrnuje pseudokód č. \ref{alg:shiftDisk}:
 
@@ -623,7 +623,7 @@ tunel zatáčí.
 Na vstupu funkce $ \operatorname{shiftSharpTurn} $ tedy budeme mít předchozí
 umístěný řez resp. aktuálně umisťovaný řez s výše uvedenými vlastnostmi,
 které si označíme $ V $
-resp. $ W $. Stejně jako u předešlé funkce budeme chtít vešekeré výpočty provádět
+resp. $ W $. Stejně jako u předešlé funkce budeme chtít veškeré výpočty provádět
 v projekci do nějaké roviny. Označme si tuto rovinu $ \rho $.
 V tomto případě však budou mít oba řezy stejný
 normálový vektor, což nám dává možnost volby. Zamysleme se tedy nad tím,
@@ -653,7 +653,7 @@ situaci v podobě obrázku \ref{fig:sharp_curve_lookahead_from_up}.
 \end{figure}
 
 Je zřejmé, že na výběru druhého vektoru projekční roviny skutečně záleží, neboť
-například pohled shora nedává žádnou indicii o tom, jakým způosobem bychom
+například pohled shora nedává žádnou indicii o tom, jakým způsobem bychom
 se měli zachovat. Prakticky ale stačí vzít vektor, který je
 určen středy našich řezů, tedy vektor $ v = W^{center} - V^{center} $. Ze všech
 přípustných rovin pak takto vzniklá rovina bude maximalizovat vzdálenost mezi
@@ -663,7 +663,7 @@ rovině nedeformované úsečky o maximálních délkách - jejich průměr bude
 jako průměr promítaných řezů.
 
 Teoreticky by se nám ještě mohlo stát, že by takto vzniklý vektor byl lineárně
-závislý vzhledem k normálnovému vektoru $ V^{normal} $. V taktovém případě k žádnému
+závislý vzhledem k normálovému vektoru $ V^{normal} $. V taktovém případě k žádnému
 zatočení zřejmě nedochází. Popisovaný algoritmus bude i tak fungovat,
 a to pro libovolnou volbu vektoru lineárně nezávislého na $ V^{normal} $.
 
@@ -672,7 +672,7 @@ procedury $ \operatorname{shiftDisk} $ najít korespondující
 vrcholy $ P_1, P_2 $ resp. $ Q_1, Q_2 $. Nyní je potřeba rozlišit dva případy.
 
 Pokud $ W^{radius} \geq V^{radius} $, pak pomocí vrcholů úseček zjistíme, která
-dvojice korespondujicích vrcholů je od sebe dál a tu pak ztotožníme. V případě
+dvojice korespondujících vrcholů je od sebe dál a tu pak ztotožníme. V případě
 druhé dvojice umístíme vrchol $Q_i $ do vzdálenosti menší než $\delta$ od vrcholu
 $ P_i $. Tuto situaci můžeme vidět na obrázku \ref{fig:sharp_curve_lookahead}.
 
@@ -753,7 +753,7 @@ je lineárně závislá na jejich normálách, pak zřejmě bude platit
 $ \norm{\vec{v_1}} = \norm{\vec{v_2}} $. Tunel se tedy v tomto místě
 pravděpodobně ubírá přímo rovně. V souladu s tímto faktem se v obou případech
 větvení vydáme druhou větví a oba vrcholy umístíme do stejné vzdálenosti, čímž
-zajístíme přímý pohyb tunelem.
+zajistíme přímý pohyb tunelem.
 
 Stejně jako v případě funkce $ \operatorname{shiftDisk} $ musíme nakonec
 zkontrolovat splnění našich podmínek ze stejných důvodů jako u funkce
@@ -772,7 +772,7 @@ funkce $ \operatorname{isSharpTurn} $. Ta podobně jako v těle hlavního
 algoritmu \ref{alg:digTunnel} posune poslední umístěný řez o konstantu
 $ \Delta $ ve směru jeho normály. Sečnou rovinu zkonstruujeme stejně jako v
 případě funkce $ \operatorname{shiftSharpTurn} $ a v ní najdeme korespondující
-vrcholy $ P_1$, $P_2$, $Q_1$ a $ Q_2 $. Následně zjistíme percentuální rozdíl
+vrcholy $ P_1$, $P_2$, $Q_1$ a $ Q_2 $. Následně zjistíme procentuální rozdíl
 mezi vzdálenostmi vrcholů. Ostrou zatáčku pak implementujeme ve chvíli, kdy se
 vzdálenosti liší o více než 35\%. Tato hranice nepoměru se nám v praxi osvědčila
 velmi dobře. Výpočet je zachycen pseudokódem č. \ref{alg:isSharpTurn}.
@@ -875,7 +875,7 @@ následujícím způsobem.
 
 Sčítance uprostřed uvedeného výrazu odpovídají integraci po úsečce vždy mezi
 dvěma po sobě jdoucími středy $ C_i $, $C_{i+1} $. Toho využijeme a nejprve ukážeme,
-jak počítat integrály tohoto typu. Označmě $\delta = \norm{C_{i + 1} - C_i}$.
+jak počítat integrály tohoto typu. Označme $\delta = \norm{C_{i + 1} - C_i}$.
 Díky tomu, že je křivka $ \gamma $ parametrizovaná
 obloukem, dostaneme substitucí
 $ s(t) = \frac{t - \gamma^{-1}(C_i)}{\delta} $ vztah
@@ -942,7 +942,7 @@ integrálů
 \end{align*}
 
 Tyto dva integrály společně s krajními integrály v součtu (\ref{eq:integral_sum})
-jsou z definice posloupnosti $ P $ intergrály na intervalu, na kterém je křivka
+jsou z definice posloupnosti $ P $ integrály na intervalu, na kterém je křivka
 $ \gamma(t) $ konstantní. Označme si meze takovéhoto integrálu $ c $ a $ d $.
 Pak ale existují vrcholy $ C_i $ a $ C_{i + 1} $ křivky $ \gamma $ takové, že
 $ [c, d] \subseteq [\gamma^{-1}(C_i), \gamma^{-1}(C_{i + 1})] $. Díky tomu stačí
@@ -992,7 +992,7 @@ nebo Broyden-Fletcher-Goldfarb-Shannův algoritmus. Vedle těchto metod jsme zá
 ještě implementovali vlastní, poměrně naivní prohledávání. Výsledky byly
 překvapivé. Obecné metody byly zpravidla schopny globální minimum mnohem přesněji
 lokalizovat a obvykle nacházely řešení, které bylo oproti našemu vlastnímu
-algoritmu o jednotky procent lepší, avšak v případě některých komplikovanejších
+algoritmu o jednotky procent lepší, avšak v případě některých komplikovanějších
 tunelů se stávalo, že uvázly v lokálním minimu, které se od globálního lišilo
 o desítky procent, kdežto náš naivní přístup tímto způsobem neselhal ani jednou.
 Je ale nutno podotknout, že uvedené obecné metody by potenciálně mohly fungovat
@@ -1043,7 +1043,7 @@ od aktuální normály a celý proces zopakujeme.
 Vnější cyklus uvedeného algoritmu tedy ovlivňuje, jak široké okolí budeme ve vnitřních
 cyklech prohledávat a s jakým krokem budeme na řádku \ref{alg:findMinimalDisk:inner_for}
 zvětšovat úhel $\varphi $. Rotací na řádku \ref{alg:findMinimalDisk:rotate} rozumíme to,
-že vektor $\vec{v} $ nejprve odkloníme o úhel $ \theta $ a následně jej orotujeme
+že vektor $\vec{v} $ nejprve odkloníme o úhel $ \theta $ a následně jej rotujeme
 kolem osy určené původním $\vec{v} $. Tento proces je znázorněn na obrázku
 \ref{fig:vector_rotate} s tím, že osa z v našem případě odpovídá směru vektoru
 $\vec{v} $.
@@ -1074,7 +1074,7 @@ Tuto situaci můžeme vidět na obrázku \ref{fig:side_cut}.
 
 Prakticky algoritmus na tomto místě zjišťuje, zda trajektorie tunelu tvořená středy
 koulí reálně prochází našim řezem. Vzhledem k tomu, že je trajektorie po částech
-konstantní křivka, dá se toto ověření poměrně snadno naimplementovat.
+konstantní křivka, dá se toto ověření poměrně snadno implementovat.
 
 Příklad výsledných minimálních řezů, které jsme spočítali tímto algoritmem,
 můžeme vidět na obrázku \ref{fig:min_cuts}.
