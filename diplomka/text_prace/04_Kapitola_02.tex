@@ -161,9 +161,10 @@ například ve chvíli, kdy se pokoušíme implementovat konvergenční trajekto
 v příliš úzkem místě (příklad takové situace můžeme vidět na obrázku č.
 \ref{fig:narrow_tunnel}). Prakticky pak porovnáváme celkovou potenciální energii
 ligandu $ E(\lambda') $ se zadaným parametrem maximální energie $ E_{max} $.
-Tento parametr může být nastaven například na nějaký násobek dolního odhadu na
-transportní energii na daném řezu. Kontrolu přípustnosti implementujeme na řádku
-č. \ref{alg:convergence:feasibility}.
+Tento parametr může být nastaven například na energii ligandu, která nás vedla ke
+spuštění backtrackingu (ujistíme se tak, že backtracking s konvergencí nepovedou
+k většímu energetickému maximu, než potenciální dopředná trajektorie). Kontrolu
+přípustnosti implementujeme na řádku č. \ref{alg:convergence:feasibility}.
 
 \begin{figure}[ht]
 \centering
