@@ -1,4 +1,5 @@
-for f in `find tunells -name "*.pdb"`; do
-    echo $f
-    time python readtunel.py -f $f --delta 0.3
+
+for f in `find tunnels_prod -name "*tun_cl_*.pdb"`; do
+    # echo $f
+    python2.7 -W ignore discretizer.py -f $f --delta 0.3
 done

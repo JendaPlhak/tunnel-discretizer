@@ -1115,4 +1115,60 @@ tunel může zabrat jednotky až desítky hodin výpočetního času.
 
 Implementace je veřejně dostupná na GitHubu \cite{discretizer}.
 
+
+
+
+
 \section{Evaluace} \label{subsec:evaluation}
+Námi navržený a implementovaný algoritmus jsme vyhodnocovali spuštěním nad
+množinou 152 různých tunelů v 35 různých proteinech s nastavením $ \delta = \frac{3}{10} $.
+Vyhodnocení probíhalo na stroji se 4jádrovým procesorem Intel(R) Core(TM) i7-4800MQ.
+
+Validní diskretizaci se povedlo vypočítat bez dalších úprav parametrů pro všechny
+tunely. Nejdelší dva tunely byly tvořeny 139 resp. 120 sférami pro něž bylo
+vygenerováno 833 resp. 588 řezů za 667 resp. 261 sekund, přičemž preprocessing
+fáze zabrala 529 resp. 196 sekund paralelního výpočtu. Diskretizaci kratšího
+z tunelů můžeme vidět na obrázku č. \ref{fig:1YGE} (diskretizaci delšího tunelu
+neuvádíme, neboť jeho profil nebyl nijak zajímavý). Takto dlouhé tunely byly ale
+spíše výjimkou a průměrná délka tunelu se pohybovala kolem 32 sfér a 162
+výsledných řezů. Průměrná délka výpočtu byla 38 sekund, což vzhledem k délce
+následného výpočtu spojité trajektorie považujeme za naprosto dostatečné.
+Kompletní informace o vyhodnocení na každém tunelu uvádíme v apendixu A.
+
+Pro zajímavost ještě na obrázcích \ref{fig:2INC} - \ref{fig:2SQC} uvádíme
+diskretizace některých dalších tunelů společně s názvem enzymu, v němž se daný
+tunel nachází.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.75\textwidth]{img/1YGE.png}
+    \caption{Diskretizace tunelu v enzymu Lipooxygenase (1YGE).}
+  \centering
+  \label{fig:1YGE}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.75\textwidth]{img/2INC.png}
+    \caption{Diskretizace tunelu v enzymu  Toluene/o-xylene monooxygenase (2INC).}
+  \centering
+  \label{fig:2INC}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+    \includegraphics[width=70mm]{img/1EA5.png}
+    \caption{Acetylcholinesterase (1EA5).}
+  \centering
+  \label{fig:1EA5}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+     \centering
+    \includegraphics[width=70mm]{img/2SQC.png}
+    \caption{Squalene-hopene cyclase (2SQC).}
+  \centering
+  \label{fig:2SQC}
+\end{minipage}
+\end{figure}
