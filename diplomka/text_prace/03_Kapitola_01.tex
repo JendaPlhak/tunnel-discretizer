@@ -1122,6 +1122,8 @@ Implementace je veřejně dostupná na GitHubu \cite{discretizer}.
 \section{Evaluace} \label{subsec:evaluation}
 Námi navržený a implementovaný algoritmus jsme vyhodnocovali spuštěním nad
 množinou 152 různých tunelů v 35 různých proteinech s nastavením $ \delta = \frac{3}{10} $.
+Tunely a molekuly byly převzaty z článku \cite{Enzymes}, ve kterém je možno
+je najít pod jejich kódovým označením společně s jejich detailní vizualizací.
 Vyhodnocení probíhalo na stroji se 4jádrovým procesorem Intel(R) Core(TM) i7-4800MQ.
 
 Validní diskretizaci se povedlo vypočítat bez dalších úprav parametrů pro všechny
@@ -1134,10 +1136,12 @@ spíše výjimkou a průměrná délka tunelu se pohybovala kolem 32 sfér a 162
 výsledných řezů. Průměrná délka výpočtu byla 38 sekund, což vzhledem k délce
 následného výpočtu spojité trajektorie považujeme za naprosto dostatečné.
 Kompletní informace o vyhodnocení na každém tunelu uvádíme v apendixu A.
-
 Pro zajímavost ještě na obrázcích \ref{fig:2INC} - \ref{fig:2SQC} uvádíme
 diskretizace některých dalších tunelů společně s názvem enzymu, v němž se daný
 tunel nachází.
+
+Přestože se problém diskretizace tunelu ukázal být oproti našim očekáváním
+poměrně obtížný, podařilo se jej podle dosavadního testování spolehlivě vyřešit.
 
 \begin{figure}[ht]
     \centering
