@@ -190,7 +190,7 @@ potřeba spustit z jiné pozice backtracking trajektorie.
 Výpočet úspěšně ukončíme pokud platí $\lambda \in \Delta\tilde{\lambda}$ a
 vrátíme vypočítanou konvergenční trajektorii $ \tau $.
 
-\begin{algorithm}
+\begin{algorithm}[ht]
 \caption{Výpočet konvergenční trajektorie}
 \label{alg:convergence}
 \begin{algorithmic}[1]
@@ -226,17 +226,31 @@ vrátíme vypočítanou konvergenční trajektorii $ \tau $.
 
 
 
-
+\clearpage
 \section{Evaluace} \label{subsec:convergence_evaluation}
-Evaluaci konvergenčního algoritmu jsem provedli na vybraných proteinech
+Evaluaci konvergenčního algoritmu jsem provedli na vybraných tunelech proteinů
 z první kapitoly. Výpočet byl realizován ve výpočetním centru CERIT-SC na
 stroji s konfigurací 2x Xeon E-2670 (8 jader na 2.6GHz), 128GB RAM.
 
 V souladu s našimi předoklady byl přínos konvergenčního algoritmu největší
-v případě tunelů s více úzkými hrdly a při počítání s většími ligandy.
+v případě tunelů s více úzkými hrdly a při počítání s většími ligandy. Výsledky
+výpočtu pro molekuly 1YGE resp. 1BRT z první kapitoly uvádíme v tabulkách
+\ref{table:1YGE_energy} resp. \ref{table:1BRT_energy}. V prvním případě šlo
+o tunel, který jsme v první kapitole mohli vidět na obrázku \ref{fig:1YGE}.
+Obrázek diskretizace druhého tunelu je možno dohledat v apendixu B.
+V obou tabulkách můžeme vidět výsledky pro různé ligandy. V prvním sloupci
+je zaznamenán počet atomů, které tvoří daný ligand. Druhou sloupec pak udává
+počet volných torzních úhlů (prakticky to znamená počet míst, ve kterých
+se ligand může ohýbat nebo kroutit). V posledních čtyřech sloupcích nalezneme
+postupně informaci o maximální dosažené energii a průměrné energii v průběhu
+pohybu tunelem. Uvádíme vždy nejprve energii původního algoritmu bez konvergence
+a následně s aktivním konvergenčním algoritmem.
 
+Můžeme vidět, že dosažené energie jsou v některých případech podstatně lepší
+a pokud jsou horší, tak jen o několik málo procent, což můžeme přičíst na vrub
+náhodnostnímu výpočtu dokingu.
 
-\begin{table}[htbp]
+\begin{table}[ht]
     \centering
     \begin{tabular}{cccccc}
     \toprule
@@ -255,9 +269,10 @@ v případě tunelů s více úzkými hrdly a při počítání s většími lig
         \bottomrule
     \end{tabular}
     \caption{Evaluace ligandů na tunelu v molekule 1YGE.}
+    \label{table:1YGE_energy}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[ht]
     \centering
     \begin{tabular}{cccccc}
     \toprule
@@ -276,20 +291,29 @@ v případě tunelů s více úzkými hrdly a při počítání s většími lig
         \bottomrule
     \end{tabular}
     \caption{Evaluace ligandů na tunelu v molekule 1BRT.}
+    \label{table:1BRT_energy}
 \end{table}
+
+Pro ilustraci ještě uvádíme obrázky \ref{fig:1YGE_energy_0}-\ref{fig:1BRT_energy_1},
+na kterých můžeme vidět detailní porovnání energetických profilů pro trajektorie
+s (zelená křivka) a bez konvergenčního algoritmu (fialová křivka). Jak vidno
+rozdíl může být v některých případech skutečně dramatický. Navíc jsme při našich
+experimentech zaznamenali, že doba výpočtu obou verzí algoritmu je buďto téměř
+stejná nebo mírně kratší ve prospěch algoritmu s konvergencí.
 
 \begin{figure}[ht]
 \centering
-\begin{minipage}{.5\textwidth}
+\begin{minipage}{.49\textwidth}
   \centering
-    \includegraphics[width=75mm]{img/1YGE_energy_0.png}
+    \includegraphics[width=1\textwidth]{img/1YGE_energy_0.png}
     \caption{Energetický profil v molekule 1YGE pro ligand s 9 atomy a 6 torzními úhly}
   \centering
   \label{fig:1YGE_energy_0}
 \end{minipage}%
-\begin{minipage}{.5\textwidth}
+\hfill
+\begin{minipage}{.49\textwidth}
      \centering
-    \includegraphics[width=75mm]{img/1YGE_energy_1.png}
+    \includegraphics[width=1\textwidth]{img/1YGE_energy_1.png}
     \caption{Energetický profil v molekule 1YGE pro ligand s 8 atomy a 5 torzními úhly}
   \centering
   \label{fig:1YGE_energy_1}
@@ -298,16 +322,17 @@ v případě tunelů s více úzkými hrdly a při počítání s většími lig
 
 \begin{figure}[ht]
 \centering
-\begin{minipage}{.5\textwidth}
+\begin{minipage}{.49\textwidth}
   \centering
-    \includegraphics[width=75mm]{img/1BRT_energy_0.png}
+    \includegraphics[width=1\textwidth]{img/1BRT_energy_0.png}
     \caption{Energetický profil v molekule 1BRT pro ligand s 5 atomy a 2 torzními úhly}
   \centering
   \label{fig:1BRT_energy_0}
 \end{minipage}%
-\begin{minipage}{.5\textwidth}
+\hfill
+\begin{minipage}{.49\textwidth}
      \centering
-    \includegraphics[width=75mm]{img/1BRT_energy_1.png}
+    \includegraphics[width=1\textwidth]{img/1BRT_energy_1.png}
     \caption{Energetický profil v molekule 1BRT pro ligand se 7 atomy a 4 torzními úhly}
   \centering
   \label{fig:1BRT_energy_1}
