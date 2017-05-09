@@ -231,3 +231,87 @@ vrátíme vypočítanou konvergenční trajektorii $ \tau $.
 Evaluaci konvergenčního algoritmu jsem provedli na vybraných proteinech
 z první kapitoly. Výpočet byl realizován ve výpočetním centru CERIT-SC na
 stroji s konfigurací 2x Xeon E-2670 (8 jader na 2.6GHz), 128GB RAM.
+
+V souladu s našimi předoklady byl přínos konvergenčního algoritmu největší
+v případě tunelů s více úzkými hrdly a při počítání s většími ligandy.
+
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{cccccc}
+    \toprule
+        & & \multicolumn{2}{c}{Max Energy} & \multicolumn{2}{c}{Avg Energy} \\
+        Atoms & Torsion & Orig & Conv & Orig & Conv \\
+        \midrule
+            2 & 0 & 7.90  &8.00 & 2.94 & 2.95 \\
+            3 & 0 & 13.00 & 13.20 & 5.67 & 5.55 \\
+            4 & 1 & 20.60 & 19.10 & 7.24 & 7.09 \\
+            5 & 2 & 29.70 & 22.20 & 8.99 & 8.34 \\
+            6 & 3 & 29.00 & 18.70 & 11.93 & 9.98 \\
+            7 & 0 & 41.10 & 41.70 & 21.74 & 21.19 \\
+            7 & 4 & 34.10 & 28.20 & 13.50 & 11.14 \\
+            8 & 5 & 38.70 & 35.50 & 14.48 & 13.20 \\
+            9 & 6 & 49.50 & 42.60 & 17.49 & 15.93 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Evaluace ligandů na tunelu v molekule 1YGE.}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{cccccc}
+    \toprule
+        & & \multicolumn{2}{c}{Max Energy} & \multicolumn{2}{c}{Avg Energy} \\
+        Atoms & Torsion & Orig & Conv & Orig & Conv \\
+        \midrule
+            2 & 0 & 7.90 & 8.00 & 1.92 & 1.87 \\
+            3 & 0 & 17.70 & 13.30 & 3.65 & 3.45 \\
+            4 & 1 & 20.40 & 16.30 & 4.79 & 4.65 \\
+            5 & 2 & 27.80 & 24.00 & 6.41 & 6.01 \\
+            6 & 3 & 26.00 & 26.30 & 7.43 & 6.89 \\
+            7 & 0 & 41.00 & 37.20 & 15.69 & 15.45 \\
+            7 & 4 & 33.20 & 31.50 & 10.06 & 8.89 \\
+            8 & 5 & 38.30 & 34.60 & 12.20 & 9.85 \\
+            9 & 6 & 41.30 & 39.20 & 13.70 & 12.00 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Evaluace ligandů na tunelu v molekule 1BRT.}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+    \includegraphics[width=75mm]{img/1YGE_energy_0.png}
+    \caption{Energetický profil v molekule 1YGE pro ligand s 9 atomy a 6 torzními úhly}
+  \centering
+  \label{fig:1YGE_energy_0}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+     \centering
+    \includegraphics[width=75mm]{img/1YGE_energy_1.png}
+    \caption{Energetický profil v molekule 1YGE pro ligand s 8 atomy a 5 torzními úhly}
+  \centering
+  \label{fig:1YGE_energy_1}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+    \includegraphics[width=75mm]{img/1BRT_energy_0.png}
+    \caption{Energetický profil v molekule 1BRT pro ligand s 5 atomy a 2 torzními úhly}
+  \centering
+  \label{fig:1BRT_energy_0}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+     \centering
+    \includegraphics[width=75mm]{img/1BRT_energy_1.png}
+    \caption{Energetický profil v molekule 1BRT pro ligand se 7 atomy a 4 torzními úhly}
+  \centering
+  \label{fig:1BRT_energy_1}
+\end{minipage}
+\end{figure}
+
+
