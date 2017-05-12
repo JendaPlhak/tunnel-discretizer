@@ -1,70 +1,75 @@
 \chapter*{Úvod}
 \addcontentsline{toc}{chapter}{Úvod}
 
-Vědět jakým způsobem spolu budou interagovat různé dvojice protein-ligand je
-velice důležité pro pochopení řady fundamentálních biochemických procesů, které
-nalézají uplatnění v mnoha praktických odvětvích jako je například farmacie.
-Ligand interaguje s proteinem v jeho \texttt{aktivním místě} (centru), kde dochází
-k enzymové reakci. Příkladem může být inhibice aktivního místa proteinu, které
-jinak umožňuje viru napadnout buňku. Simulace navázání ligandu (ligand vstoupí
-do aktivního místa a vznikne stabilní vazba mezi ligandem a proteinem) a jeho
-uvolnění (uvolnění ligandu ze stabilního komplexu) je užitečná v mnoha praktických
-aplikacích, neboť nám umožňuje identifikovat ligandy, které se budou navazovat
-v daném proteinu nejrychleji, případně získané informace můžeme použít k úpravě
-ligandu tak aby se navazoval rychleji nebo modifikovat samotný protein aby k
-navázání docházelo snáz nebo hůř podle toho jaké chování je žádoucí. Aktivní
-centrum proteinu je mnohdy ukryto hluboko uvnitř molekuly, takže aby se ligand
-mohl navázat, musí nejprve projít tzv. tunelem, který vede z povrchu proteinu
-k jeho aktivnímu centru. V takovém případě je potřeba analyzovat, zda je
-pravděpodobné, aby se ligand do aktivního centra skrze tunel dostal.
+Porozumění interakcím biomolekul je
+zásadní pro pochopení řady fundamentálních biochemických procesů, které
+nalézají uplatnění v mnoha praktických odvětvích, jako je například farmacie.
+\textit{Ligand} (malá molekula, např. léčivo) interaguje s \textit{proteinem} 
+v~jeho \textit{aktivním místě}, kde dochází ke změně biochemických vlastností proteinu
+či přeměně ligandu. Může tak dojít k inhibici funkce proteinu (který např. 
+jinak umožňuje viru napadnout buňku), nebo enzimatické přeměně substrátu na produkt 
+(např. rozklad toxické látky na neškodné produkty). 
+Simulace navázání ligandu (ligand vstoupí
+do aktivního místa a vznikne stabilní komplex) a uvolnění ligandu či produktu ze stabilního komplexu 
+je užitečná v mnoha praktických
+aplikacích, neboť nám poskytne aproximaci energie nutné pro transport ligandu či produktu z či do aktivního místa. 
+To v důsledku umožní například identifikovat ligandy, které se budou navazovat
+v daném proteinu nejrychleji (při hledání léčiva), nebo modifikovat samotný protein tak, 
+aby k~navázání docházelo snáze nebo hůře podle toho, jaké chování je žádoucí (optimalizace 
+proteinu pro rychlý rozklad toxických látek). Aktivní
+místo proteinu je mnohdy ukryto hluboko uvnitř molekuly, takže aby se ligand
+mohl navázat, musí nejprve projít tzv. \textit{tunelem}, který vede z povrchu proteinu
+k jeho aktivnímu místu. V takovém případě je potřeba analyzovat, zda je
+pravděpodobné, aby se ligand do aktivního místa skrze tunel dostal.
 
 Chemické systémy, jakým je protein interagující s ligandem, se řídí druhým
-termodynamickým zákonem a mají proto tendenci minimalizovat jejich
+termodynamickým zákonem a mají proto tendenci minimalizovat svou
 celkovou potenciální energii. Prakticky to znamená, že nejpravděpodobnější
-\textit{konformace} molekul (tj. pozice jejich atomů) jsou ty, která mají minimální
+\textit{konformace} molekul (tj. pozice jejich atomů) jsou ty, které mají minimální
 potenciální energii. Molekulární systém se ale může nacházet také v nějakém
 lokálním energetickém minimu a s určitou pravděpodobností mezi těmito lokálními
 minimy může přecházet. Pravděpodobnost přechodu pak ovlivňuje teplota systému a
 velikost energetické bariéry, která musí být při přechodu překonána, přičemž platí
-že čím menší bariéra, tím vyšší pravděpodobnost přechodu. Tím pádem pokud známe
-energetický profil průchodu ligandu tunelem proteinu, tak můžeme kvantifikovat
-pravděpodobnost s jakou ligand tunelem projde. Funkci která pro zadanou konformaci
-spočítá aproximaci její potenciální energie nazýváme \textit{silové pole}. Analýzou
+že čím menší bariéra, tím vyšší pravděpodobnost přechodu. Pokud známe
+energetický profil průchodu ligandu tunelem proteinu, můžeme kvantifikovat
+pravděpodobnost, s jakou ligand tunelem projde. Funkci, která pro zadanou konformaci
+spočítá aproximaci její potenciální energii, nazýváme \textit{silové pole}. Analýzou
 potenciální energie, kterou získáme ze silového pole, pak můžeme vypočítat
 s jakou pravděpodobností se bude daná konformace vyskytovat v reálném chemickém
-systému. Díky tomu je možné porovnat dva chemické komplexy tvořené
-dvojicemi protein-ligand (jakými jsou třeba dvě možné konformace ligandu
-v aktivním centru jednoho proteinu) a rozhodnout, který komplex má vyšší
-pravděpodobnost zformování v reálném systému.
+systému. 
+%Díky tomu je možné porovnat dva chemické komplexy tvořené
+%dvojicemi protein-ligand (jakými jsou třeba dvě možné konformace ligandu
+%v aktivním místě jednoho proteinu) a rozhodnout, který komplex má vyšší
+%pravděpodobnost zformování v reálném systému.
 
-Pokud chceme studovat navázání a uvolnění ligandu z aktivního centra, potřebujeme
+Pokud chceme studovat navázání a uvolnění ligandu z aktivního místa, potřebujeme
 být schopni vyhodnotit potenciální energii ligandu procházejícího tunelem
-z povrchu proteinu do jeho aktivního centra a naopak. Ligand se v aktivním
-jádře proteinu naváže pokud v tomto místě existuje silné energetické minimum
+z povrchu proteinu do jeho aktivního místa a naopak. Ligand se v aktivním
+místě proteinu naváže pokud v tomto místě existuje silné energetické minimum
 a v průběhu průchodu tunelem nenarazí na žádnou významnou energetickou bariéru
 (gradient tunelu by měl být s menšími lokálními výkyvy stále klesající od
 vstupu do tunelu až na jeho konec v aktivním místě). Pokud tunel obsahuje nějakou
-silnou odpudivou bariéru, je pravděpodobné, že se ji ligandu nepodaří překonat
+silnou repulsivní bariéru, je pravděpodobné, že se ji ligandu nepodaří překonat
 a tunelem neprojde. Poznamenejme, že energetický profil tunelu je pro každý
 ligand unikátní a je tedy potřeba jej pro každou variaci ligandu vyhodnotit
 znovu.
 
-Navázání ligandu v aktivním jádře proteinu se obvykle počítá pomocí takzvaného
+Pozice ligandu v aktivním místě proteinu se obvykle počítá pomocí takzvaného
 molekulárního dokingu. Algoritmus molekulárního dokingu prochází konformační
-prostor molekulárního komplexu protein-ligand a snaží lokalizovat energetická
-minima. Výstupem molekulárního dokingu je jeden nebo více protein-ligand
-konformačních komplexů společně s jejich potenciální energií. Díky tomu
+prostor molekulárního komplexu protein-ligand a snaží se lokalizovat energetická
+minima. Výstupem molekulárního dokingu je jedna nebo více konformací komplexu protein-ligand
+společně s jejich potenciální energií. Díky tomu
 uživatel získá informaci o tom, který ligand se na protein váže s nižší potenciální
 energií a může se na základě této informace pokoušet ligand nebo protein
 dále upravovat. Problémem je, že algoritmus molekulárního dokingu vypočítá pouze
 statické pozice ligandu a proteinu - nevygeneruje \textit{trajektorii} ligandu
 (pohyb ligandu tunelem v čase), což znamená, že tento algoritmus sám o sobě
-nestačí na to abychom mohli studovat přenos ligandu z povrchu proteinu
-do jeho aktivního centra skrze jeho tunel.
+nestačí na to, abychom mohli studovat přenos ligandu z povrchu proteinu
+do jeho aktivního místa skrze jeho tunel, či naopak.
 
 V této práci popíšeme některé části nové metody pro výpočet potenciální energie
 trajektorie ligandu, která umožňuje studovat proces navázání i uvolnění ligandu
-včetně jeho cesty skrze tunel k aktivnímu centru. Naše metoda je založena na
+včetně jeho cesty skrze tunel k aktivnímu místu. Naše metoda je založena na
 algoritmu molekulárního dokingu, který používá tak, že iterativně dokuje ligand
 podél trajektorie tunelu a vyhodnocuje jeho potenciální energii. Náš doking
 pracuje s hybridními silovými poli - jedná se o kombinaci chemického silového
@@ -74,16 +79,17 @@ konformací ligandu. Díky tomu je pozice ligandu v každém místě tunelu
 omezena pouze na oblast definovaného prostoru. Skrze tunel zadaného proteinu
 může existovat velmi mnoho cest, po kterých můžeme ligand provést. Prostor
 všech potenciálních cest proto prohledáváme pomocí heuristického algoritmu
-s backtrackingem. Naše metoda byla implementována uživatelsky přívětivém
-nástroji CaverDock, který je navržen tak, aby byl schopen maximalizovat utilizaci
+s backtrackingem. Naše metoda byla implementována v uživatelsky přívětivém
+nástroji CaverDock, který je navržen tak, aby byl schopen maximálně využít
 paralelních výpočetních architektur.
 
 Tato práce se bude primárně soustředit na informaticko-matematickou stranu
 daného problému: poskytneme obecný náhled na celý algoritmus a pak se budeme
 soustředit zejména na dvě jeho části, za jejichž návrh a implementaci byl
 zodpovědný autor této diplomové práce. Konkrétně se jedná o algoritmus pro
-diskretizaci tunelu a algoritmus pro výpočet konvergence ligandu. Paralelně
-s touto prací vzniká ještě článek popisující další části našeho algoritmu
+diskretizaci tunelu a algoritmus pro výpočet konvergence trajektorií ligandu. 
+
+Paralelně s touto prací vzniká ještě článek popisující další části našeho algoritmu
 do větších detailů společně s evaluací jeho celkového výkonu. Rovněž je v přípravě
 publikace, která se zabývá biochemickými tématy, jakými jsou nastavení
 vstupních parametrů algoritmu, interpretace výsledků nebo vyhodnocení výsledků
