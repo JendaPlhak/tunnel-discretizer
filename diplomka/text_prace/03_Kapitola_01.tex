@@ -13,11 +13,11 @@ musí platit
 
 K tomu ještě budeme požadovat, aby tunel sám sebe nikdy neprotínal. Exaktněji řečeno
 chceme, aby byl objem tunelu $ \Tau $ topologicky ekvivalentní válci.
-Pro představu jak takový tunel může vypadat uvádíme obrázek \ref{fig:basic_tunnel}.
+Pro představu, jak takový tunel může vypadat, uvádíme obrázek \ref{fig:basic_tunnel}.
 \begin{figure}[ht]
-  	\centering
-	\includegraphics[width=100mm]{img/basic_tunnel.jpg}
-	\caption{Tunel v molekule}
+    \centering
+    \includegraphics[width=100mm]{img/basic_tunnel.jpg}
+    \caption{Tunel v molekule}
   \centering
   \label{fig:basic_tunnel}
 \end{figure}
@@ -32,12 +32,12 @@ $ S_{i+1}^{center} $.
 \end{defi}
 
 Abychom mohli provádět doking ligandu, musíme nejprve takto definovaný tunel nařezat na
-jemné plátky - kruhy, na které pak v průběhu výpočtu budeme dokovat průběžné konformace ligandu.
+jemné plátky – kruhy, na které pak budeme v průběhu výpočtu dokovat průběžné konformace ligandu.
 Popišme si nyní, jak by takové řezy měly vypadat.
 
 \begin{defi}
 Řezem tunelu $ \Tau $ rozumíme kruh v prostoru, který je určen uspořádanou trojicí
-$\theta = (A, u, r)$, kde $ A $ je střed, $ u \in \Rbb^3 $ je normálnový vektor a $ r > 0 $ je poloměr.
+$\theta = (A, u, r)$, kde $ A $ je střed, $ u \in \Rbb^3 $ je normálový vektor a $ r > 0 $ je poloměr.
 Pro tento kruh $ \theta $ musí platit, že $ \Tau \cap \theta $ je souvislá množina a navíc
 $ \exists \delta > 0 $ tak, že $ \forall \varepsilon > 0,  \varepsilon < \delta $ je
 $ (A, u, r + \varepsilon) \cap \Tau = \theta \cap \Tau $.
@@ -94,7 +94,7 @@ Tím dostáváme podmínku
 
 Přirozeným požadavkem je abychom se tunelem pohybovali stále vpřed.
 Vzhledem k tomu, že řez $ \theta_i \in \Theta $ musí dělit tunel vždy na dvě části, stačí
-požadovat aby střed následujícího řezu $ \theta_{i + 1} \in \Theta $ ležel před
+požadovat, aby střed následujícího řezu $ \theta_{i + 1} \in \Theta $ ležel před
 $ \theta_i $. To zajistíme podmínkou \ref{cond:going_forward}.
 
 \begin{align}
@@ -187,7 +187,7 @@ je pravděpodobně kvůli tomu, jaké volíme výchozí normálové vektory pro 
 tak se nám může stát, že právě například nezačneme zatáčet dostatečně brzy apod.
 Z tohoto důvodu budeme pro výpočet normály nového řezu používat třídu
 $ TunnelCurve $ a její metodu $ getWeightedDir $, která pro daný bod $ P $ na křivce
-- trajektorii tunelu vrátí co nejlepší aproximaci směru tunelu na okolí bodu $ P $.
+– trajektorii tunelu vrátí co nejlepší aproximaci směru tunelu na okolí bodu $ P $.
 Exaktněji tento výpočet a případná zlepšení rozvedeme v podkapitole \ref{subsec:tunnel_dir}.
 Pro ilustraci se ještě podívejme na obrázek \ref{fig:weighted_dir}. Je vidět, že
 řezy nyní kopírují zakřivení tunelu mnohem ochotněji.
@@ -298,8 +298,8 @@ místě tvoří prudkou zatáčku a je tak potřeba aktivovat agresivnější st
 umístění následujícího řezu nebo bude postačující aplikovat konzervativnější
 přístup. V prvním případě umístíme iniciální řez nového disku do vzdálenosti
 $ \delta $ ve směru normály předchozího disku a normálu necháme stejnou. Disk
-umisťujeme tak daleko abychom začali zatáčet skutečně včas a měli lepší
-informaci o tom jak vypadá tunel v místech kam právě směřujeme. Ve druhém případě
+umisťujeme tak daleko, abychom začali zatáčet skutečně včas a měli lepší
+informaci o tom, jak vypadá tunel v místech, kam právě směřujeme. Ve druhém případě
 se posuneme pouze o $ \epsilon $ a normálu natočíme tak aby co nejlépe odpovídala
 aktuálnímu směrování tunelu.
 
@@ -310,18 +310,18 @@ $ \operatorname{doShift} $, abychom skutečně dostali řez, který splňuje vš
 naše podmínky.
 
 Nakonec na řádcích \ref{digTunnel:last_if} až \ref{digTunnel:last_if_end}
-zkontrolujeme zda nemůžeme vynechat předchozí řez a případně jej odstraníme.
-Výsledný algoritmus tedy iterativně prochází tajektorii tunelu a postupně vytváří řezy,
+zkontrolujeme, zda nemůžeme vynechat předchozí řez a případně jej odstraníme.
+Výsledný algoritmus tedy iterativně prochází trajektorii tunelu a postupně vytváří řezy,
 které pak v případě potřeby posune tak, aby byly zachovány námi požadované podmínky.
 
 V předchozím textu si čtenář mohl povšimnout použití konstanty $ \epsilon $.
-Ta udává s jakým krokem se budeme tunelem pohybovat.
+Ta udává, s jakým krokem se budeme tunelem pohybovat.
 Volíme ji tak, aby platilo  $ \epsilon < \delta $, byla dostatečně malá abychom
 předešli zaokrouhlovacím chybám, ale zároveň čím větší bude, tím rychleji se
 budeme tunelem pohybovat a tím rychleji také celý algoritmus doběhne. Experimentálně
 jsme ověřili, že vhodnou volbou je například $ \epsilon = \frac{1}{10} \delta $.
 
-Další použitou konstantou je $ \Delta $, která udává o jakou vzdálenost dopředu
+Další použitou konstantou je $ \Delta $, která udává, o jakou vzdálenost dopředu
 se díváme, když zjišťujeme, zda je potřeba začít implementovat prudkou zatáčku.
 V našich experimentech nejlépe vycházelo použití hodnoty $ \Delta = 2 \delta $.
 Poznamenejme, že stejnou konstantu používáme také při vyhodnocení funkce
@@ -332,7 +332,7 @@ $ \operatorname{isSharpTurn} $, kterou rozvedeme v podkapitole \ref{subsec:is_sh
 
 \section{Disk fitting} \label{subsec:disk_fit}
 Nyní se budeme věnovat funkci $ \operatorname{fitDiskTunnel} $ použité na řádku
-\ref{alg:fit_disk}. Na tomto místě již víme jaký normálový vektor by měl řez mít a
+\ref{alg:fit_disk}. Na tomto místě již víme, jaký normálový vektor by měl řez mít a
 zároveň máme k dispozici referenční bod $ P $, který nám společně s normálou
 určuje rovinu $ \rho $. Našim úkolem je najít střed a poloměr řezu tak, aby
 byly splněny požadované podmínky a zároveň aby byl poloměr řezu co nejmenší.
@@ -366,7 +366,7 @@ popisuje jednoduchá funkce $ findNeighbors $, která je zachycena pseudokódem
 \end{algorithmic}
 \end{algorithm}
 
-Výpočet bude zřejmě pro libovolný vstup konečný neboť tunel je tvořen jen konečným
+Výpočet bude zřejmě pro libovolný vstup konečný, neboť tunel je tvořen jen konečným
 počtem koulí.
 
 Teď když víme, které koule jsou pro nás relevantní, uvážíme průřez rovinou
@@ -430,7 +430,7 @@ na řádku \ref{alg:shift_disk}. Jejím úkolem je posunout aktuální řez tak,
 byly splněny podmínky (\ref{cond:not_intersecting}), (\ref{cond:distance})
 a (\ref{cond:going_forward}) na průnik, vzdálenost a pohyb vpřed.
 
-Funkce bude na vstupu očekávat poslední umístený řez $ V $ a aktuální řez $ W $,
+Funkce bude na vstupu očekávat poslední umístěný řez $ V $ a aktuální řez $ W $,
 který se snažíme umístit. Pro správné fungování budeme vyžadovat aby nový řez
 alespoň částečně ležel v poloprostoru určeném normálou a středem řezu $ V $.
 Tento poloprostor budeme značit $ \mathcal{H}(V) $. Formálně
@@ -513,7 +513,7 @@ minimální (nejvýše 2) a dopad na celkový výkon algoritmu nebyl vůbec mě�
 ještě rozebereme). Proč za epsilon nezvolit přímo $ \delta $ bude zřejmé z
 pozdějšího textu.
 
-Z výsledných bodů zrekonstruujeme řez jehož střed je určen vrcholy
+Z výsledných bodů zrekonstruujeme řez, jehož střed je určen vrcholy
 $ Q_1 $, $ Q_2 $ a normála $ \vec{n} $ bude vektor ležící v rovině $ \rho $
 kolmý na vektor $ \overrightarrow{Q_1 Q_2} $, který orientujeme tak, že bude platit
 $ \langle V^{normal}, \vec{n} \rangle \geq 0 $, tedy vyžadujeme souhlasnou
@@ -584,7 +584,7 @@ $ \widetilde{V} $. To společně se spojitostí a konečnými rozměry tunelu za
 že se po konečném počtu kroků dostaneme do vzdálenosti menší než $ \delta $.
 
 Zevrubným testováním jsme zjistili, že problém může nastat ve chvíli, kdy
-z důvodu prudké změny poloměru nebo směru tunelu nemůžeme pokračovat vpřed aniž
+z důvodu prudké změny poloměru nebo směru tunelu nemůžeme pokračovat vpřed, aniž
 bychom porušili některou z našich podmínek kladených na posloupnost řezů.
 Tuto situaci dobře demonstruje obrázek \ref{fig:sharp_curve}. V této situaci
 téměř jakékoliv posunutí vpřed vyústí v prudké změny poloměru minimální kružnice
@@ -659,7 +659,7 @@ určen středy našich řezů, tedy vektor $ v = W^{center} - V^{center} $. Ze v
 přípustných rovin pak takto vzniklá rovina bude maximalizovat vzdálenost mezi
 středy úseček vzniklých projekcí řezů do $ \rho $. Také díky tomu, že
 výsledná rovina bude obsahovat oba středy našich řezů, dostaneme v projekční
-rovině nedeformované úsečky o maximálních délkách - jejich průměr bude stejný
+rovině nedeformované úsečky o maximálních délkách – jejich průměr bude stejný
 jako průměr promítaných řezů.
 
 Teoreticky by se nám ještě mohlo stát, že by takto vzniklý vektor byl lineárně
@@ -766,7 +766,7 @@ která umístění řezu dokončí.
 
 
 \section{Funkce isSharpTurn} \label{subsec:is_sharp_turn}
-To zda použijeme funkci $ \operatorname{shiftDisk} $ nebo radikálnější
+To, zda použijeme funkci $ \operatorname{shiftDisk} $ nebo radikálnější
 $ \operatorname{shiftSharpTurn} $ rozhodujeme na základě návratové hodnoty
 funkce $ \operatorname{isSharpTurn} $. Ta podobně jako v těle hlavního
 algoritmu \ref{alg:digTunnel} posune poslední umístěný řez o konstantu
@@ -774,7 +774,7 @@ $ \Delta $ ve směru jeho normály. Sečnou rovinu zkonstruujeme stejně jako v
 případě funkce $ \operatorname{shiftSharpTurn} $ a v ní najdeme korespondující
 vrcholy $ P_1$, $P_2$, $Q_1$ a $ Q_2 $. Následně zjistíme procentuální rozdíl
 mezi vzdálenostmi vrcholů. Ostrou zatáčku pak implementujeme ve chvíli, kdy se
-vzdálenosti liší o více než 35\%. Tato hranice nepoměru se nám v praxi osvědčila
+vzdálenosti liší o více než 35 \%. Tato hranice nepoměru se nám v praxi osvědčila
 velmi dobře. Výpočet je zachycen pseudokódem č. \ref{alg:isSharpTurn}.
 
 \begin{algorithm}
@@ -809,7 +809,7 @@ $ C_i $ a pro začátek je definujeme jakožto středy koulí našeho tunelu:
 $ \{C_i = S_i^{center}\}_{i=0}^{n} $.
 
 Podél křivky $ \gamma(t) $ se můžeme tunelem pohybovat a přirozeně bychom pro
-směrování našeho algoritmu chtěli použít směr pohybu - derivaci
+směrování našeho algoritmu chtěli použít směr pohybu – derivaci
 $ \frac{d\gamma}{dt}(t_0) $. Narazíme však na to, že pro $ t_0 $ taková, že
 $ \gamma(t_0) = C_i $ pro nějaké $ 0 < i < n $ derivace neexistuje. To můžeme
 napravit tak, že namísto $ \frac{d\gamma}{dt}(t_0) $ budeme definovat vektorové
@@ -838,13 +838,13 @@ Prakticky se jedná o jednoduchý vážený průměr, který postupně mezi jedn
 $ C_i $ spojitě transformuje jeden směrový vektor na druhý.
 
 Jak jsme ale mohli vidět na obrázku \ref{fig:naive_cuts}, použití takto definovaných
-směrových vektorů jakožto normál řezů vyústí v silně volatilní posloupnost
+směrových vektorů jakožto normál řezů vyústí v silně volatilní posloupnost,
 a tak je potřeba vektorové pole $ \Omega $ ještě dále vyhladit.
 
 Uvažme tedy opět libovolný bod $ t_0 \in [0, l] $ pro který chceme získat vektor,
 který co nejlépe vystihuje směr tunelu v daném bodě. Nechceme pro tyto účely použít
 přímo vektorové pole $ \Omega $, protože to by mohlo být příliš volatilní
-a nemuselo by dobře reflektovat globální směr tunelu. Co můžeme udělat je spočítat
+a nemuselo by dobře reflektovat globální směr tunelu. Co můžeme udělat, je spočítat,
 jak se v průměru chová $ \Omega $ na okolí bodu $ t_0 $. Formálně budeme
 definovat nové vektorové pole $ \Phi \colon [0, l] \to \Rbb^3 $,
 
@@ -933,8 +933,8 @@ přičemž $ d = \Delta + t_0 - \gamma^{-1}(C_i) $.
 
 Tímto způsobem jsme schopni vypočítat hodnotu integrálu mezi dvěma po sobě jdoucími
 body $ C_i $ a $ C_{i + 1} $. Kvůli odstranění absolutní hodnoty jsme se ale
-museli omezit na úsečky na kterých neleží bod $ \gamma(t_0) $. Integrál jehož
-integrační interval obsahuje $ t_0 $ rozdělíme na součet dvou
+museli omezit na úsečky na kterých neleží bod $ \gamma(t_0) $. Integrál, jehož
+integrační interval obsahuje $ t_0 $, rozdělíme na součet dvou
 integrálů
 
 \begin{align*}
@@ -947,7 +947,7 @@ $ \gamma(t) $ konstantní. Označme si meze takovéhoto integrálu $ c $ a $ d $
 Pak ale existují vrcholy $ C_i $ a $ C_{i + 1} $ křivky $ \gamma $ takové, že
 $ [c, d] \subseteq [\gamma^{-1}(C_i), \gamma^{-1}(C_{i + 1})] $. Díky tomu stačí
 k výpočtu použít vzorečky (\ref{eq:result_1}) nebo (\ref{eq:result_2}), podle
-toho zda jsme před nebo za bodem $ t_0 $, s tím že
+toho, zda jsme před, nebo za bodem $ t_0 $, s tím že
 namísto integračního intervalu $ [0, 1] $ zvolíme interval
 $ \left[ \frac{c - \gamma^{-1}(C_i)}{\gamma^{-1}(C_{i + 1}) - \gamma^{-1}(C_i)},
  \frac{d - \gamma^{-1}(C_i)}{\gamma^{-1}(C_{i + 1}) - \gamma^{-1}(C_i)} \right] $.
@@ -984,10 +984,10 @@ ve kterém tento bod leží a který má zároveň co nejmenší poloměr. Jak t
 Úlohu nalezení minimálního řezu můžeme formulovat jako úlohu nalezení minima
 funkce $ \operatorname{fitDiskTunnel} $ (minimum bráno podle průměru umístěného řezu)
 nad množinou vektorů daných jednotkovou sférou (ve skutečnosti stačí brát
-jen polovinu - hemisféru - díky symetrii).
+jen polovinu – hemisféru – díky symetrii).
 
 Na tento problém jsme se pokusili aplikovat řadu metod implementovaných v Python
-knihovně SciPy, namátkou uveďme například simulované žíhání, Nelder–Meadovu metodu
+knihovně SciPy, namátkou uveďme například simulované žíhání, Nelder-Meadovu metodu
 nebo Broyden-Fletcher-Goldfarb-Shannův algoritmus. Vedle těchto metod jsme zároveň
 ještě implementovali vlastní, poměrně naivní prohledávání. Výsledky byly
 překvapivé. Obecné metody byly zpravidla schopny globální minimum mnohem přesněji
@@ -997,7 +997,7 @@ tunelů se stávalo, že uvázly v lokálním minimu, které se od globálního 
 o desítky procent, kdežto náš naivní přístup tímto způsobem neselhal ani jednou.
 Je ale nutno podotknout, že uvedené obecné metody by potenciálně mohly fungovat
 dobře, pokud by autor při implementaci věnoval více času ladění jejich parametrů,
-případně adaptaci vstupní úlohy aby lépe odpovídala typickým úlohám, které tyto
+případně adaptaci vstupní úlohy, aby lépe odpovídala typickým úlohám, které tyto
 algoritmy řeší dobře.
 
 V našem případě jsme ovšem dali přednost naší naivní metodě, která
@@ -1088,7 +1088,7 @@ můžeme vidět na obrázku \ref{fig:min_cuts}.
 \end{figure}
 
 Středy výsledných řezů nakonec vezmeme a zkonstruujeme pomocí nich křivku
-$ \gamma $ z předchozí kapitoly, se kterou pak počítáme jak již bylo popsáno.
+$ \gamma $ z předchozí kapitoly, se kterou pak počítáme, jak již bylo popsáno.
 
 \section{Implementace} \label{subsec:implementation}
 Algoritmus pro diskretizaci tunelu byl v popsané podobě implementován v
@@ -1137,7 +1137,7 @@ spíše výjimkou a průměrná délka tunelu se pohybovala kolem 32 sfér a 162
 výsledných řezů. Průměrná délka výpočtu byla 38 sekund, což vzhledem k délce
 následného výpočtu spojité trajektorie považujeme za naprosto dostatečné.
 Kompletní informace o vyhodnocení na každém tunelu uvádíme v apendixu A.
-Pro zajímavost ještě na obrázcích \ref{fig:2INC} - \ref{fig:2SQC} uvádíme
+Pro zajímavost ještě na obrázcích \ref{fig:2INC}–\ref{fig:2SQC} uvádíme
 diskretizace některých dalších tunelů společně s názvem enzymu, v němž se daný
 tunel nachází.
 
