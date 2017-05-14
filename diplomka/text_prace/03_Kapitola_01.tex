@@ -153,7 +153,7 @@ K problémům dochází proto, že takto bereme v potaz pouze velmi lokální in
 tunelu a zřejmě zcela ignorujeme dříve uvedené požadavky na řezy. Tento postup ale
 můžeme zdokonalit. Prvním problémem je, že když takto postupně generujeme nové řezy,
 může se stát, že od sebe budou příliš daleko nebo se budou protínat. Potřebujeme proto
-funkci $ shiftDisk $, která přesně toto znemožní. Tuto funkci do detailu rozvedeme v
+funkci $ shiftDisc $, která přesně toto znemožní. Tuto funkci do detailu rozvedeme v
 podkapitole \ref{subsec:disk_shift}. Ve stručnosti pouze poznamenejme, že tato funkce
 vstupní řez upraví tak, aby neprotínal předchozí řez a byl od něj vzdálen nejvýše
 o $ \delta $. Jak ale můžeme vidět na obrázku \ref{fig:shift_cuts}, toto způsobí,
@@ -222,7 +222,7 @@ přidání prvku na konec listu.
 \Function{digTunnel}{$\Tau, \delta$}
     \State $ centers \gets [ S^{center} \mid S \in \Tau ] $ \label{digTunnel:first_init}
     \
-    \State $ disks \gets   [ \operatorname{fitDiskTunnel}(\operatorname{norm}(S_{1}^{center} - S_{0}^{center}), S_0^{center})] $
+    \State $ discs \gets   [ \operatorname{fitDiscTunnel}(\operatorname{norm}(S_{1}^{center} - S_{0}^{center}), S_0^{center})] $
     \State $ curve \gets \operatorname{TunnelCurve}(centers) $ \label{digTunnel:last_init}
     \Statex
 
@@ -232,42 +232,42 @@ přidání prvku na konec listu.
 
         \State $ d \gets 0 $
         \While {True}
-            \State $ prev\_disk \gets disks[|disks|-1] $
-            \State $ plane \gets \operatorname{getPlane}(prev\_disk) $ \Comment{Konstrukce roviny, ve které řez leží}
+            \State $ prev\_disc \gets discs[|discs|-1] $
+            \State $ plane \gets \operatorname{getPlane}(prev\_disc) $ \Comment{Konstrukce roviny, ve které řez leží}
             \State $ d \gets \dis(plane \cap line, S_{i}^{center}) + \epsilon  $
             \If {$ d > \norm{dir} $} \label{digTunnel:while_condition}
                 \Break
             \EndIf
             \Statex
 
-            \If{$\operatorname{makesSharpTurn}(prev\_disk, curve)$}
-                \State $ disk\_center
-                    \gets prev\_disk^{center} + \Delta * prev\_disk^{normal} $ \label{alg:shift_by_delta}
-                \State $ disk\_normal \gets prev\_disk^{normal} $   \label{alg:same_normal}
+            \If{$\operatorname{makesSharpTurn}(prev\_disc, curve)$}
+                \State $ disc\_center
+                    \gets prev\_disc^{center} + \Delta * prev\_disc^{normal} $ \label{alg:shift_by_delta}
+                \State $ disc\_normal \gets prev\_disc^{normal} $   \label{alg:same_normal}
                 \State $ \operatorname{doShift} \gets \operatorname{shiftSharpTurn} $
             \Else
-                \State $ disk\_center \gets prev\_disk^{center} + \epsilon * prev\_disk^{normal} $
-                \State $ disk\_normal \gets \operatorname{getWeightedDir}(curve, i, d) $
-                \State $ \operatorname{doShift} \gets \operatorname{shiftDisk} $
+                \State $ disc\_center \gets prev\_disc^{center} + \epsilon * prev\_disc^{normal} $
+                \State $ disc\_normal \gets \operatorname{getWeightedDir}(curve, i, d) $
+                \State $ \operatorname{doShift} \gets \operatorname{shiftDisc} $
             \EndIf
 
-            \State $ disk \gets \operatorname{fitDiskTunnel}(disk\_normal, disk\_center) $ \label{alg:fit_disk}
-            \State $ disk \gets \operatorname{doShift}(prev\_disk, disk) $ \label{alg:shift_disk}
+            \State $ disc \gets \operatorname{fitDiscTunnel}(disc\_normal, disc\_center) $ \label{alg:fit_disk}
+            \State $ disc \gets \operatorname{doShift}(prev\_disc, disc) $ \label{alg:shift_disk}
 
-            \If{$ |disks| \geq 2  \wedge \dst(disk, disks[|disks|-2]) < \delta $} \label{digTunnel:last_if}
-                \State $ \operatorname{pop}(disks)  $ \label{digTunnel:last_if_end}
+            \If{$ |discs| \geq 2  \wedge \dst(disc, discs[|discs|-2]) < \delta $} \label{digTunnel:last_if}
+                \State $ \operatorname{pop}(discs)  $ \label{digTunnel:last_if_end}
             \EndIf
-            \State $ \operatorname{append}(disks, disk) $
+            \State $ \operatorname{append}(discs, disc) $
         \EndWhile
     \EndFor
-    \State \Return $ disks $
+    \State \Return $ discs $
 \EndFunction
 
 \end{algorithmic}
 \end{algorithm}
 
 Na řádcích \ref{digTunnel:first_init} až \ref{digTunnel:last_init} provedeme
-inicializaci potřebných datových struktur. Do pole $ disks $ budeme
+inicializaci potřebných datových struktur. Do pole $ discs $ budeme
 v průběhu algoritmu ukládat vygenerované řezy. Iniciálně do něj vložíme
 řez daný středem první koule a první normálou, čímž zajistíme splnění první
 části podmínky (\ref{cond:good_start}). Poslední inicializovanou proměnnou je
@@ -306,7 +306,7 @@ informaci o tom, jak vypadá tunel v místech, kam právě směřujeme. Ve druh�
 se posuneme pouze o $ \epsilon $ a normálu natočíme tak, aby co nejlépe odpovídala
 aktuálnímu směrování tunelu.
 
-Následně zavoláme funkci $ \operatorname{fitDiskTunnel} $, která posunem iniciálního
+Následně zavoláme funkci $ \operatorname{fitDiscTunnel} $, která posunem iniciálního
 středu a vhodnou volbou poloměru vygeneruje řez. Ten ale ještě nemusí být ve vhodné
 konformaci, proto aplikujeme příslušnou transformaci (funkci) uloženou v proměnné
 $ \operatorname{doShift} $, abychom skutečně dostali řez, který splňuje všechny
@@ -333,8 +333,8 @@ $ \operatorname{isSharpTurn} $, kterou rozvedeme v podkapitole \ref{subsec:is_sh
 
 
 
-\section{Disk fitting} \label{subsec:disk_fit}
-Nyní se budeme věnovat funkci $ \operatorname{fitDiskTunnel} $ použité na řádku
+\section{Disc fitting} \label{subsec:disk_fit}
+Nyní se budeme věnovat funkci $ \operatorname{fitDiscTunnel} $ použité na řádku
 \ref{alg:fit_disk}. Na tomto místě již víme, jaký normálový vektor by měl řez mít a
 zároveň máme k dispozici referenční bod $ P $, který nám společně s normálou
 určuje rovinu $ \rho $. Našim úkolem je najít střed a poloměr řezu tak, aby
@@ -409,13 +409,13 @@ Výše uvedené pak můžeme vyjádřit pomocí jednoduchého pseudokódu \ref{a
 \label{alg:fitDiskTunnel}
 \begin{algorithmic}[1]
 
-\Function{fitDiskTunnel}{$ \vec{n}, P$}
+\Function{fitDiscTunnel}{$ \vec{n}, P$}
     \State $ \rho \gets Plane(\vec{n}, P) $
     \State $ C \gets \{S_i \in \Tau \mid P \in S_i \} $
     \State $ O \gets \operatorname{findNeighbors}(C$, $\rho)$
     \State $ circles \gets \{ \operatorname{Circle}_{\rho}(S \cap \rho) \mid S \in O \} $
     \State $ Q, radius \gets \operatorname{getMinCircle}(circles) $
-    \State \Return $ \operatorname{Disk}(\vec{n}, \rho(Q), radius) $
+    \State \Return $ \operatorname{Disc}(\vec{n}, \rho(Q), radius) $
 \EndFunction
 
 \end{algorithmic}
@@ -428,8 +428,8 @@ roviny $ \rho $ do souřadného systému původního prostoru.
 
 
 
-\section{Disk shifting} \label{subsec:disk_shift}
-Druhou popisovanou funkcí bude $ \operatorname{shiftDisk} $, kterou jsme použili
+\section{Disc shifting} \label{subsec:disk_shift}
+Druhou popisovanou funkcí bude $ \operatorname{shiftDisc} $, kterou jsme použili
 na řádku \ref{alg:shift_disk}. Jejím úkolem je posunout aktuální řez tak, aby
 byly splněny podmínky (\ref{cond:not_intersecting}), (\ref{cond:distance})
 a (\ref{cond:going_forward}) na průnik, vzdálenost a pohyb vpřed.
@@ -522,7 +522,7 @@ $ Q_1 $, $ Q_2 $, a normála $ \vec{n} $ bude vektor ležící v rovině $ \rho 
 kolmý na vektor $ \overrightarrow{Q_1 Q_2} $, který orientujeme tak, že bude platit
 $ \langle V^{normal}, \vec{n} \rangle \geq 0 $, tedy vyžadujeme souhlasnou
 orientaci, jakou má předchozí řez. Nakonec zavoláme funkci
-$ \operatorname{fitDiskTunnel} $, která zajistí správně zvolený poloměr.
+$ \operatorname{fitDiscTunnel} $, která zajistí správně zvolený poloměr.
 Uvedený postup shrnuje pseudokód č. \ref{alg:shiftDisk}:
 
 
@@ -531,7 +531,7 @@ Uvedený postup shrnuje pseudokód č. \ref{alg:shiftDisk}:
 \label{alg:shiftDisk}
 \begin{algorithmic}[1]
 
-\Function{shiftDisk}{$ V, W$}
+\Function{shiftDisc}{$ V, W$}
     \State $ P_1, P_2, Q_1, Q_2 \gets $ Proper vertex correspondence
     \State $ \vec{v_1} \gets Q_1 - V^{center} $
     \State $ \vec{v_2} \gets Q_2 - V^{center} $
@@ -556,12 +556,12 @@ Uvedený postup shrnuje pseudokód č. \ref{alg:shiftDisk}:
     \EndIf
     \Statex
 
-    \State $ Z \gets $ Construct disk from $ Q_1$, $Q_2$ perpendicular to $ \rho $
-    \State $ W \gets \operatorname{fitDiskTunnel}(Z^{normal}, Z^{center}) $ \label{shiftDisk:fit}
+    \State $ Z \gets $ Construct disc from $ Q_1$, $Q_2$ perpendicular to $ \rho $
+    \State $ W \gets \operatorname{fitDiscTunnel}(Z^{normal}, Z^{center}) $ \label{shiftDisk:fit}
     \Statex
 
     \If {$ \dst(V, W) > \delta \vee \neg \operatorname{isFollower}(V, W)$ }
-        \State \Return $ \operatorname{shiftDisk}(V, W) $ \label{shiftDisk:recursion}
+        \State \Return $ \operatorname{shiftDisc}(V, W) $ \label{shiftDisk:recursion}
     \Else
         \State \Return $ W $
     \EndIf
@@ -580,7 +580,7 @@ případně podmínky (\ref{cond:not_intersecting}) a (\ref{cond:going_forward})
 aplikujeme celý postup rekurzivním voláním na řádku \ref{shiftDisk:recursion} znovu.
 
 Díky tomu algoritmus pro každý vstup vrátí správný výsledek, pokud zastaví.
-Jak je to tedy s konečnosti výpočtu? Algoritmus $\operatorname{fitDiskTunnel} $
+Jak je to tedy s konečnosti výpočtu? Algoritmus $\operatorname{fitDiscTunnel} $
 nemění normálový vektor řezu a proto
 rovina $ \rho $ zůstane během rekurze stále stejná. Díky tomu jistě úsečku
 $ \widetilde{W} $ při každém rekurzivním zanoření posuneme o kousek blíže k
@@ -596,7 +596,7 @@ obepínající tunel a algoritmus v tomto případě selže. V tuto chvíli se b
 můžeme spustit nějakou formu backtrackingu nebo se pokusíme pravděpodobnost
 této situace minimalizovat, což v našem případě bude znamenat, že zvolíme v případě
 detekce potenciálně velmi prudkého ohybu jinou strategii a funkci
-$ \operatorname{shiftDisk} $ spustíme jen když toto nebezpečí nebude hrozit.
+$ \operatorname{shiftDisc} $ spustíme jen když toto nebezpečí nebude hrozit.
 
 \begin{figure}[ht]
     \centering
@@ -619,7 +619,7 @@ Funkce v případě blížící se prudké
 zatáčky načte poslední umístěný řez a posune jej vpřed o $ \Delta $ ve směru
 jeho normály. To se realizuje na řádcích \ref{alg:shift_by_delta} a
 \ref{alg:same_normal} v hlavním algoritmu. Na takto posunutý řez aplikujeme
-funkci $ \operatorname{fitDiskTunnel} $. Tímto způsobem získáme docela dobrou
+funkci $ \operatorname{fitDiscTunnel} $. Tímto způsobem získáme docela dobrou
 představu o tom, co se s tunelem v nejbližší době bude dít, na základě čehož
 můžeme implementovat případné korekce a orientovat nový řez směrem, kterým
 tunel zatáčí.
@@ -672,7 +672,7 @@ zatočení zřejmě nedochází. Popisovaný algoritmus bude i tak fungovat,
 a to pro libovolnou volbu vektoru lineárně nezávislého na $ V^{normal} $.
 
 Když máme k dispozici projekční rovinu, můžeme podobně jako v případě
-procedury $ \operatorname{shiftDisk} $ najít korespondující
+procedury $ \operatorname{shiftDisc} $ najít korespondující
 vrcholy $ P_1, P_2 $, resp. $ Q_1, Q_2 $. Nyní je potřeba rozlišit dva případy.
 
 Pokud $ W^{radius} \geq V^{radius} $, pak pomocí vrcholů úseček zjistíme, která
@@ -732,12 +732,12 @@ postup je zachycen pseudokódem č. \ref{alg:shiftSharpTurn}.
     \EndIf
 
     \Statex
-    \State $ Z \gets $ Construct disk from $ Q_1$, $Q_2$ perpendicular to $ \rho $
-    \State $ W \gets \operatorname{fitDiskTunnel}(Z^{normal}, Z^{center}) $
+    \State $ Z \gets $ Construct disc from $ Q_1$, $Q_2$ perpendicular to $ \rho $
+    \State $ W \gets \operatorname{fitDiscTunnel}(Z^{normal}, Z^{center}) $
     \Statex
 
     \If {$ \dst(V, W) > \delta \vee \neg \operatorname{isFollower}(V, W)$ }
-        \State \Return $ \operatorname{shiftDisk}(V, W) $ \label{shiftSharpTurn:shift_disk}
+        \State \Return $ \operatorname{shiftDisc}(V, W) $ \label{shiftSharpTurn:shift_disk}
     \Else
         \State \Return $ W $
     \EndIf
@@ -759,10 +759,10 @@ pravděpodobně ubírá přímo rovně. V souladu s tímto faktem se v obou př�
 větvení vydáme druhou větví a oba vrcholy umístíme do stejné vzdálenosti, čímž
 zajistíme přímý pohyb tunelem.
 
-Stejně jako v případě funkce $ \operatorname{shiftDisk} $ musíme nakonec
+Stejně jako v případě funkce $ \operatorname{shiftDisc} $ musíme nakonec
 zkontrolovat splnění našich podmínek ze stejných důvodů jako u funkce
 \ref{alg:shiftDisk} a v případě jejich porušení voláme ještě
-na řádku \ref{shiftSharpTurn:shift_disk} funkci $ \operatorname{shiftDisk} $,
+na řádku \ref{shiftSharpTurn:shift_disk} funkci $ \operatorname{shiftDisc} $,
 která umístění řezu dokončí.
 
 
@@ -770,7 +770,7 @@ která umístění řezu dokončí.
 
 
 \section{Funkce isSharpTurn} \label{subsec:is_sharp_turn}
-To, zda použijeme funkci $ \operatorname{shiftDisk} $ nebo radikálnější
+To, zda použijeme funkci $ \operatorname{shiftDisc} $ nebo radikálnější
 $ \operatorname{shiftSharpTurn} $, rozhodujeme na základě návratové hodnoty
 funkce $ \operatorname{isSharpTurn} $. Ta podobně jako v těle hlavního
 algoritmu \ref{alg:digTunnel} posune poslední umístěný řez o konstantu
@@ -986,7 +986,7 @@ ve kterém tento bod leží a který má zároveň co nejmenší poloměr. Jak t
 
 \section{Hledání minimálního řezu} \label{subsec:min_cut}
 Úlohu nalezení minimálního řezu můžeme formulovat jako úlohu nalezení minima
-funkce $ \operatorname{fitDiskTunnel} $ (minimum bráno podle průměru umístěného řezu)
+funkce $ \operatorname{fitDiscTunnel} $ (minimum bráno podle průměru umístěného řezu)
 nad množinou vektorů daných jednotkovou sférou (ve skutečnosti stačí brát
 jen polovinu – hemisféru – díky symetrii).
 
@@ -1015,8 +1015,8 @@ pseudokód č. \ref{alg:findMinimalDisk}.
 \begin{algorithmic}[1]
 
 
-\Function{findMinimalDisk}{$ P, \vec{n}$}
-    \State $ V  \gets \operatorname{fitDiskTunnel}(\vec{n}, P) $
+\Function{findMinimalDisc}{$ P, \vec{n}$}
+    \State $ V  \gets \operatorname{fitDiscTunnel}(\vec{n}, P) $
     \For{$ i = 0, \dots, 4 $}
         \State $ \theta \gets \frac{\pi / 3}{4^i} $ \label{alg:findMinimalDisk:dec_angle}
         \State $ found\_better \gets $ True
@@ -1025,7 +1025,7 @@ pseudokód č. \ref{alg:findMinimalDisk}.
             \State $ \vec{v} \gets V^{normal} $
             \For{$ \varphi \in \{ k \frac{i + 1}{10} \mid k \frac{i + 1}{10} < 2 \pi, k \in \Nbb \}$} \label{alg:findMinimalDisk:inner_for}
                 \State $ \vec{w} \gets$ Vector $\vec{v} $ rotated by $ \theta $ and $\varphi $ \label{alg:findMinimalDisk:rotate}
-                \State $ W \gets \operatorname{fitDiskTunnel}(\vec{w}, P) $
+                \State $ W \gets \operatorname{fitDiscTunnel}(\vec{w}, P) $
                 \If{$ W^{radius} < V^{radius} \wedge $ Tunnel trajectory threads through $ W $}  \label{alg:findMinimalDisk:if}
                     \State $ V \gets W $
                     \State $ found\_better \gets $ True
