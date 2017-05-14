@@ -104,7 +104,6 @@ $ \theta_i $. To zajistíme podmínkou \ref{cond:going_forward}.
         \Rightarrow \langle \theta_i^{normal}, \theta_{i+1}^{center} - \theta_i^{center} \rangle > 0
         \label{cond:going_forward}
 \end{align}
-Poznamenejme, že $ \langle \cdot, \cdot \rangle$ značí skalární součin.
 Nakonec přidáním podmínky \ref{cond:good_start} na první a poslední řez zajistíme,
 že řezy pokryjí tunel v celé jeho délce. Pro potřeby této podmínky označme
 $ w = S_2^{center} - S_1^{center} $.
@@ -211,8 +210,8 @@ případech. Podrobně se jí budeme věnovat v podkapitole \ref{subsec:shift_sh
 
 Kostru naznačeného algoritmu zachycuje pseudokód č. \ref{alg:digTunnel}.
 Poznamenejme, že budeme značit $ \operatorname{norm}(v) = \frac{v}{\norm{v}}$ a
-výrazy \textit{pop}, resp. \textit{append} budeme používat pro odstranění posledního prvku z listu, resp.
-přidání prvku na konec listu.
+výrazy \textit{Pop}, resp. \textit{Append} budeme používat pro odstranění
+posledního prvku z listu, resp. přidání prvku na konec listu.
 
 \begin{algorithm}
 \caption{Algoritmus pro výpočet diskretizace tunelu}
@@ -255,9 +254,9 @@ přidání prvku na konec listu.
             \State $ disc \gets \operatorname{doShift}(prev\_disc, disc) $ \label{alg:shift_disk}
 
             \If{$ |discs| \geq 2  \wedge \dst(disc, discs[|discs|-2]) < \delta $} \label{digTunnel:last_if}
-                \State $ \operatorname{pop}(discs)  $ \label{digTunnel:last_if_end}
+                \State $ \operatorname{Pop}(discs)  $ \label{digTunnel:last_if_end}
             \EndIf
-            \State $ \operatorname{append}(discs, disc) $
+            \State $ \operatorname{Append}(discs, disc) $
         \EndWhile
     \EndFor
     \State \Return $ discs $
@@ -1125,11 +1124,11 @@ Implementace je veřejně dostupná na GitHubu \cite{discretizer}.
 
 \section{Evaluace} \label{subsec:evaluation}
 Námi navržený a implementovaný algoritmus jsme vyhodnocovali spuštěním nad
-množinou 152 různých tunelů v 35 různých proteinech s nastavením $ \delta = \frac{3}{10} $.
+množinou 152 různých tunelů v 35 různých proteinech s nastavením $ \delta = \frac{3}{10} Å $.
 Tunely a molekuly byly převzaty z článků \cite{Enzymes} a \cite{Caver}, ve
 kterých je možno
 je najít pod jejich kódovým označením společně s jejich detailní vizualizací.
-Vyhodnocení probíhalo na stroji se 4 jádrovým procesorem Intel(R) Core(TM) i7-4800MQ.
+Vyhodnocení probíhalo na stroji se čtyřjádrovým procesorem Intel(R) Core(TM) i7-4800MQ.
 
 Validní diskretizaci se povedlo vypočítat bez dalších úprav parametrů pro všechny
 tunely. Nejdelší dva tunely byly tvořeny 139, resp. 120 sférami, pro něž bylo
@@ -1137,7 +1136,7 @@ vygenerováno 833, resp. 588 řezů za 667, resp. 261 sekund, přičemž preproc
 fáze zabrala 529, resp. 196 sekund paralelního výpočtu. Diskretizaci kratšího
 z tunelů můžeme vidět na obrázku č. \ref{fig:1YGE} (diskretizaci delšího tunelu
 neuvádíme, neboť jeho profil nebyl nijak zajímavý). Takto dlouhé tunely byly ale
-spíše výjimkou a průměrná délka tunelu se pohybovala kolem 32 sfér a 162
+spíše výjimkou a průměrná délka tunelu se pohybovala kolem 32 koulí a 162
 výsledných řezů. Průměrná délka výpočtu byla 38 sekund, což vzhledem k délce
 následného výpočtu spojité trajektorie považujeme za naprosto dostatečné.
 Kompletní informace o vyhodnocení na každém tunelu uvádíme v apendixu A.
