@@ -49,7 +49,7 @@ důsledku čehož nedetekujeme úzké a potenciálně neprůchodné hrdlo tunelu
 
 \section{Doking s omezujícími podmínkami}
 Konformace ligandu $ \lambda $ je definována pozicí atomů
-$ \lambda = {a}^m_{i = 1} $ v klasické kartézské souřadné soustavě. Maje
+$ \lambda = \{a_i\}^m_{i = 1} $ v klasické kartézské souřadné soustavě. Maje
 k dispozici diskretizaci tunelu, můžeme vybrat atom ligandu $ a_c \in \lambda $,
 a poté iterativně provádět doking ligandu na disky $ \theta_1, \dots, \theta_n $,
 přičemž budeme požadovat, aby výsledná konformace ligandu po dokingu na
@@ -70,14 +70,18 @@ Spojitou trajektorii můžeme vypočítat tak, že při přechodu mezi po sobě 
 řezy omezíme pohyb každého z atomů na nějaké jeho $ \delta $-okolí. Přesněji řečeno
 budeme požadovat, aby vzdálenost atomů v nové konformaci ligandu $ \lambda^{i + 1} $
 od příslušných atomů v předchozí konformaci $ \lambda^{i} $ byla shora omezená
-konstantou $ \delta $. Formálně
+konstantou $ \delta > 0 $. Formálně
 \begin{align}
     a_j \in \lambda^{i}, b_j \in \lambda^{i + 1} \Rightarrow |a_j - b_j| < \delta.
     \label{eq:pattern}
 \end{align}
+
+\begin{defi} \label{def:strong_pattern}
 V této situaci řekneme, že $ \lambda^i $ je vzorem omezujícím konformaci
 $ \lambda^{i+1} $ a budeme značit $ \lambda^{i+1} \in \Delta \lambda^i $ jestliže
 je splněna podmínka (\ref{eq:pattern}).
+\end{defi}
+
 
 \begin{figure}[t]
 \centering
@@ -94,11 +98,11 @@ V průběhu výpočtu pak kdykoliv počítáme další konformaci $ \lambda^{i+1
 omezíme pohyb ligandu na aktuální vzor $ \lambda^{i} $. Díky tomu budeme mít
 garantováno, že $ \lambda^{i+1} \in \Delta \lambda^i $, z čehož plyne, že
 transformace konformací ligandu mezi po sobě jdoucími řezy bude spojitá
-(shora omezená konstantou $ \delta $). Na tomto místě musíme poznamenat, že aby
+(shora omezená kladnou konstantou $ \delta $). Na tomto místě musíme poznamenat, že aby
 výše uvedený postup dával smysl, musí platit, že každé dva po sobě jdoucí řezy jsou
 od sebe vzdáleny o vzdálenost menší než $ \delta $. Demonstraci použití
 omezujícího vzoru můžeme vidět na obrázku č. \ref{fig:continuous_transition}. Jak
-můžeme vidět, omezující vzor nedovolí ligandu rotaci jakou jsme mohli pozorovat
+vidno omezující vzor nedovolí ligandu rotaci jakou jsme mohli pozorovat
 v předchozím případě (obrázek č. \ref{fig:lower-bound}), což nám umožní detekovat
 úzké geometrické hrdlo.
 
@@ -151,7 +155,7 @@ energie nějaké již známé konformace $ \lambda^i_{low} $ (například konfor
 získaná během výpočtu dolního odhadu na energii trajektorie), nastavíme
 $ \lambda^i_j = \lambda^i_{low} $ a začneme prohledávat tunel z tohoto místa
 směrem dozadu přes řezy $ \theta_{i-1}, \theta_{i-2}, \dots $. Backtracking
-skončí ve chvíli kdy dojde ke konvergenci dopředné a zpětné trajektorie a jsou
-navázány nebo v případě že se dostaneme na úplný začátek tunelu.
+skončí ve chvíli, kdy dojde ke konvergenci dopředné a zpětné trajektorie a jsou
+navázány nebo v případě, že se dostaneme na úplný začátek tunelu.
 Algoritmus pro detekci konvergence trajektorií je obsahem druhé kapitoly.
 

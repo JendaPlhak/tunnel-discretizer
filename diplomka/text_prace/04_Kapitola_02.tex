@@ -1,7 +1,7 @@
 \chapter{Konvergence trajektorií}
 Jak již bylo naznačeno v úvodní kapitole, v některých případech používáme ke
 zlepšení energie aktuální trajektorie backtracking. Nicméně realizovat
-backtracking trajektorii až úplně zpět k ústí tunelu by bylo výpočetně velmi náročné
+backtracking až úplně zpět k ústí tunelu by bylo výpočetně velmi náročné
 a neefektivní, proto chceme nějakým způsobem backtracking napojit na již
 spočítanou trajektorii, čímž si často můžeme ušetřit značné množství práce a hlavně
 takto dokážeme snížit energii trajektorie například v případě, že máme více úzkých
@@ -23,7 +23,8 @@ pravděpodobně selže.
 Uvažme tedy, že máme pozici backtracking trajektorie $ \tilde{\lambda}^i $
 na řezu $ \theta_i $ a pozici dopředné trajektorie $ \lambda^i $ na tomtéž řezu.
 Nejjednodušším přístupem v takové situaci je zkontrolovat, zda platí
-$ \tilde{\lambda}^i \in \Delta \lambda^i $. Tuto kontrolu můžeme provádět v každé
+$ \tilde{\lambda}^i \in \Delta \lambda^i $ ve smyslu definice \ref{def:strong_pattern}.
+Tuto kontrolu můžeme provádět v každé
 iteraci backtrackingu, neboť při ní stačí lineárně projít všechny atomy ligandu
 a zkontrolovat jejich vzdálenosti oproti ligandu dopředné trajektorie. Ligandy
 navíc typicky mívají velmi malý počet atomů, takže se skutečně jedná o nenáročný
@@ -187,7 +188,7 @@ posouvá směrem k cílové pozici. Pokud se nám během jedné iterace nepodař
 vzdálenost zlepšit, algoritmus končí a vyhlásí, že konvergence selhala a je ji
 potřeba spustit z jiné pozice backtracking trajektorie.
 
-Výpočet úspěšně ukončíme pokud platí $\lambda \in \Delta\tilde{\lambda}$ a
+Výpočet úspěšně ukončíme, pokud platí $\lambda \in \Delta\tilde{\lambda}$ a
 vrátíme vypočítanou konvergenční trajektorii $ \tau $.
 
 \begin{algorithm}[ht]
@@ -296,7 +297,7 @@ náhodnostnímu výpočtu dokingu.
 
 Pro ilustraci ještě uvádíme obrázky \ref{fig:1YGE_energy_0}-\ref{fig:1BRT_energy_1},
 na kterých můžeme vidět detailní porovnání energetických profilů pro trajektorie
-s (zelená křivka) a bez konvergenčního algoritmu (fialová křivka). Jak vidno
+s (zelená křivka) a bez konvergenčního algoritmu (fialová křivka). Jak vidno,
 rozdíl může být v některých případech skutečně dramatický. Navíc jsme při našich
 experimentech zaznamenali, že doba výpočtu obou verzí algoritmu je buďto téměř
 stejná nebo mírně kratší ve prospěch algoritmu s konvergencí.
