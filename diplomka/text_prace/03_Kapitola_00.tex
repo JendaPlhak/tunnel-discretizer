@@ -10,7 +10,7 @@ pohybu ligandu, který je typický pro simulace molekulární dynamiky.
 
 Prvním krokem naší metody je diskretizace tunelu jejímž výstupem je posloupnost
 omezujících podmínek, díky kterým můžeme definovat pozici ligandu v tunelu a
-tím pádem i směr jeho pohyb tunelem - dopředu a dozadu. Na takto diskretizovaném
+tím pádem i směr jeho pohyb tunelem – dopředu a dozadu. Na takto diskretizovaném
 tunelu je poté ligand iterativně dokován na sérii po sobě jdoucích pozic v tunelu,
 což nám umožňuje simulovat proces navázání ligandu nebo naopak jeho uvolnění.
 
@@ -63,11 +63,11 @@ může mezi sousedními řezy volně rotovat). Tuto nespojitou trajektorii budem
 používat jakožto dolní odhad na transportní energii. Příklad takové trajektorie
 je vykreslen na obrázku č. \ref{fig:lower-bound}. Jak můžeme vidět, atom $ a_c $
 je přichycen ke kruhu a jeho posunem skrze tunel modelujeme transportní
-proces. Na obrázku lze také vidět příklad nespojitého pohybu - konkrétně
+proces. Na obrázku lze také vidět příklad nespojitého pohybu – konkrétně
 se jedná o otočení ligandu mezi řezy $ \theta_7$ a $\theta_8$.
 
 Spojitou trajektorii můžeme vypočítat tak, že při přechodu mezi po sobě jdoucími
-řezy omezíme pohyb každého z atomů na nějaké jeho $ \delta $-okolí. Přesněji řečeno
+řezy omezíme pohyb každého z atomů na nějaké jeho $ \delta $– okolí. Přesněji řečeno
 budeme požadovat, aby vzdálenost atomů v nové konformaci ligandu $ \lambda^{i + 1} $
 od příslušných atomů v předchozí konformaci $ \lambda^{i} $ byla shora omezená
 konstantou $ \delta > 0 $. Formálně
@@ -88,7 +88,7 @@ je splněna podmínka (\ref{eq:pattern}).
 \includegraphics[width=.5\hsize]{img/tun-2.pdf}
 \caption{Schématický 2D pohled na průchod tunelem, při kterém je předchozí pozice
 ligandu použita jakožto omezující vzor. Omezení pohybu atomů zapříčiní, že geometrické
-úzké hrdlo mezi řezy $\theta_6$ a $\theta_7$ je detekováno neboť ligand nyní
+úzké hrdlo mezi řezy $\theta_6$ a $\theta_7$ je detekováno, neboť ligand nyní
 nemá možnost rotace. Ve výsledném energetickém profilu bychom pak viděli prudké
 zvýšení energetického potenciálu v místě zadokování ligandu na řez č. 8.}
 \label{fig:continuous_transition}
@@ -144,7 +144,7 @@ vyskytuje v tunelu někde dále. Uvažme například situaci na obrázku
 může, ale také nemusí překonat. Kvůli tomu musíme začít uvažovat vícero potenciálních
 trajektorií.
 
-Počet všech možných spojitých trajektorií je velmi vysoký - roste exponenciálně vzhledem
+Počet všech možných spojitých trajektorií je velmi vysoký – roste exponenciálně vzhledem
 k počtu řezů: přechod na následující disk může změnit pozici ligandu, orientaci
 nebo konformaci (relativní pozici atomů v rámci ligandu). Vyčerpávající zkoušení
 všech možných trajektorií tedy nepřipadá v úvahu vzhledem k tomu, že čas
