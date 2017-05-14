@@ -488,7 +488,7 @@ správné polorovině. K tomu nám poslouží vektory
 \end{align*}
 
 Díky podmínce \ref{cond:halfspace} nastane vždy nejvýše jedna
-ze dvou možností. Buďto $ {\langle V^{normal}, v_1\rangle < 0 }$ a je potřeba
+ze dvou možností. Buďto \break $ {\langle V^{normal}, v_1\rangle < 0 }$ a je potřeba
 přesunout vrchol $ Q_1 $. Posun provedeme ve směru normály $ V^{normal} $ položením
 $ Q_1 = P_1 + \epsilon V^{normal} $, kde $ \epsilon $ může být opět libovolné
 kladné číslo menší než $ \delta $, nicméně v rámci alespoň částečného zachování
@@ -859,7 +859,7 @@ definovat nové vektorové pole $ \Phi \colon [0, l] \to \Rbb^3 $,
 Zjednodušeně řečeno, funkce $ \Phi $ realizuje součet vektorů vektorového pole,
 $ \Omega $ jejichž váha kvadraticky klesá se zvyšující se vzdáleností od bodu
 $ t_0 $, a to až do maximální vzdálenosti $ \Delta $. (V praxi se nám osvědčilo
-nastavení $ \Delta = 5 Å $, kde Å je značkou pro jednotku délky angstrom, běžně
+nastavení $ \Delta = 5 $Å, kde Å je značkou pro jednotku délky angstrom, běžně
 používanou v chemii. Hodnota jednoho angstromu je rovna 0.1 nm.)
 
 Uvedený integrál budeme v průběhu výpočtu potřebovat prakticky vyhodnocovat,
@@ -1124,14 +1124,16 @@ Implementace je veřejně dostupná na GitHubu \cite{discretizer}.
 
 \section{Evaluace} \label{subsec:evaluation}
 Námi navržený a implementovaný algoritmus jsme vyhodnocovali spuštěním nad
-množinou 152 různých tunelů v 35 různých proteinech s nastavením $ \delta = \frac{3}{10} Å $.
+množinou 152 různých tunelů v 35 různých proteinech s nastavením $ \delta = \frac{3}{10}$Å.
 Tunely a molekuly byly převzaty z článků \cite{Enzymes} a \cite{Caver}, ve
 kterých je možno
 je najít pod jejich kódovým označením společně s jejich detailní vizualizací.
 Vyhodnocení probíhalo na stroji se čtyřjádrovým procesorem Intel(R) Core(TM) i7-4800MQ.
 
 Validní diskretizaci se povedlo vypočítat bez dalších úprav parametrů pro všechny
-tunely. Nejdelší dva tunely byly tvořeny 139, resp. 120 sférami, pro něž bylo
+tunely (poznamenejme, že vzhledem ke kontrole validity diskretizace v průběhu výpočtu
+máme garantováno, že pokud algoritmus skončí, tak bude výsledná diskretizace validní).
+Nejdelší dva tunely byly tvořeny 139, resp. 120 sférami, pro něž bylo
 vygenerováno 833, resp. 588 řezů za 667, resp. 261 sekund, přičemž preprocessing
 fáze zabrala 529, resp. 196 sekund paralelního výpočtu. Diskretizaci kratšího
 z tunelů můžeme vidět na obrázku č. \ref{fig:1YGE} (diskretizaci delšího tunelu
