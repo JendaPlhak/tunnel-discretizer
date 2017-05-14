@@ -7,7 +7,7 @@ nalézají uplatnění v mnoha praktických odvětvích, jako je například far
 \textit{Ligand} (malá molekula, např. léčivo) interaguje s \textit{proteinem}
 v jeho \textit{aktivním místě}, kde dochází ke změně biochemických vlastností proteinu
 či přeměně ligandu. Může tak dojít k inhibici funkce proteinu (který např.
-jinak umožňuje viru napadnout buňku), nebo enzimatické přeměně substrátu na produkt
+jinak umožňuje viru napadnout buňku), nebo enzymatické přeměně substrátu na produkt
 (např. rozklad toxické látky na neškodné produkty).
 Simulace navázání ligandu (ligand vstoupí
 do aktivního místa a vznikne stabilní komplex) a uvolnění ligandu či produktu ze stabilního komplexu
@@ -45,7 +45,7 @@ systému.
 Pokud chceme studovat navázání a uvolnění ligandu z aktivního místa, potřebujeme
 být schopni vyhodnotit potenciální energii ligandu procházejícího tunelem
 z povrchu proteinu do jeho aktivního místa a naopak. Ligand se v aktivním
-místě proteinu naváže pokud v tomto místě existuje silné energetické minimum
+místě proteinu naváže, pokud v tomto místě existuje silné energetické minimum
 a v průběhu průchodu tunelem nenarazí na žádnou významnou energetickou bariéru
 (gradient tunelu by měl být s menšími lokálními výkyvy stále klesající od
 vstupu do tunelu až na jeho konec v aktivním místě). Pokud tunel obsahuje nějakou
@@ -62,7 +62,7 @@ společně s jejich potenciální energií. Díky tomu
 uživatel získá informaci o tom, který ligand se na protein váže s nižší potenciální
 energií a může se na základě této informace pokoušet ligand nebo protein
 dále upravovat. Problémem je, že algoritmus molekulárního dokingu vypočítá pouze
-statické pozice ligandu a proteinu - nevygeneruje \textit{trajektorii} ligandu
+statické pozice ligandu a proteinu – nevygeneruje \textit{trajektorii} ligandu
 (pohyb ligandu tunelem v čase), což znamená, že tento algoritmus sám o sobě
 nestačí na to, abychom mohli studovat přenos ligandu z povrchu proteinu
 do jeho aktivního místa skrze jeho tunel, či naopak.

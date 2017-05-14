@@ -3,14 +3,14 @@ Jak již bylo naznačeno v úvodní kapitole, v některých případech použív
 zlepšení energie aktuální trajektorie backtracking. Nicméně realizovat
 backtracking až úplně zpět k ústí tunelu by bylo výpočetně velmi náročné
 a neefektivní, proto chceme nějakým způsobem backtracking napojit na již
-spočítanou trajektorii, čímž si často můžeme ušetřit značné množství práce a hlavně
+spočítanou trajektorii, čímž si často můžeme ušetřit značné množství práce, a hlavně
 takto dokážeme snížit energii trajektorie například v případě, že máme více úzkých
 hrdel těsně po sobě. To ilustruje obrázek č. \ref{fig:two_bottlenecks}, na kterém
 můžeme vidět, že se algoritmus nejprve dostane na řez č. 2 z pozice řezu č. 1
 a musí spustit backtracking z konformace ligandu, která je vyobrazena na řezu č. 2.
 S touto konformací pak pokračuje dále, avšak pokud během průchodu prostorem
 mezi řezy 2 a 3 nedojde k rotaci, bude na řezu č. 3 opět potřeba spouštět
-backtracking s opačnou rotací, avšak ten ve chvíli, kdy dospěje na řez č.2,
+backtracking s opačnou rotací, avšak ten ve chvíli, kdy dospěje na řez č. 2,
 pravděpodobně selže.
 
 \begin{figure}[ht]
@@ -159,7 +159,7 @@ pokoušíme natlačit příliš blízko k atomům proteinu, čímž můžeme vyn
 velký skok. S tím souvisí také druhá podmínka přípustnosti, která ověřuje, zda
 se nesnažíme překonat příliš velkou energetickou bariéru. K tomu může docházet
 například ve chvíli, kdy se pokoušíme implementovat konvergenční trajektorii
-v příliš úzkem místě (příklad takové situace můžeme vidět na obrázku č.
+v příliš úzkém místě (příklad takové situace můžeme vidět na obrázku č.
 \ref{fig:narrow_tunnel}). Prakticky pak porovnáváme celkovou potenciální energii
 ligandu $ E(\lambda') $ se zadaným parametrem maximální energie $ E_{max} $.
 Tento parametr může být nastaven například na energii ligandu, která nás vedla ke
@@ -182,7 +182,7 @@ $ \operatorname{AvgDst}(\lambda, \tilde{\lambda})
     = \frac{\mathlarger{\sum}\norm{a_j - b_j}}{|\lambda|} $, kde $ a_j \in \lambda $,
 $ b_j \in \tilde{\lambda} $ jsou pozice atomů a $ |\lambda| $ značí počet atomů ligandu.
 V této metrice jednak vybíráme nejlepší pozici ligandu z pozic aktuální iterace
-(konkrétně se jedná o podmínku na řádku \ref{alg:convergence:best}) a druhak
+(konkrétně se jedná o podmínku na řádku \ref{alg:convergence:best}) a jednak
 pomocí ní na řádku \ref{alg:convergence:progress} kontrolujeme, zda se algoritmus
 posouvá směrem k cílové pozici. Pokud se nám během jedné iterace nepodaří průměrnou
 vzdálenost zlepšit, algoritmus končí a vyhlásí, že konvergence selhala a je ji
