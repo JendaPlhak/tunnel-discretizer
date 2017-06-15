@@ -16,7 +16,7 @@
 % \usepackage[cp1250]{inputenc} %% NASTAVENI PRO WINDOWS
 % \usepackage[T1]{fontenc} %% puvodni evropske fonty->spatne umistene hacky nad c, d s hackem ma za sebou mezeru
 \usepackage[IL2]{fontenc} %fonty vyladene pro cestinu/slovenstinu
-
+\usepackage{booktabs}
 
 % There are many different themes available for Beamer. A comprehensive
 % list with examples is given here:
@@ -83,6 +83,7 @@
 \newcommand{\Rbb}{\mathbb{R}}
 \newcommand{\Tau}{\mathrm{T}}
 
+
 % Let's get started
 \begin{document}
 
@@ -143,7 +144,8 @@
     \end{figure}
 \end{frame}
 
-\begin{frame}{Obecný náhled na algoritmus}
+\subsection{Výpočet spojité trajektorie}
+\begin{frame}{Výpočet spojité trajektorie}
   \begin{itemize}
   \item Diskretizace tunelu $\rightarrow$ posloupnost omezujících podmínek - řezů.
  	\item Ligand iterativně dokujeme na po sobě jdoucí řezy - simulace procesu navázání a uvolnění ligandu
@@ -173,7 +175,7 @@ $ (A, u, r + \varepsilon) \cap \Tau = \theta \cap \Tau $.
 
 \begin{frame}{Diskretizační algoritmus}{Ukázka diskretizace}
     \begin{figure}
-        \includegraphics[width=\textwidth]{img/weighted_dir.png}
+        \includegraphics[width=0.9\textwidth]{img/weighted_dir.png}
     \end{figure}
 \end{frame}
 
@@ -193,62 +195,88 @@ $ (A, u, r + \varepsilon) \cap \Tau = \theta \cap \Tau $.
     \end{figure}
 \end{frame}
 
+
+\section{Konvergenční algoritmus}
+\begin{frame}{Konvergenční algoritmus}
+    \begin{itemize}
+	\item V případě backtrackingu potřebujeme navázat na dopřednou trajektorii.
+	\item Optimalizace algoritmu pro hledání spojité trajektorie (potenciálně časová, ale zejména kvalitativní - dosahujeme nižších energií).
+	\item Vstup - Molekula proteinu společně s diskretizovaným tunelem, výchozí (dopředná) a cílová (backtracking) konformace ligandu
+	\item Výstup - Spojitá posloupnost konformací ligandu, která transformuje výchozí konformaci na cílovou.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Konvergenční algoritmus}{Ilustrace}
+    \begin{figure}
+        \includegraphics[width=\textwidth]{img/backtracking_bad_rotation.pdf}
+        \caption{Obrázek zachycuje situaci, ve které při backtrackingu dojde k opačné
+rotaci ligandu, která v důsledku znemožní aplikaci jednoduché konvergence.
+Dopředná trajektorie je vyznačena tečkovaně, backtracking plnou čárou.
+}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Konvergenční algoritmus}{Evaluace}
+    \begin{itemize}
+	\item Algoritmus byl implementován v jazyce C++ a byl začleněn do již existujícího CaverDock softwaru.
+	\item V souladu s našimi předpoklady byl přínos konvergenčního algoritmu největší v případě
+tunelů s více úzkými hrdly a při počítání s většími ligandy
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Konvergenční algoritmus}{Ilustrace}
+    \begin{figure}
+        \includegraphics[width=0.7\textwidth]{img/1YGE_energy_m007.eps}
+        \caption{Energetický profil v molekule 1YGE pro ligand s 8 atomy a 5 torzními úhly.}
+    \end{figure}
+\end{frame}
+
 % Placing a * after \section means it will not show in the
 % outline or table of contents.
 \section*{Summary}
 
-\begin{frame}{Summary}
+\begin{frame}{Shrnutí}
   \begin{itemize}
   \item
-    The \alert{first main message} of your talk in one or two lines.
+    Návrh a implementace diskretizačního algoritmu.
   \item
-    The \alert{second main message} of your talk in one or two lines.
-  \item
-    Perhaps a \alert{third message}, but not more than that.
-  \end{itemize}
-  
-  \begin{itemize}
-  \item
-    Outlook
-    \begin{itemize}
-    \item
-      Something you haven't solved.
-    \item
-      Something else you haven't solved.
+    Návrh, implementace a integrace konvergenčního algoritmu a implementace slabého omezujícího vzoru.
     \end{itemize}
-  \end{itemize}
 \end{frame}
 
+\begin{frame}
+\centering \Large
+  \emph{Děkuji za Vaši pozornost.}
+  \end{frame}
 
 
 % All of the following is optional and typically not needed. 
 \appendix
 \section<presentation>*{\appendixname}
-\subsection<presentation>*{For Further Reading}
+\subsection<presentation>*{Evaluační tabulka}
 
-\begin{frame}[allowframebreaks]
-  \frametitle<presentation>{For Further Reading}
-    
-  \begin{thebibliography}{10}
-    
-  \beamertemplatebookbibitems
-  % Start with overview books.
-
-  \bibitem{Author1990}
-    A.~Author.
-    \newblock {\em Handbook of Everything}.
-    \newblock Some Press, 1990.
- 
-    
-  \beamertemplatearticlebibitems
-  % Followed by interesting articles. Keep the list short. 
-
-  \bibitem{Someone2000}
-    S.~Someone.
-    \newblock On this and that.
-    \newblock {\em Journal of This and That}, 2(1):50--100,
-    2000.
-  \end{thebibliography}
+\begin{frame}{Evaluační tabulka konvergenčního algoritmu}
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{cccccc}
+    \toprule
+        & & \multicolumn{2}{c}{Max Energy} & \multicolumn{2}{c}{Avg Energy} \\
+        Atoms & DOFs & Orig & Conv & Orig & Conv \\
+        \midrule
+            2 & 0 & 7.90  &8.00 & 2.94 & 2.95 \\
+            3 & 0 & 13.00 & 13.20 & 5.67 & 5.55 \\
+            4 & 1 & 20.60 & 19.10 & 7.24 & 7.09 \\
+            5 & 2 & 29.70 & 22.20 & 8.99 & 8.34 \\
+            6 & 3 & 29.00 & 18.70 & 11.93 & 9.98 \\
+            7 & 0 & 41.10 & 41.70 & 21.74 & 21.19 \\
+            7 & 4 & 34.10 & 28.20 & 13.50 & 11.14 \\
+            8 & 5 & 38.70 & 35.50 & 14.48 & 13.20 \\
+            9 & 6 & 49.50 & 42.60 & 17.49 & 15.93 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Evaluace ligandů na tunelu v molekule 1YGE.}
+    \label{table:1YGE_energy}
+\end{table}
 \end{frame}
 
 \end{document}
