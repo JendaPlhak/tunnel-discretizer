@@ -124,10 +124,11 @@
 \begin{frame}{Problém}
   \begin{itemize}
   \item {
-    	Výpočet molekulárního dokingu.
+    	Molekulární doking se používá pro nalezení energetického minima v aktivním místě.
     }
+  \item Čím nižší energie, tím vyšší pravděpodobnost, že dojde ke vzniku stabilního komplexu.
   \item {
-    	Aktivní místo je často hluboko uvnitř molekuly a ligand musí projít tzv. \textit{tunelem}.
+    	Aktivní místo je ale občas hluboko uvnitř molekuly a ligand musí projít tzv. \textit{tunelem}.
     }
     \item {
     	Pokud tunel obsahuje nějakou silnou energetickou bariéru, ligand jím pravděpodobně neprojde.
@@ -140,17 +141,17 @@
 
 \begin{frame}{Příklad tunelu}
     \begin{figure}
-        \includegraphics[width=\textwidth]{img/basic_tunnel.jpg}
+        \includegraphics[width=0.6\textwidth]{img/tunnels.jpg}
     \end{figure}
 \end{frame}
 
 \subsection{Výpočet spojité trajektorie}
 \begin{frame}{Výpočet spojité trajektorie}
   \begin{itemize}
-  \item Diskretizace tunelu $\rightarrow$ posloupnost omezujících podmínek - řezů.
+  \item  V rámci ÚVT a LL vzniká software CaverDock, který bude schopen analyzovat cestu ligandu skrze tunel na základě molekulárního dokingu. Pro jeho fungování je potřeba zajistit diskretizaci tunelu - stěžejní téma této práce.
+  \item Diskretizace tunelu - posloupnost omezujících podmínek - řezů.
  	\item Ligand iterativně dokujeme na po sobě jdoucí řezy - simulace procesu navázání a uvolnění ligandu
  	\item Dbáme na to, aby pohyb ligandu tunelem byl spojitý.
- 	\item Algoritmus pro hledání spojité trajektorie je implementován programem CaverDock.
   \end{itemize}
 \end{frame}
 
@@ -181,8 +182,6 @@ $ (A, u, r + \varepsilon) \cap \Tau = \theta \cap \Tau $.
 
 \begin{frame}{Diskretizační algoritmus}
     \begin{itemize}
-	\item Hledání minimálního řezu a minimální kružnice.
-	\item Prudké změny poloměru a směru tunely.
 	\item Výsledný algoritmus je heuristika - může selhat, avšak pokud skončí, pak je výsledná diskretizace korektní.
 	\item Algoritmus byl implementován v jazyce Python.
 	\item Testováno na 152 různých tunelech, diskretizace byla vždy nalezena.
@@ -199,7 +198,8 @@ $ (A, u, r + \varepsilon) \cap \Tau = \theta \cap \Tau $.
 \section{Konvergenční algoritmus}
 \begin{frame}{Konvergenční algoritmus}
     \begin{itemize}
-	\item V případě backtrackingu potřebujeme navázat na dopřednou trajektorii.
+    \item Tunelem postupujeme dopředným směrem. Pokud narazíme na energetickou bariéru, najdeme konformaci s menší energii a spustíme backtracking.
+	\item V případě backtrackingu potřebujeme navázat na dopřednou trajektorii - konvergenční algoritmus.
 	\item Optimalizace algoritmu pro hledání spojité trajektorie (potenciálně časová, ale zejména kvalitativní - dosahujeme nižších energií).
 	\item Vstup - Molekula proteinu společně s diskretizovaným tunelem, výchozí (dopředná) a cílová (backtracking) konformace ligandu
 	\item Výstup - Spojitá posloupnost konformací ligandu, která transformuje výchozí konformaci na cílovou.
@@ -210,7 +210,7 @@ $ (A, u, r + \varepsilon) \cap \Tau = \theta \cap \Tau $.
     \begin{figure}
         \includegraphics[width=\textwidth]{img/backtracking_bad_rotation.pdf}
         \caption{Obrázek zachycuje situaci, ve které při backtrackingu dojde k opačné
-rotaci ligandu, která v důsledku znemožní aplikaci jednoduché konvergence.
+rotaci ligandu.
 Dopředná trajektorie je vyznačena tečkovaně, backtracking plnou čárou.
 }
     \end{figure}
@@ -241,6 +241,7 @@ tunelů s více úzkými hrdly a při počítání s většími ligandy
     Návrh a implementace diskretizačního algoritmu.
   \item
     Návrh, implementace a integrace konvergenčního algoritmu a implementace slabého omezujícího vzoru.
+    \item V přípravě jsou dva články - biochemický a informatický.
     \end{itemize}
 \end{frame}
 
