@@ -32,7 +32,7 @@ if __name__ == '__main__':
     tunnel.t = tunnel.t[:]
     draw_ARG = arguments["--draw"]
 
-    delta = float(arguments["--delta"] or 0.1)
+    delta = float(arguments["--delta"] or 0.3)
     disks = []
     disks = dig_tunnel(tunnel, DigOpts(delta, filename))
 
