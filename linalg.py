@@ -13,6 +13,13 @@ def normalize(v):
        return v
     return v / norm
 
+def angle_norm_vectors(vector1, vector2):
+    cosx = np.dot(vector1, vector2)
+    if cosx < 1:
+        rad = np.arccos(cosx)
+        return rad*180/np.pi
+    return 0
+
 def null_space(A, eps=1e-15):
     u, s, vh = np.linalg.svd(A)
     null_space = np.compress(s <= eps, vh, axis=0)
