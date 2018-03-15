@@ -3,7 +3,7 @@
 """Molecule tunnel discretization tool.
 
 Usage:
-  discretizer.py -f | --file <in-filename> [-d] [--delta <delta>] [-o <out-filename>]
+  discretizer.py -f | --file <in-filename> [--delta <delta>] [-o <out-filename>]
 
 Options:
   -h --help                         Show this help.
