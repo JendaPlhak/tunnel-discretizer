@@ -16,6 +16,7 @@ Options:
 import random
 import json
 import sys
+import visual as vs
 
 from docopt import docopt
 from digger import *
