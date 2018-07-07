@@ -7,7 +7,7 @@ from linalg import *
 from tunnel import Tunnel
 from minimal_enclosing import make_circle
 from digger import *
-from tunnel_curve import TunnelCurve
+from tunnel_curve import TunnelCurve, OmegaCurve
 
 
 class DigOpts:
@@ -22,9 +22,12 @@ def dig_tunnel(tunnel, opts):
     normals = [normalize(centers[i + 1] - centers[i]) \
                for i in xrange(len(centers) - 1)]
     curve = TunnelCurve(tunnel, 6., opts)
+    phi_curve = OmegaCurve(tunnel, 6., opts)
+    print(phi_curve.get_direction(0))
     disks = [
-        tunnel.fit_disk(curve.get_weighted_dir(0, 0), centers[0])
+        tunnel.fit_disk(phi_curve.get_direction(0), centers[0])
     ]
+    # return
 
 
     # Calculate disks position
@@ -60,7 +63,10 @@ def dig_tunnel(tunnel, opts):
             else:
                 # print("Moving!")
                 disk_center = disks[-1].center + disks[-1].normal * opts.eps
-                new_normal  = curve.get_weighted_dir(i, size)
+
+                t = phi_curve._c_dists[i] + size
+                new_normal  = phi_curve.get_direction(t)
+                # new_normal  = curve.get_weighted_dir(i, size)
                 shift_fun   = shift_new_disk
 
             try:
