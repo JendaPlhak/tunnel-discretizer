@@ -7,7 +7,7 @@ from linalg import *
 from tunnel import Tunnel
 from minimal_enclosing import make_circle
 from digger import *
-from tunnel_curve import TunnelCurve, OmegaCurve
+from tunnel_curve import PhiCurve
 
 
 class DigOpts:
@@ -21,14 +21,11 @@ def dig_tunnel(tunnel, opts):
     centers = [s.center for s in tunnel.t]
     normals = [normalize(centers[i + 1] - centers[i]) \
                for i in xrange(len(centers) - 1)]
-    curve = TunnelCurve(tunnel, 6., opts)
-    phi_curve = OmegaCurve(tunnel, 6., opts)
+    phi_curve = PhiCurve(tunnel, 6., opts)
     print(phi_curve.get_direction(0))
     disks = [
         tunnel.fit_disk(phi_curve.get_direction(0), centers[0])
     ]
-    # return
-
 
     # Calculate disks position
     for i, __ in enumerate(tunnel.t):
@@ -82,35 +79,6 @@ def dig_tunnel(tunnel, opts):
                 disks.append(new_disk)
 
     return disks
-
-
-def fit_disk_tunnel(normal, center, tunnel):
-    disk_plane  = Plane(center, normal)
-    circle_cuts = []
-
-    for sphere in tunnel.get_all_intersecting_disk(disk_plane, center):
-        # calculate center of cap that we get by intersection disk_plane
-        # and sphere
-        cut_circle = disk_plane.intersection_sphere(sphere)
-        assert cut_circle is not None
-
-        circle_cuts.append(cut_circle)
-    assert circle_cuts
-
-    circles = []
-    # print "{"
-    for c in circle_cuts:
-        # print "%s,"% c.to_geogebra()
-        circles.append(minball.Sphere2D(list(c.center), c.radius))
-    # print "}"
-
-    min_circle = minball.get_min_sphere2D(circles)
-    t, u = min_circle.center
-    radius = min_circle.radius
-
-    new_center = disk_plane.get_point_for_param(t, u)
-    assert disk_plane.contains(new_center)
-    return Disk(new_center, normal, radius)
 
 # For two given points and vector determining plane, calculate disk that is
 # perpendicular to that plane, and its vertices are point1 and point2
