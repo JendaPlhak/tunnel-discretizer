@@ -18,10 +18,10 @@ class DigOpts:
         self.filename = filename
 
 def dig_tunnel(tunnel, opts):
-    centers = [s.center for s in tunnel.t]
-    normals = [normalize(centers[i + 1] - centers[i]) \
-               for i in xrange(len(centers) - 1)]
-    phi_curve = PhiCurve(tunnel, 6., opts)
+    centers = tunnel.centers
+    normals = [normalize(d) for d in tunnel.dirs]
+
+    phi_curve = PhiCurve(tunnel, 6.)
     print(phi_curve.get_direction(0))
     disks = [
         tunnel.fit_disk(phi_curve.get_direction(0), centers[0])

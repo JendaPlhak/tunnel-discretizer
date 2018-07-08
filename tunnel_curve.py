@@ -7,101 +7,20 @@ from sortedcontainers import SortedList
 from linalg import *
 from geometrical_objects import Segment
 
-class TunnelCurve(object):
-    def __init__(self, tunnel, delta, opts):
-        self.centers = [s.center for s in tunnel.t]
-        self.dirs = []
-        self.delta = delta
+class PhiCurve(object):
 
-        home_dir = os.path.expanduser("~")
-        dump_file = home_dir + "/tmp/" + opts.filename.replace("/", "_") + ".json"
-        load_file = dump_file if os.path.exists(dump_file) else None
+    def __init__(self, tunnel, delta = 3):
+        self._delta = delta
 
-        if load_file:
-            with open(load_file) as infile:
-                self.dirs = [np.array(d) for d in json.load(infile)]
-        else:
-            self.dirs = self._compute_dirs(tunnel)
-
-        if dump_file:
-            with open(dump_file, 'w') as outfile:
-                json.dump([list(d) for d in self.dirs], outfile)
-
-    def _compute_dirs(self, tunnel):
-        def get_minimal(task_q, result_q, tunnel):
-            while True:
-                task = task_q.get()
-                if task is None:
-                    task_q.put(None)
-                    break
-                center, normal, idx = task
-                result_q.put((idx, tunnel.find_minimal_disk(center, normal, self).normal))
-
-        N_CORES = cpu_count()
-        task_q = Queue()
-        result_q = Queue()
-        processes = [Process(target=get_minimal, args=(task_q, result_q, tunnel))
-            for __ in xrange(N_CORES)
-        ]
-
-        dirs_count = len(self.centers) - 1
-        for i in xrange(dirs_count):
-            n = normalize(self.centers[i + 1] - self.centers[i])
-            task_q.put((self.centers[i], n, i))
-
-        task_q.put(None)
-        for p in processes:
-            p.start()
-        for p in processes:
-            p.join()
-        dirs = [None for __ in xrange(dirs_count)]
-        while not result_q.empty():
-            idx, normal = result_q.get()
-            dirs[idx] = normal
-        return dirs
-
-    # Finds whether given `disk` is passed through by given curve in topological
-    # sense.
-    def pass_through_disk(self, disk):
-        first_pass_sgn = None
-        last_pass_sgn = None
-        split = None
-
-        for i in xrange(len(self.centers) - 1):
-            seg = Segment(self.centers[i], self.centers[i + 1])
-            inter = seg.intersection_disk(disk)
-
-            if inter is not None:
-                d = self.centers[i + 1] - self.centers[i]
-                d_sgn = np.sign(np.dot(disk.normal, d))
-                if disk.contains(self.centers[i + 1]):
-                    split = split or d
-                elif split is not None:
-                    sgn = d_sgn * np.sign(np.dot(disk.normal, split))
-                    if sgn > 0:
-                        first_pass_sgn = first_pass_sgn or d_sgn
-                        last_pass_sgn = d_sgn
-                    split = None
-                else:
-                    first_pass_sgn = first_pass_sgn or d_sgn
-                    last_pass_sgn = d_sgn
-        return first_pass_sgn is not None and first_pass_sgn == last_pass_sgn
-
-class PhiCurve(TunnelCurve):
-
-    def __init__(self, *args):
-        super(PhiCurve, self).__init__(*args)
-        self._delta = 3
-
-        self.centers.append(self.centers[-1] + (self.centers[-1] - self.centers[-2]))
+        self._centers = tunnel.centers
+        self._centers.append(self._centers[-1] + (self._centers[-1] - self._centers[-2]))
         self._c_dists = self._load_distances()
-        self.dirs.append(self.dirs[-1])
 
     def _load_distances(self):
         distances = SortedList([0.])
         dst = 0.
-        for i in range(1, len(self.centers)):
-            center_dst = np.linalg.norm(self.centers[i] - self.centers[i - 1])
+        for i in range(1, len(self._centers)):
+            center_dst = np.linalg.norm(self._centers[i] - self._centers[i - 1])
             dst += center_dst
             distances.add(dst)
 
@@ -151,11 +70,9 @@ class PhiCurve(TunnelCurve):
         d = self._delta + sign * (-t0 + x)
         assert self._delta >= d >= 0
 
-        alpha = np.linalg.norm(self.centers[i + 1] - self.centers[i])
-        # v1 = normalize(self.centers[i + 1] - self.centers[i])
-        # v2 = normalize(self.centers[i + 2] - self.centers[i + 1])
-        v1 = normalize(self.dirs[i])
-        v2 = normalize(self.dirs[i + 1])
+        alpha = np.linalg.norm(self._centers[i + 1] - self._centers[i])
+        v1 = normalize(self._centers[i + 1] - self._centers[i])
+        v2 = normalize(self._centers[i + 2] - self._centers[i + 1])
 
         p = (x - self._c_dists[i]) / alpha
         q = (y - self._c_dists[i]) / alpha

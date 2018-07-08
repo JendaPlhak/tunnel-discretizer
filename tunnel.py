@@ -1,31 +1,25 @@
+import json
 import minball
 import numpy as np
+import os
 import scipy
 import time
 import random
+from multiprocessing import Process, Queue, cpu_count
 from scipy import optimize
+
 from geometrical_objects import *
 from linalg import *
 
 class Tunnel:
 
-    def load_from_file(self, filename):
-        self.t = []
-        infile = file(filename)
+    def __init__(self, opts):
+        self.t = None
+        self.centers = None
+        self.dirs = None
 
-        for line in infile.readlines():
-            words = line.split()
-            #print words
-            if len(words) > 0 and words[0] == "ATOM":
-                center = np.array([float(words[6]), float(words[7]), float(words[8])])
-                radius = float(words[9])
-                self.t.append(Sphere(center, radius));
-            # else:
-                # print "Unexpected data: " + line
-
-        infile.close()
-        self.check_requirements()
-        print "Tunnel readed (" + str(len(self.t)) + " spheres)."
+        self._load_from_file(opts.filename)
+        self._compute_optimized_trajectory(opts)
 
     def get_neighbors(self, sphere_idx):
         first = None
@@ -104,7 +98,44 @@ class Tunnel:
         assert disk_plane.contains(new_center)
         return Disk(new_center, normal, radius)
 
-    def find_minimal_disk(self, point, init_normal, curve):
+    def _load_from_file(self, filename):
+        self.t = []
+        infile = file(filename)
+
+        for line in infile.readlines():
+            words = line.split()
+            #print words
+            if len(words) > 0 and words[0] == "ATOM":
+                center = np.array([float(words[6]), float(words[7]), float(words[8])])
+                radius = float(words[9])
+                self.t.append(Sphere(center, radius));
+
+        infile.close()
+        self.check_requirements()
+        print "Tunnel read (" + str(len(self.t)) + " spheres)."
+
+    def _compute_optimized_trajectory(self, opts):
+        home_dir = os.path.expanduser("~")
+        dump_file = home_dir + "/tmp/" + opts.filename.replace("/", "_") + ".json"
+        load_file = dump_file if os.path.exists(dump_file) else None
+
+        if load_file:
+            with open(load_file) as infile:
+                in_ = json.load(infile)
+                self.centers = [np.array(c) for c in in_["centers"]]
+                self.dirs = [np.array(d) for d in in_["dirs"]]
+        else:
+            self.centers, self.dirs = self._compute_tunnel_body()
+
+        if dump_file:
+            with open(dump_file, 'w') as outfile:
+                out = {
+                    "centers": [list(c) for c in self.centers],
+                    "dirs": [list(d) for d in self.dirs],
+                }
+                json.dump(out, outfile)
+
+    def _find_minimal_disk(self, point, init_normal, curve):
         def get_axes(normal):
             axis1 = null_space(np.array([normal, null_vec, null_vec]))
             axis2 = null_space(np.array([normal, axis1, null_vec]))
@@ -146,3 +177,78 @@ class Tunnel:
             best_disk.radius)
         assert np.dot(best_disk.normal, init_normal) > 0.
         return best_disk
+
+    def _compute_tunnel_body(self):
+        curve = _BallCentersCurve(self.t)
+
+        def get_minimal(self, task_q, result_q):
+            while True:
+                task = task_q.get()
+                if task is None:
+                    task_q.put(None)
+                    break
+                center, normal, idx = task
+                result_q.put((idx, self._find_minimal_disk(center, normal, curve)))
+
+        task_q, result_q = Queue(), Queue()
+        processes = [Process(target=get_minimal, args=(self, task_q, result_q))
+            for __ in xrange(cpu_count())
+        ]
+
+        ball_centers = [ball.center for ball in self.t]
+        balls_count = len(ball_centers)
+
+        # Add one extra ball center so that each original center has direction
+        ball_centers.append(ball_centers[-1] + (ball_centers[-1] - ball_centers[-2]))
+
+        i = 0
+        for center, next_center in zip(ball_centers, ball_centers[1:]):
+            n = normalize(next_center - center)
+            task_q.put((center, n, i))
+            i += 1
+
+        task_q.put(None)
+        for p in processes:
+            p.start()
+        for p in processes:
+            p.join()
+
+        centers = [None for __ in xrange(balls_count)]
+        dirs = [None for __ in xrange(balls_count)]
+        while not result_q.empty():
+            idx, disk = result_q.get()
+            centers[idx] = disk.center
+            dirs[idx] = disk.normal
+        return centers, dirs
+
+class _BallCentersCurve:
+
+    def __init__(self, balls):
+        self.centers = [ball.center for ball in balls]
+
+    # Finds whether given `disk` is passed through by given curve in topological
+    # sense.
+    def pass_through_disk(self, disk):
+        first_pass_sgn = None
+        last_pass_sgn = None
+        split = None
+
+        for i in xrange(len(self.centers) - 1):
+            seg = Segment(self.centers[i], self.centers[i + 1])
+            inter = seg.intersection_disk(disk)
+
+            if inter is not None:
+                d = self.centers[i + 1] - self.centers[i]
+                d_sgn = np.sign(np.dot(disk.normal, d))
+                if disk.contains(self.centers[i + 1]):
+                    split = split or d
+                elif split is not None:
+                    sgn = d_sgn * np.sign(np.dot(disk.normal, split))
+                    if sgn > 0:
+                        first_pass_sgn = first_pass_sgn or d_sgn
+                        last_pass_sgn = d_sgn
+                    split = None
+                else:
+                    first_pass_sgn = first_pass_sgn or d_sgn
+                    last_pass_sgn = d_sgn
+        return first_pass_sgn is not None and first_pass_sgn == last_pass_sgn

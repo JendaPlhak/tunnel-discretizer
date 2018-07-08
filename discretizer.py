@@ -26,15 +26,16 @@ from visual import *
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
-    tunnel = Tunnel()
-    filename = arguments['<in-filename>']
-    tunnel.load_from_file(filename)
-    tunnel.t = tunnel.t[:]
-    draw_ARG = arguments["--draw"]
 
     delta = float(arguments["--delta"] or 0.3)
+    filename = arguments['<in-filename>']
+    opts = DigOpts(delta, filename)
+
+    tunnel = Tunnel(opts)
+    draw_ARG = arguments["--draw"]
+
     disks = []
-    disks = dig_tunnel(tunnel, DigOpts(delta, filename))
+    disks = dig_tunnel(tunnel, opts)
 
     # draw disks
     if draw_ARG:
