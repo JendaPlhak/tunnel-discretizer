@@ -30,6 +30,7 @@ if __name__ == '__main__':
     delta = float(arguments["--delta"] or 0.3)
     filename = arguments['<in-filename>']
     opts = DigOpts(delta, filename)
+    print("Discretization of tunnel {}".format(filename))
 
     tunnel = Tunnel(opts)
     draw_ARG = arguments["--draw"]
@@ -57,10 +58,9 @@ if __name__ == '__main__':
             # central line
             if (i < len(tunnel.t)-1):
                 s2 = tunnel.t[i+1]
-                vVis = vs.arrow(pos=s.center - centScene,
-                                axis=(s2.center[0]-s.center[0],
-                                        s2.center[1]-s.center[1],
-                                        s2.center[2]-s.center[2]),
+
+                vVis = vs.arrow(pos=tunnel.centers[i] - centScene,
+                                axis=tunnel.dirs[i],
                                 color=(1,0,0), shaftwidth=0.3)
         for i, disk in enumerate(disks[:]):
             # if (i != 0):

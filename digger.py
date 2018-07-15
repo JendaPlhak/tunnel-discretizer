@@ -19,9 +19,8 @@ class DigOpts:
 
 def dig_tunnel(tunnel, opts):
     centers = tunnel.centers
-    normals = [normalize(d) for d in tunnel.dirs]
 
-    phi_curve = PhiCurve(tunnel, 6.)
+    phi_curve = PhiCurve(tunnel, 1.)
     print(phi_curve.get_direction(0))
     disks = [
         tunnel.fit_disk(phi_curve.get_direction(0), centers[0])
@@ -36,7 +35,9 @@ def dig_tunnel(tunnel, opts):
         center       = centers[i]
         next_center  = centers[i + 1]
         centers_dist = np.linalg.norm(next_center - center)
-        # disks.append(tunnel.fit_disk(curve.dirs[i], center))
+
+        # t = phi_curve._c_dists[i]
+        # disks.append(tunnel.fit_disk(phi_curve.get_direction(t), tunnel.centers[i]))
         # continue
 
         # line between centers
@@ -155,7 +156,9 @@ def is_sharp_turn(tunnel, prev_disk, opts):
     # print abs(d1 - d2) / d1
     return abs(d1 - d2) / ((d1 + d2) / 2.) > 0.35
 
-def shift_new_disk(prev_disk, new_disk, tunnel, opts):
+def shift_new_disk(prev_disk, new_disk, tunnel, opts, rec_lvl = 0):
+    if rec_lvl > 100:
+        raise RuntimeError("Too many recursive calls")
     # print "\n\n"
     # print "Previous Disk:"
     # print prev_disk.to_geogebra()
@@ -222,7 +225,7 @@ def shift_new_disk(prev_disk, new_disk, tunnel, opts):
     # print "Disk distance: %f > %f\n" % (disk_dist(new_disk, prev_disk), delta)
 
     if disk_dist(new_disk, prev_disk) > delta or not is_follower(prev_disk, new_disk):
-        new_disk = shift_new_disk(prev_disk, new_disk, tunnel, opts)
+        new_disk = shift_new_disk(prev_disk, new_disk, tunnel, opts, rec_lvl + 1)
     assert is_follower(prev_disk, new_disk)
 
     # Check whether our function does what it is supposed to do.

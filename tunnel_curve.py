@@ -12,19 +12,9 @@ class PhiCurve(object):
     def __init__(self, tunnel, delta = 3):
         self._delta = delta
 
+        self._dirs = tunnel.dirs
         self._centers = tunnel.centers
-        self._centers.append(self._centers[-1] + (self._centers[-1] - self._centers[-2]))
         self._c_dists = self._load_distances()
-
-    def _load_distances(self):
-        distances = SortedList([0.])
-        dst = 0.
-        for i in range(1, len(self._centers)):
-            center_dst = np.linalg.norm(self._centers[i] - self._centers[i - 1])
-            dst += center_dst
-            distances.add(dst)
-
-        return distances
 
     def get_direction(self, t0):
         t1 = max(t0 - self._delta, 0)
@@ -37,13 +27,27 @@ class PhiCurve(object):
         v = self._integrate_interval(t0, t1, self._c_dists[g1], is_before_center = True)
         v += self._integrate_between_centers(t0, g1 + 1, g0, is_before_center = True)
 
-        v += self._integrate_interval(t0, self._c_dists[g0], t0, is_before_center = True)
-        v += self._integrate_interval(t0, t0, self._c_dists[g0 + 1], is_before_center = False)
+        if g0 != g1: # Integrate interval only if it wasn't integrated in the first case
+            v += self._integrate_interval(t0, self._c_dists[g0], t0,
+                is_before_center = True)
+        if g0 != g2: # Integrate interval only if it won't be integrated by the last case
+            v += self._integrate_interval(t0, t0, self._c_dists[g0 + 1],
+                is_before_center = False)
 
         v += self._integrate_between_centers(t0, g0 + 1, g2, is_before_center = False)
         v += self._integrate_interval(t0, self._c_dists[g2], t2, is_before_center = False)
 
         return normalize(v)
+
+    def _load_distances(self):
+        distances = SortedList([0.])
+        dst = 0.
+        for i in range(1, len(self._centers)):
+            center_dst = np.linalg.norm(self._centers[i] - self._centers[i - 1])
+            dst += center_dst
+            distances.add(dst)
+
+        return distances
 
     def _max_dst(self):
         return self._c_dists[-1]
@@ -68,16 +72,16 @@ class PhiCurve(object):
         i = self._get_prev_center(x)
 
         d = self._delta + sign * (-t0 + x)
-        assert self._delta >= d >= 0
+        # assert self._delta >= d >= 0
 
         alpha = np.linalg.norm(self._centers[i + 1] - self._centers[i])
-        v1 = normalize(self._centers[i + 1] - self._centers[i])
-        v2 = normalize(self._centers[i + 2] - self._centers[i + 1])
+        v1 = normalize(self._dirs[i])
+        v2 = normalize(self._dirs[i + 1])
 
         p = (x - self._c_dists[i]) / alpha
         q = (y - self._c_dists[i]) / alpha
 
-        def eval_indef(t):
+        def eval_indef_integral(t):
             return t * (
                 12*d**2 * v1
                 + 3*t**3 * alpha**2 * (v2 - v1)
@@ -85,7 +89,7 @@ class PhiCurve(object):
                 + 4 * alpha * t**2 * (-sign * 2*d * (v1 - v2) + alpha * v1)
             ) / (12 * alpha)
 
-        return eval_indef(q) - eval_indef(p)
+        return eval_indef_integral(q) - eval_indef_integral(p)
 
 
 
