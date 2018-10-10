@@ -7,7 +7,7 @@ from linalg import *
 from tunnel import Tunnel
 from minimal_enclosing import make_circle
 from digger import *
-from tunnel_curve import TunnelCurve
+from tunnel_curve import PhiCurve
 
 
 class DigOpts:
@@ -18,14 +18,13 @@ class DigOpts:
         self.filename = filename
 
 def dig_tunnel(tunnel, opts):
-    centers = [s.center for s in tunnel.t]
-    normals = [normalize(centers[i + 1] - centers[i]) \
-               for i in xrange(len(centers) - 1)]
-    curve = TunnelCurve(tunnel, 6., opts)
-    disks = [
-        tunnel.fit_disk(curve.get_weighted_dir(0, 0), centers[0])
-    ]
+    centers = tunnel.centers
 
+    phi_curve = PhiCurve(tunnel, 1.)
+    print(phi_curve.get_direction(0))
+    disks = [
+        tunnel.fit_disk(phi_curve.get_direction(0), centers[0])
+    ]
 
     # Calculate disks position
     for i, __ in enumerate(tunnel.t):
@@ -36,7 +35,9 @@ def dig_tunnel(tunnel, opts):
         center       = centers[i]
         next_center  = centers[i + 1]
         centers_dist = np.linalg.norm(next_center - center)
-        # disks.append(tunnel.fit_disk(curve.dirs[i], center))
+
+        # t = phi_curve._c_dists[i]
+        # disks.append(tunnel.fit_disk(phi_curve.get_direction(t), tunnel.centers[i]))
         # continue
 
         # line between centers
@@ -60,7 +61,10 @@ def dig_tunnel(tunnel, opts):
             else:
                 # print("Moving!")
                 disk_center = disks[-1].center + disks[-1].normal * opts.eps
-                new_normal  = curve.get_weighted_dir(i, size)
+
+                t = phi_curve._c_dists[i] + size
+                new_normal  = phi_curve.get_direction(t)
+                # new_normal  = curve.get_weighted_dir(i, size)
                 shift_fun   = shift_new_disk
 
             try:
@@ -76,35 +80,6 @@ def dig_tunnel(tunnel, opts):
                 disks.append(new_disk)
 
     return disks
-
-
-def fit_disk_tunnel(normal, center, tunnel):
-    disk_plane  = Plane(center, normal)
-    circle_cuts = []
-
-    for sphere in tunnel.get_all_intersecting_disk(disk_plane, center):
-        # calculate center of cap that we get by intersection disk_plane
-        # and sphere
-        cut_circle = disk_plane.intersection_sphere(sphere)
-        assert cut_circle is not None
-
-        circle_cuts.append(cut_circle)
-    assert circle_cuts
-
-    circles = []
-    # print "{"
-    for c in circle_cuts:
-        # print "%s,"% c.to_geogebra()
-        circles.append(minball.Sphere2D(list(c.center), c.radius))
-    # print "}"
-
-    min_circle = minball.get_min_sphere2D(circles)
-    t, u = min_circle.center
-    radius = min_circle.radius
-
-    new_center = disk_plane.get_point_for_param(t, u)
-    assert disk_plane.contains(new_center)
-    return Disk(new_center, normal, radius)
 
 # For two given points and vector determining plane, calculate disk that is
 # perpendicular to that plane, and its vertices are point1 and point2
@@ -181,7 +156,9 @@ def is_sharp_turn(tunnel, prev_disk, opts):
     # print abs(d1 - d2) / d1
     return abs(d1 - d2) / ((d1 + d2) / 2.) > 0.35
 
-def shift_new_disk(prev_disk, new_disk, tunnel, opts):
+def shift_new_disk(prev_disk, new_disk, tunnel, opts, rec_lvl = 0):
+    if rec_lvl > 100:
+        raise RuntimeError("Too many recursive calls")
     # print "\n\n"
     # print "Previous Disk:"
     # print prev_disk.to_geogebra()
@@ -248,7 +225,7 @@ def shift_new_disk(prev_disk, new_disk, tunnel, opts):
     # print "Disk distance: %f > %f\n" % (disk_dist(new_disk, prev_disk), delta)
 
     if disk_dist(new_disk, prev_disk) > delta or not is_follower(prev_disk, new_disk):
-        new_disk = shift_new_disk(prev_disk, new_disk, tunnel, opts)
+        new_disk = shift_new_disk(prev_disk, new_disk, tunnel, opts, rec_lvl + 1)
     assert is_follower(prev_disk, new_disk)
 
     # Check whether our function does what it is supposed to do.
