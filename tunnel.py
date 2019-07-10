@@ -11,21 +11,20 @@ class Tunnel:
 
     def load_from_file(self, filename):
         self.t = []
-        infile = file(filename)
+        with open(filename, "r") as infile:
 
-        for line in infile.readlines():
-            words = line.split()
-            #print words
-            if len(words) > 0 and words[0] == "ATOM":
-                center = np.array([float(words[6]), float(words[7]), float(words[8])])
-                radius = float(words[9])
-                self.t.append(Sphere(center, radius));
-            # else:
-                # print "Unexpected data: " + line
+            for line in infile.readlines():
+                words = line.split()
+                #print words
+                if len(words) > 0 and words[0] == "ATOM":
+                    center = np.array([float(words[6]), float(words[7]), float(words[8])])
+                    radius = float(words[9])
+                    self.t.append(Sphere(center, radius));
+                # else:
+                    # print "Unexpected data: " + line
 
-        infile.close()
         self.check_requirements()
-        print "Tunnel readed (" + str(len(self.t)) + " spheres)."
+        print("Tunnel readed (" + str(len(self.t)) + " spheres).")
 
     def get_neighbors(self, sphere_idx):
         first = None
@@ -124,7 +123,7 @@ class Tunnel:
 
         best_disk = self.fit_disk(init_normal, point)
         init_radius = best_disk.radius
-        for i in xrange(5):
+        for i in range(5):
             theta = (math.pi / 3) / 4**i
             # print("Round %d" % i)
             found_better = True
@@ -142,7 +141,7 @@ class Tunnel:
                         found_better = True
                         # print "Found better!", best_disk.radius
 
-        print "Init radius {}, Optimized: {}".format(init_radius,
-            best_disk.radius)
+        print("Init radius {}, Optimized: {}".format(init_radius,
+            best_disk.radius))
         assert np.dot(best_disk.normal, init_normal) > 0.
         return best_disk

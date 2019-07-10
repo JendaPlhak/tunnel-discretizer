@@ -17,11 +17,10 @@ Options:
 import random
 import json
 import sys
-import visual as vs
+import vpython as vs
 
 from docopt import docopt
 from digger import *
-from visual import *
 
 
 if __name__ == '__main__':
@@ -51,24 +50,24 @@ if __name__ == '__main__':
         centScene = cMin + (cMax-cMin)/2
 
         for i, s in enumerate(tunnel.t):
-            sVis = vs.sphere(pos = tuple(s.center - centScene),
+            sVis = vs.sphere(pos = vs.vector(*(s.center - centScene)),
                                 radius = s.radius, opacity=0.3)
             # central line
             if (i < len(tunnel.t)-1):
                 s2 = tunnel.t[i+1]
-                vVis = vs.arrow(pos=s.center - centScene,
-                                axis=(s2.center[0]-s.center[0],
+                vVis = vs.arrow(pos=vs.vector(*(s.center - centScene)),
+                                axis=vs.vector(s2.center[0]-s.center[0],
                                         s2.center[1]-s.center[1],
                                         s2.center[2]-s.center[2]),
-                                color=(1,0,0), shaftwidth=0.3)
+                                color=vs.vector(1,0,0), shaftwidth=0.3)
         for i, disk in enumerate(disks[:]):
             # if (i != 0):
             #     print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
-            vs.ring(pos=disk.center - centScene,
-                    axis=disk.normal,
+            vs.ring(pos=vs.vector(*(disk.center - centScene)),
+                    axis=vs.vector(*disk.normal),
                     radius=disk.radius,
                     thickness=0.01,
-                    color=(1,0,0))
+                    color=vs.vector(1,0,0))
             # if i % 2 == 1:
             #     vVis = vs.arrow(pos=tuple(disk.center - centScene),
             #                     axis=tuple(disk.normal * 0.25) ,

@@ -86,7 +86,7 @@ def get_intersection_line_sphere(sphere, line):
         return []
 
     inter_points = []
-    for i in xrange(2):
+    for i in range(2):
         # d is distance from starting point
         d = - np.dot(line_dir, vec) + (-1)**i * math.sqrt(discrim)
         inter_points.append(line.point + d * line_dir)
@@ -119,8 +119,8 @@ def disk_dist(d1, d2, normal = None):
 
         # Calculate transformation matrix from standard basis to
         # (d1.normal, d2.normal, normal).
-        print "Transformation matrix from beta to standard:\n{}".format(
-            np.array([d1.normal, d2.normal, normal]))
+        print("Transformation matrix from beta to standard:\n{}".format(
+            np.array([d1.normal, d2.normal, normal])))
         A     = np.array([d1.normal, d2.normal, normal])
         A_inv = np.linalg.inv(np.array([d1.normal, d2.normal, normal]))
         # print dot(d1.normal, A_inv)
@@ -128,8 +128,8 @@ def disk_dist(d1, d2, normal = None):
         # print dot(normal, A_inv)
         # Because 'normal' vector is perpendicular to disk normals, the third
         # coordinate of segment directions will be always zero in this basis.
-        seg_dir1_proj = dot(seg_dir1, A_inv)
-        seg_dir2_proj = dot(seg_dir2, A_inv)
+        seg_dir1_proj = np.dot(seg_dir1, A_inv)
+        seg_dir2_proj = np.dot(seg_dir2, A_inv)
 
 def rotation_matrix(axis, theta):
     """

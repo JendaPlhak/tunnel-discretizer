@@ -13,13 +13,13 @@ class TunnelCurve:
         dump_file = "/tmp/" + opts.filename.replace("/", "") + ".json"
         load_file = dump_file if os.path.exists(dump_file) else None
 
-        if None:
+        if load_file:
             with open(load_file) as infile:
                 self.dirs = [np.array(d) for d in json.load(infile)]
         else:
             self.dirs = self._compute_dirs(tunnel)
 
-        if None:
+        if dump_file:
             with open(dump_file, 'w') as outfile:
                 json.dump([list(d) for d in self.dirs], outfile)
 
@@ -37,11 +37,11 @@ class TunnelCurve:
         task_q = Queue()
         result_q = Queue()
         processes = [Process(target=get_minimal, args=(task_q, result_q, tunnel))
-            for __ in xrange(N_CORES)
+            for __ in range(N_CORES)
         ]
 
         dirs_count = len(self.centers) - 1
-        for i in xrange(dirs_count):
+        for i in range(dirs_count):
             n = normalize(self.centers[i + 1] - self.centers[i])
             task_q.put((self.centers[i], n, i))
 
@@ -50,7 +50,7 @@ class TunnelCurve:
             p.start()
         for p in processes:
             p.join()
-        dirs = [None for __ in xrange(dirs_count)]
+        dirs = [None for __ in range(dirs_count)]
         while not result_q.empty():
             idx, normal = result_q.get()
             dirs[idx] = normal
@@ -74,7 +74,7 @@ class TunnelCurve:
         cent_dist = []
         w_dir = np.array([0.,0.,0.])
 
-        for j in xrange(len(self.dirs)):
+        for j in range(len(self.dirs)):
             dist = self._center_distance_from_point(j, i, d)
             if dist < max_dist:
                 w_dir += self.dirs[j] * (max_dist - dist) ** 3
@@ -107,7 +107,7 @@ class TunnelCurve:
         last_pass_sgn = None
         split = None
 
-        for i in xrange(len(self.centers) - 1):
+        for i in range(len(self.centers) - 1):
             seg = Segment(self.centers[i], self.centers[i + 1])
             inter = seg.intersection_disk(disk)
 

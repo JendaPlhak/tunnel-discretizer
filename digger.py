@@ -1,4 +1,5 @@
 import math
+import minball
 import numpy as np
 from decimal import *
 
@@ -6,7 +7,6 @@ from geometrical_objects import *
 from linalg import *
 from tunnel import Tunnel
 from minimal_enclosing import make_circle
-from digger import *
 from tunnel_curve import TunnelCurve
 
 
@@ -20,7 +20,7 @@ class DigOpts:
 def dig_tunnel(tunnel, opts):
     centers = [s.center for s in tunnel.t]
     normals = [normalize(centers[i + 1] - centers[i]) \
-               for i in xrange(len(centers) - 1)]
+               for i in range(len(centers) - 1)]
     curve = TunnelCurve(tunnel, 6., opts)
     disks = [
         tunnel.fit_disk(curve.get_weighted_dir(0, 0), centers[0])
