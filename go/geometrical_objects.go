@@ -106,6 +106,13 @@ func (p Plane) orthogonalProjectionParametrized(point mat.Vector) Vec2 {
 	})
 }
 
+func (p Plane) transformPointTo3D(point Vec2) Vec3 {
+	v1, v2 := p.getBaseVectors()
+	w := NewVec3(nil)
+	w.AddVec(v1.Scaled(point.AtVec(0)), v2.Scaled(point.AtVec(1)))
+	return w
+}
+
 func (p Plane) intersectionWithSphere(s Sphere) (Circle, bool) {
 	projectedCenter := p.orthogonalProjection(s.center)
 	if !s.containsPoint(projectedCenter) {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"tunnel-discretizer/go/minball"
 )
 
 type Tunnel []Sphere
@@ -19,6 +20,25 @@ func (t Tunnel) GetMinimalDisk(point Vec3, normal Vec3) Disk {
 	}
 	if len(cuts) == 0 {
 		panic("disk-tunnel intersection yielded no cuts")
+	}
+
+	balls := make([]minball.Ball2D, 0, len(cuts))
+	for _, cut := range cuts {
+		balls = append(balls, minball.Ball2D{
+			Center: [2]float64{cut.center.AtVec(0), cut.center.AtVec(1)},
+			Radius: cut.radius,
+		})
+	}
+	minball := minball.ComputeMinball2D(balls)
+	minCut := Circle{
+		center: NewVec2(minball.Center[:]),
+		radius: minball.Radius,
+	}
+
+	return Disk{
+		center: diskPlane.transformPointTo3D(minCut.center),
+		normal: normal,
+		radius: minCut.radius,
 	}
 }
 
