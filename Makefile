@@ -8,3 +8,6 @@ extern: minballPy
 minballPy:
 	make -C extern/minballPy
 	cp extern/minballPy/build/minball.so .
+
+minballGO:
+	make -C minball
