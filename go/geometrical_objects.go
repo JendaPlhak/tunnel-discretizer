@@ -21,12 +21,51 @@ func (d Disk) Contains(p Vec3) bool {
 	return v.Length() <= d.radius+fError
 }
 
+func (d Disk) isPointInDisksHalfPlane(P Vec3) bool {
+	return mat.Dot(d.normal, SubVec3(P, d.center)) >= 0
+}
+
 func disksLinearCombination(d1 Disk, a1 float64, d2 Disk, a2 float64) Disk {
 	return Disk{
 		center: AddVec3(d1.center.Scaled(a1), d2.center.Scaled(a2)),
 		normal: AddVec3(d1.normal.Scaled(a1), d2.normal.Scaled(a2)),
 		radius: a1*d1.radius + a2*d2.radius,
 	}
+}
+
+// GetDisksDistance calculates the segment vertex distances of disks d1 and d2 in projection plane
+// given by their normal vectors. The distances can be both positive and negative depending
+// on whether the segment vertex of disk d2 is before or after disk d1 with respect to its normal.
+func GetDisksDistances(d1, d2 Disk) (float64, float64) {
+	var n Vec3
+	if d1.normal.IsLinearCombinationOf(d2.normal) {
+		n = d1.normal.Normal()
+	} else {
+		n = CrossVec3(d1.normal, d2.normal)
+	}
+	// Vector dir1 realizes the line segment from disk's center to the edge of
+	// line segment given by a projection of disk d1 to the plane determined by normal n.
+	dir1 := CrossVec3(n, d1.normal).Normalized().Scaled(d1.radius)
+	dir2 := CrossVec3(n, d2.normal).Normalized().Scaled(d2.radius)
+
+	A1, A2 := AddVec3(d1.center, dir1), AddVec3(d1.center, dir1.Scaled(-1))
+	B1, B2 := AddVec3(d2.center, dir2), AddVec3(d2.center, dir2.Scaled(-1))
+
+	sumDistances := func(A1, A2, B1, B2 Vec3) float64 {
+		return SubVec3(A1, B1).Length() + SubVec3(A2, B2).Length()
+	}
+	if sumDistances(A1, A2, B1, B2) > sumDistances(A2, A1, B1, B2) {
+		A1, A2 = A2, A1
+	}
+
+	l1, l2 := SubVec3(A1, B1).Length(), SubVec3(A2, B2).Length()
+	if !d1.isPointInDisksHalfPlane(B1) {
+		l1 = -l1
+	}
+	if !d1.isPointInDisksHalfPlane(B2) {
+		l2 = -l2
+	}
+	return l1, l2
 }
 
 type Sphere struct {
@@ -56,7 +95,7 @@ func (s Sphere) intersectionLine(l Line) []Vec3 {
 	scaledDir1 := lineDir.Scaled(d1)
 	p1 := AddVec3(l.point, scaledDir1)
 
-	d2 := -mat.Dot(lineDir, v) + math.Sqrt(discriminant)
+	d2 := -mat.Dot(lineDir, v) - math.Sqrt(discriminant)
 	scaledDir2 := lineDir.Scaled(d2)
 	p2 := AddVec3(l.point, scaledDir2)
 
@@ -106,7 +145,8 @@ func (p Plane) orthogonalProjection(point Vec3) Vec3 {
 	return projPoint
 }
 
-func (p Plane) orthogonalProjectionParametrized(point mat.Vector) Vec2 {
+func (p Plane) orthogonalProjectionParametrized(point Vec3) Vec2 {
+	point.SubVec(point, p.point)
 	projVec := NewVec3(nil)
 	projVec.MulVec(p.getBaseTransMatrix(), point)
 	return NewVec2([]float64{
@@ -118,7 +158,7 @@ func (p Plane) transformPointTo3D(point Vec2) Vec3 {
 	v1, v2 := p.getBaseVectors()
 	w := NewVec3(nil)
 	w.AddVec(v1.Scaled(point.AtVec(0)), v2.Scaled(point.AtVec(1)))
-	return w
+	return AddVec3(w, p.point)
 }
 
 func (p Plane) intersectionWithSphere(s Sphere) (Circle, bool) {

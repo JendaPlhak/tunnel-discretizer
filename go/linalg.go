@@ -19,6 +19,12 @@ type Vec3 struct {
 func NewVec3(data []float64) Vec3 {
 	return Vec3{mat.NewVecDense(3, data)}
 }
+func (v Vec3) RawVector() []float64 {
+	return v.VecDense.RawVector().Data
+}
+func (v Vec3) IsLinearCombinationOf(u Vec3) bool {
+	return SubVec3(v.Normalized(), u.Normalized()).Length() < fError
+}
 func SubVec3(u, v Vec3) Vec3 {
 	w := NewVec3(nil)
 	w.SubVec(u, v)
@@ -76,6 +82,19 @@ type Vec2 struct {
 
 func NewVec2(data []float64) Vec2 {
 	return Vec2{mat.NewVecDense(2, data)}
+}
+func AddVec2(u, v Vec2) Vec2 {
+	w := NewVec2(nil)
+	w.AddVec(u, v)
+	return w
+}
+func SubVec2(u, v Vec2) Vec2 {
+	w := NewVec2(nil)
+	w.SubVec(u, v)
+	return w
+}
+func (v Vec2) Length() float64 {
+	return math.Sqrt(mat.Dot(v, v))
 }
 
 func computeOrthogonalComplement(baseVector Vec3) [2]Vec3 {
