@@ -21,6 +21,14 @@ func (d Disk) Contains(p Vec3) bool {
 	return v.Length() <= d.radius+fError
 }
 
+func disksLinearCombination(d1 Disk, a1 float64, d2 Disk, a2 float64) Disk {
+	return Disk{
+		center: AddVec3(d1.center.Scaled(a1), d2.center.Scaled(a2)),
+		normal: AddVec3(d1.normal.Scaled(a1), d2.normal.Scaled(a2)),
+		radius: a1*d1.radius + a2*d2.radius,
+	}
+}
+
 type Sphere struct {
 	center Vec3
 	radius float64

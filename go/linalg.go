@@ -46,7 +46,7 @@ func (v Vec3) LengthSqr() float64 {
 	return mat.Dot(v, v)
 }
 func (v *Vec3) Normalize() {
-	v.ScaleVec(1/v.Length(), v)
+	v.VecDense.ScaleVec(1/v.Length(), v.VecDense)
 }
 func (v Vec3) Normalized() Vec3 {
 	u := NewVec3(nil)
