@@ -1,119 +1,93 @@
 package main
 
 import (
-	"fmt"
-	"math"
-
-	"gonum.org/v1/gonum/mat"
+	"encoding/csv"
+	"os"
+	"strconv"
 )
 
-const fError = 0.001
 const Delta = 0.5
 const Eps = Delta / 10.
 
+func panicOnError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
-	tunnel := []Sphere{
-		Sphere{NewVec3([]float64{0, 0, 0}), 3},
-		Sphere{NewVec3([]float64{2, 0, 0}), 3},
-		Sphere{NewVec3([]float64{4, 0, 0}), 3},
-		Sphere{NewVec3([]float64{6, 0, 0}), 3},
-	}
-	disks := []Disk{
-		Disk{NewVec3([]float64{1, 0, 0}), NewVec3([]float64{1, 0, 0}), 3},
-		Disk{NewVec3([]float64{3, 0, 0}), NewVec3([]float64{1, 0, 0}), 3},
-		Disk{NewVec3([]float64{5, 0, 0}), NewVec3([]float64{1, 0, 0}), 3},
-	}
+	tunnelsFileName := "../tun_cl_002_1.pdb"
+	tunnel := LoadTunnelFromPdbFile(tunnelsFileName)
+	disks := generateInitialDisks(tunnel)
 	optimizeDisks(tunnel, disks)
+
+	dumpResult(disks, tunnelsFileName+".disks")
 }
 
-type DiskForce struct {
-	positional Vec3
-	torsional  mat.Dense
-	radial     float64
-}
+func generateInitialDisks(tunnel Tunnel) []Disk {
+	centers := []Vec3{}
+	for _, sphere := range tunnel {
+		centers = append(centers, sphere.center)
+	}
+	dirs := []Vec3{}
+	for i := 0; i < len(centers)-1; i++ {
+		c1, c2 := centers[i], centers[i+1]
+		dirs = append(dirs, SubVec3(c2, c1))
+	}
 
-func optimizeDisks(tunnel Tunnel, disks []Disk) {
-	for round := 0; round < 100; round++ {
-		for i := 1; i < len(disks)-1; i++ {
-			left, middle, right := disks[i-1], disks[i], disks[i+1]
-			disks[i] = optimizeDiskLocally(tunnel, left, middle, right)
-			fmt.Printf("Center: %v, normal %v, radius %f\n",
-				disks[i].center.RawVector(), disks[i].normal.RawVector(), disks[i].radius)
+	getNormal := func(cIdx int, offset float64) Vec3 {
+		d := dirs[cIdx].Length()
+		if offset < d/2 {
+			n1, n2 := dirs[MaxInt(cIdx-1, 0)].Normalized(), dirs[cIdx].Normalized()
+			w := 0.5 + offset/d
+			return AddVec3(n1.Scaled(1-w), n2.Scaled(w)).Normalized()
 		}
+		n1, n2 := dirs[cIdx].Normalized(), dirs[MinInt(cIdx+1, len(dirs)-1)].Normalized()
+		w := 1 - (offset/d - 0.5)
+		return AddVec3(n1.Scaled(w), n2.Scaled(1-w)).Normalized()
 	}
-}
 
-func optimizeDiskLocally(tunnel Tunnel, left, middle, right Disk) Disk {
-	minDisk := tunnel.GetMinimalDisk(middle.center, middle.normal)
+	disks := []Disk{}
+	l := 0.
+	for cIdx := 0; cIdx < len(centers)-1; cIdx++ {
+		c1, c2 := centers[cIdx], centers[cIdx+1]
+		v := SubVec3(c2, c1)
+		dst := v.Length()
+		nDir := v.Normalized()
 
-	movedLeft := moveTowardsByEps(middle, left)
-	movedToMin := moveTowardsByEps(middle, minDisk)
-	movedRight := moveTowardsByEps(middle, right)
-
-	energyToTheLeft := evaluateEnergy(tunnel, left, movedLeft, right)
-	energyToTheMin := evaluateEnergy(tunnel, left, movedToMin, right)
-	energyToTheRight := evaluateEnergy(tunnel, left, movedRight, right)
-	fmt.Println(energyToTheLeft, energyToTheMin, energyToTheRight)
-
-	energies := []DiskWithEnergy{
-		DiskWithEnergy{energyToTheLeft, movedLeft},
-		DiskWithEnergy{energyToTheMin, movedToMin},
-		DiskWithEnergy{energyToTheRight, movedRight},
-	}
-	return getMinEnergyDisk(energies)
-}
-
-type DiskWithEnergy struct {
-	energy float64
-	disk   Disk
-}
-
-func getMinEnergyDisk(energies []DiskWithEnergy) Disk {
-	fmt.Println(energies)
-	minDiskWithEnergy := energies[0]
-	for i := 1; i < len(energies); i++ {
-		if energies[i].energy < minDiskWithEnergy.energy {
-			minDiskWithEnergy = energies[i]
+		for l < dst {
+			center := AddVec3(c1, nDir.Scaled(l))
+			normal := getNormal(cIdx, l)
+			disks = append(disks, tunnel.GetMinimalDisk(center, normal))
+			l += Delta
 		}
+		l = l - dst
 	}
-	return minDiskWithEnergy.disk
+	return disks
 }
 
-func moveTowardsByEps(source, target Disk) Disk {
-	l1 := SubVec3(source.center, target.center).Length()
-	l2 := math.Abs(source.radius - target.radius)
-	l := math.Max(l1, l2)
-	alpha := math.Min(Eps, l) / l
-	return disksLinearCombination(source, 1-alpha, target, alpha)
-}
+func dumpResult(disks []Disk, filePath string) {
+	file, err := os.Create(filePath)
+	panicOnError(err)
+	defer file.Close()
 
-func evaluateEnergy(tunnel Tunnel, left, middle, right Disk) float64 {
-	e1 := evalEnergyTowardsMindisk(tunnel, middle)
-	e2 := evalDistanceEnergy(GetDisksDistances(left, middle))
-	e3 := evalDistanceEnergy(GetDisksDistances(middle, right))
-	return e1 + e2 + e3
-}
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
 
-func evalEnergyTowardsMindisk(tunnel Tunnel, middle Disk) float64 {
-	minDisk := tunnel.GetMinimalDisk(middle.center, middle.normal)
-	if minDisk.radius > middle.radius {
-		return math.Pow(minDisk.radius-middle.radius, 4)
-	} else if middle.radius-minDisk.radius < Delta*0.5 {
-		return 0
-	} else {
-		return math.Pow(middle.radius-minDisk.radius, 1.2)
+	floatToString := func(input_num float64) string {
+		return strconv.FormatFloat(input_num, 'f', 6, 64)
 	}
-}
 
-func evalDistanceEnergy(d1, d2 float64) float64 {
-	eval := func(d float64) float64 {
-		if d < -Eps {
-			return math.Pow(math.Abs(1+d), 4)
-		} else if d > Delta {
-			return math.Pow(math.Abs(d), 4)
-		} else {
-			return math.Pow(math.Abs(d), 1.2)
-		}
+	for _, disk := range disks {
+		err := writer.Write([]string{
+			floatToString(disk.center.AtVec(0)),
+			floatToString(disk.center.AtVec(1)),
+			floatToString(disk.center.AtVec(2)),
+			floatToString(disk.normal.AtVec(0)),
+			floatToString(disk.normal.AtVec(1)),
+			floatToString(disk.normal.AtVec(2)),
+			floatToString(disk.radius),
+		})
+		panicOnError(err)
 	}
-	return eval(d1) + eval(d2)
 }

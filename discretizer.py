@@ -17,12 +17,24 @@ Options:
 import random
 import json
 import sys
-import visual as vs
+import vpython as vs
+import csv
 
 from docopt import docopt
 from digger import *
-from visual import *
+from vpython import *
 
+def load_disks(filename):
+    with open(filename, "r") as file:
+        reader = csv.reader(file)
+        disks = []
+        for line in reader:
+            disks.append(Disk(
+                (float(line[0]), float(line[1]), float(line[2])),
+                (float(line[3]), float(line[4]), float(line[5])),
+                float(line[6])
+            ))
+        return disks
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
@@ -34,7 +46,8 @@ if __name__ == '__main__':
 
     delta = float(arguments["--delta"] or 0.3)
     disks = []
-    disks = dig_tunnel(tunnel, DigOpts(delta, filename))
+    # disks = dig_tunnel(tunnel, DigOpts(delta, filename))
+    disks = load_disks(filename + ".disks")
 
     # draw disks
     if draw_ARG:
@@ -51,24 +64,24 @@ if __name__ == '__main__':
         centScene = cMin + (cMax-cMin)/2
 
         for i, s in enumerate(tunnel.t):
-            sVis = vs.sphere(pos = tuple(s.center - centScene),
+            sVis = vs.sphere(pos = vs.vec(*(s.center - centScene)),
                                 radius = s.radius, opacity=0.3)
             # central line
             if (i < len(tunnel.t)-1):
                 s2 = tunnel.t[i+1]
-                vVis = vs.arrow(pos=s.center - centScene,
-                                axis=(s2.center[0]-s.center[0],
+                vVis = vs.arrow(pos=vs.vec(*(s.center - centScene)),
+                                axis=vs.vec(s2.center[0]-s.center[0],
                                         s2.center[1]-s.center[1],
                                         s2.center[2]-s.center[2]),
-                                color=(1,0,0), shaftwidth=0.3)
+                                color=vs.vec(1,0,0), shaftwidth=0.3)
         for i, disk in enumerate(disks[:]):
             # if (i != 0):
             #     print "Disk distance: {}".format(disk_dist(disks[i-1], disk))
-            vs.ring(pos=disk.center - centScene,
-                    axis=disk.normal,
+            vs.ring(pos=vs.vec(*(disk.center - centScene)),
+                    axis=vs.vec(*disk.normal),
                     radius=disk.radius,
                     thickness=0.01,
-                    color=(1,0,0))
+                    color=vs.vec(1,0,0))
             # if i % 2 == 1:
             #     vVis = vs.arrow(pos=tuple(disk.center - centScene),
             #                     axis=tuple(disk.normal * 0.25) ,

@@ -29,10 +29,10 @@ func TestPlane(t *testing.T) {
 	t.Run("intersectionWithSphere", func(t *testing.T) {
 		t.Run("center at [0,0,0]", func(t *testing.T) {
 			s := Sphere{NewVec3([]float64{0, 0, 0}), 3}
-			p := Plane{
-				point:  NewVec3([]float64{0, 0, 0}),
-				normal: NewVec3([]float64{1, 0, 0}),
-			}
+			p := MakePlane(
+				NewVec3([]float64{0, 0, 0}),
+				NewVec3([]float64{1, 0, 0}),
+			)
 			circle, ok := p.intersectionWithSphere(s)
 			if !ok {
 				t.Fatal("The sphere and plane unexpectedly don't intersect.")
@@ -45,10 +45,10 @@ func TestPlane(t *testing.T) {
 		})
 		t.Run("center at [1,0,0]", func(t *testing.T) {
 			s := Sphere{NewVec3([]float64{0, 0, 0}), 3}
-			p := Plane{
-				point:  NewVec3([]float64{1, 0, 0}),
-				normal: NewVec3([]float64{1, 0, 0}),
-			}
+			p := MakePlane(
+				NewVec3([]float64{1, 0, 0}),
+				NewVec3([]float64{1, 0, 0}),
+			)
 			circle, ok := p.intersectionWithSphere(s)
 			if !ok {
 				t.Fatal("The sphere and plane unexpectedly don't intersect.")

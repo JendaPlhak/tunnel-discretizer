@@ -1,4 +1,4 @@
-import minball
+# import minball
 import numpy as np
 import scipy
 import time
@@ -11,7 +11,7 @@ class Tunnel:
 
     def load_from_file(self, filename):
         self.t = []
-        infile = file(filename)
+        infile = open(filename, "r")
 
         for line in infile.readlines():
             words = line.split()
@@ -25,7 +25,7 @@ class Tunnel:
 
         infile.close()
         self.check_requirements()
-        print "Tunnel readed (" + str(len(self.t)) + " spheres)."
+        print("Tunnel readed (" + str(len(self.t)) + " spheres).")
 
     def get_neighbors(self, sphere_idx):
         first = None
@@ -142,7 +142,7 @@ class Tunnel:
                         found_better = True
                         # print "Found better!", best_disk.radius
 
-        print "Init radius {}, Optimized: {}".format(init_radius,
-            best_disk.radius)
+        print("Init radius {}, Optimized: {}".format(init_radius,
+            best_disk.radius))
         assert np.dot(best_disk.normal, init_normal) > 0.
         return best_disk

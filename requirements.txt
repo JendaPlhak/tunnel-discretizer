@@ -1,4 +1,4 @@
 docopt==0.*
-visual==0.*
+vpython
 scipy
 numpy

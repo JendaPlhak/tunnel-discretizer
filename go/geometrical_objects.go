@@ -112,6 +112,11 @@ type Circle struct {
 	radius float64
 }
 
+func (c Circle) containsCircle(other Circle) bool {
+	d := SubVec2(c.center, other.center).Length()
+	return c.radius+fError >= d+other.radius
+}
+
 type Plane struct {
 	point  Vec3
 	normal Vec3
@@ -122,8 +127,16 @@ type Plane struct {
 	BaseTransMatrix *mat.Dense
 }
 
+func MakePlane(point, normal Vec3) Plane {
+	return Plane{
+		point:  point,
+		normal: normal.Normalized(),
+	}
+}
+
 func (p Plane) containsPoint(point Vec3) bool {
-	return mat.Dot(p.normal, p.point)-mat.Dot(p.normal, point) <= fError
+	v := SubVec3(point, p.point)
+	return math.Abs(mat.Dot(p.normal, v)) <= fError
 }
 
 func (p Plane) intersectsWithSphere(s Sphere) bool {

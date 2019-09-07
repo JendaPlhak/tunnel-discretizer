@@ -119,8 +119,8 @@ def disk_dist(d1, d2, normal = None):
 
         # Calculate transformation matrix from standard basis to
         # (d1.normal, d2.normal, normal).
-        print "Transformation matrix from beta to standard:\n{}".format(
-            np.array([d1.normal, d2.normal, normal]))
+        # print "Transformation matrix from beta to standard:\n{}".format(
+        #     np.array([d1.normal, d2.normal, normal]))
         A     = np.array([d1.normal, d2.normal, normal])
         A_inv = np.linalg.inv(np.array([d1.normal, d2.normal, normal]))
         # print dot(d1.normal, A_inv)
