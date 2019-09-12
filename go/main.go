@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
+	"fmt"
 	"os"
 	"strconv"
 )
@@ -16,12 +18,20 @@ func panicOnError(err error) {
 }
 
 func main() {
-	tunnelsFileName := "../tun_cl_002_1.pdb"
-	tunnel := LoadTunnelFromPdbFile(tunnelsFileName)
-	disks := generateInitialDisks(tunnel)
-	optimizeDisks(tunnel, disks)
+	var tunnelsFilename string
+	flag.StringVar(&tunnelsFilename, "tunnel-path", "", "Path to the discretized tunnel (Required)")
+	flag.Parse()
 
-	dumpResult(disks, tunnelsFileName+".disks")
+	if tunnelsFilename == "" {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+
+	tunnel := LoadTunnelFromPdbFile(tunnelsFilename)
+	disks := generateInitialDisks(tunnel)
+	// optimizeDisks(tunnel, disks)
+
+	dumpResult(disks, tunnelsFilename+".disks")
 }
 
 func generateInitialDisks(tunnel Tunnel) []Disk {
@@ -50,6 +60,7 @@ func generateInitialDisks(tunnel Tunnel) []Disk {
 	disks := []Disk{}
 	l := 0.
 	for cIdx := 0; cIdx < len(centers)-1; cIdx++ {
+		fmt.Println(cIdx)
 		c1, c2 := centers[cIdx], centers[cIdx+1]
 		v := SubVec3(c2, c1)
 		dst := v.Length()
@@ -58,7 +69,8 @@ func generateInitialDisks(tunnel Tunnel) []Disk {
 		for l < dst {
 			center := AddVec3(c1, nDir.Scaled(l))
 			normal := getNormal(cIdx, l)
-			disks = append(disks, tunnel.GetMinimalDisk(center, normal))
+			minDisk := tunnel.getOptimizedDisk(center, normal)
+			disks = append(disks, minDisk)
 			l += Delta
 		}
 		l = l - dst

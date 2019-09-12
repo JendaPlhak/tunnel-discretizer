@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -53,9 +54,12 @@ func LoadTunnelFromPdbFile(path string) Tunnel {
 	return tunnel
 }
 
-func (t Tunnel) GetMinimalDisk(point Vec3, normal Vec3) Disk {
+func (t Tunnel) GetMinimalDisk(point Vec3, normal Vec3) (Disk, bool) {
 	diskPlane := MakePlane(point, normal)
 	cuts := t.getDiskCuts(diskPlane, point)
+	if len(cuts) == 0 {
+		return Disk{}, false
+	}
 
 	balls := make([]minball.Ball2D, 0, len(cuts))
 	for _, cut := range cuts {
@@ -74,61 +78,46 @@ func (t Tunnel) GetMinimalDisk(point Vec3, normal Vec3) Disk {
 		center: diskPlane.transformPointTo3D(minCut.center),
 		normal: normal,
 		radius: minCut.radius,
-	}
-}
-
-func (t Tunnel) getIntersectingSpheres(plane Plane, point Vec3) []Sphere {
-	containingSpheres := t.getSortedSpheresContainingPoint(point)
-	if len(containingSpheres) == 0 {
-		return []Sphere{}
-	}
-
-	firstIdx := containingSpheres[0].idx
-	lastIdx := containingSpheres[len(containingSpheres)-1].idx
-
-	if len(containingSpheres) != lastIdx-firstIdx+1 {
-		panic(fmt.Errorf("unexpected number of containing spheres. Expected %d, got %d ",
-			lastIdx-firstIdx+1, len(containingSpheres)))
-	}
-
-	for i := firstIdx; i >= 0; i-- {
-		if !plane.intersectsWithSphere(t[i]) {
-			firstIdx = i + 1
-			break
-		}
-	}
-	for i := lastIdx; i < len(t); i++ {
-		if !plane.intersectsWithSphere(t[i]) {
-			lastIdx = i - 1
-			break
-		}
-	}
-	return t[firstIdx : lastIdx+1]
-}
-
-type sphereWithIndex struct {
-	idx    int
-	sphere Sphere
-}
-
-func (t Tunnel) getSortedSpheresContainingPoint(point Vec3) []sphereWithIndex {
-	spheres := []sphereWithIndex{}
-	for i, s := range t {
-		if s.containsPoint(point) {
-			spheres = append(spheres, sphereWithIndex{idx: i, sphere: s})
-		}
-	}
-	return spheres
+	}, true
 }
 
 func (t Tunnel) getDiskCuts(diskPlane Plane, point Vec3) []Circle {
-	cuts := []Circle{}
-	for _, sphere := range t.getIntersectingSpheres(diskPlane, point) {
-		cut, ok := diskPlane.intersectionWithSphere(sphere)
-		if !ok {
-			panic("the plane should be intersecting with the sphere, but isn't")
+	allCuts := []Circle{}
+	for _, sphere := range t {
+		diskCircle, ok := diskPlane.intersectionWithSphere(sphere)
+		if ok {
+			allCuts = append(allCuts, diskCircle)
 		}
-		cuts = append(cuts, cut)
+	}
+	point2D := diskPlane.orthogonalProjectionParametrized(point)
+	idx := -1
+	for i, c := range allCuts {
+		if c.containsPoint(point2D) {
+			idx = i
+			break
+		}
+	}
+	if idx == -1 {
+		return []Circle{}
+	}
+
+	cuts := []Circle{}
+	toBeAdded := []int{idx}
+	added := make([]bool, len(allCuts))
+
+	for len(toBeAdded) != 0 {
+		i := toBeAdded[len(toBeAdded)-1]
+		toBeAdded = toBeAdded[:len(toBeAdded)-1]
+		c := allCuts[i]
+
+		cuts = append(cuts, c)
+		added[i] = true
+
+		for j, c2 := range allCuts {
+			if !added[j] && c.intersectsWithCircle(c2) {
+				toBeAdded = append(toBeAdded, j)
+			}
+		}
 	}
 	return cuts
 }
@@ -151,4 +140,24 @@ func (t Tunnel) isEnclosingDisk(disk Disk) bool {
 		}
 	}
 	return true
+}
+
+func (t Tunnel) getOptimizedDisk(center Vec3, baseNormal Vec3) Disk {
+	bestDisk, ok := t.GetMinimalDisk(center, baseNormal)
+	if !ok {
+		panic("TODO: Better get optimized disk logic!")
+	}
+	for prevRadius := -1.0; math.Abs(prevRadius-bestDisk.radius) > 0.1; {
+		prevRadius = bestDisk.radius
+		for i := 0; i < 1000; i++ {
+			phi := RandFloat64(0, 2*math.Phi)
+			theta := RandFloat64(0, math.Phi/3)
+			rotated := bestDisk.getRotatedDisk(theta, phi)
+			rotDisk, ok := t.GetMinimalDisk(rotated.center, rotated.normal)
+			if ok && rotDisk.radius < bestDisk.radius {
+				bestDisk = rotDisk
+			}
+		}
+	}
+	return bestDisk
 }

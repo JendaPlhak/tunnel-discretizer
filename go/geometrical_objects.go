@@ -25,6 +25,28 @@ func (d Disk) isPointInDisksHalfPlane(P Vec3) bool {
 	return mat.Dot(d.normal, SubVec3(P, d.center)) >= 0
 }
 
+func (d Disk) getRotatedDisk(theta, phi float64) Disk {
+	axis := computeOrthogonalComplement(d.normal)
+	v := NewVec3(nil)
+	v.MulVec(computeRotationMatrix(axis[0], theta), d.normal)
+	v.MulVec(computeRotationMatrix(axis[1], phi), v)
+	return Disk{
+		center: d.center,
+		normal: v.Normalized(),
+		radius: d.radius,
+	}
+}
+
+func (d Disk) hasIntersectionWithLine(line Line) bool {
+	plane := MakePlane(d.center, d.normal)
+	P, ok := plane.intersectionWithLine(line)
+	if !ok {
+		return false
+	}
+	return d.Contains(P)
+
+}
+
 func disksLinearCombination(d1 Disk, a1 float64, d2 Disk, a2 float64) Disk {
 	return Disk{
 		center: AddVec3(d1.center.Scaled(a1), d2.center.Scaled(a2)),
@@ -117,6 +139,14 @@ func (c Circle) containsCircle(other Circle) bool {
 	return c.radius+fError >= d+other.radius
 }
 
+func (c Circle) containsPoint(point Vec2) bool {
+	return SubVec2(c.center, point).Length() <= c.radius
+}
+
+func (c Circle) intersectsWithCircle(other Circle) bool {
+	return SubVec2(c.center, other.center).Length() <= c.radius+other.radius
+}
+
 type Plane struct {
 	point  Vec3
 	normal Vec3
@@ -158,10 +188,10 @@ func (p Plane) orthogonalProjection(point Vec3) Vec3 {
 	return projPoint
 }
 
-func (p Plane) orthogonalProjectionParametrized(point Vec3) Vec2 {
-	point.SubVec(point, p.point)
+func (p *Plane) orthogonalProjectionParametrized(point Vec3) Vec2 {
+	v := SubVec3(point, p.point)
 	projVec := NewVec3(nil)
-	projVec.MulVec(p.getBaseTransMatrix(), point)
+	projVec.MulVec(p.getBaseTransMatrix(), v)
 	return NewVec2([]float64{
 		projVec.AtVec(0), projVec.AtVec(1),
 	})
@@ -192,7 +222,7 @@ func (p Plane) intersectionWithSphere(s Sphere) (Circle, bool) {
 	}, true
 }
 
-func (p Plane) getBaseVectors() (Vec3, Vec3) {
+func (p *Plane) getBaseVectors() (Vec3, Vec3) {
 	if !p.hasBaseVectors {
 		p.baseVectors = computeOrthogonalComplement(p.normal)
 		p.hasBaseVectors = true
@@ -213,4 +243,11 @@ func (p *Plane) getBaseTransMatrix() *mat.Dense {
 		p.BaseTransMatrix.Inverse(baseMatrix)
 	}
 	return p.BaseTransMatrix
+}
+
+func (p *Plane) intersectionWithLine(line Line) (Vec3, bool) {
+	v1, v2 := p.getBaseVectors()
+	if !isBasis3D(v1, v2, line.dir) {
+		return NewVec3(nil), false
+	}
 }

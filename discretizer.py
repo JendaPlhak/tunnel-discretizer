@@ -51,6 +51,9 @@ if __name__ == '__main__':
 
     # draw disks
     if draw_ARG:
+        vs.scene.width = 1920
+        vs.scene.height = 1000
+
         # set first sphere as a center of scene
         cMin = tunnel.t[0].center.copy()
         cMax = tunnel.t[0].center.copy()

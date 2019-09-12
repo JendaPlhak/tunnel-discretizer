@@ -19,15 +19,22 @@ func TestGetMinimalDisk(t *testing.T) {
 		tnl := Tunnel{
 			Sphere{NewVec3([]float64{0, 0, 0}), 3},
 		}
-		minDisk := tnl.GetMinimalDisk(NewVec3([]float64{0, 0, 0}), NewVec3([]float64{1, 0, 0}))
+		minDisk, _ := tnl.GetMinimalDisk(NewVec3([]float64{0, 0, 0}), NewVec3([]float64{1, 0, 0}))
 		checkMinDisk(t, minDisk, NewVec3([]float64{0, 0, 0}), 3)
+	})
+	t.Run("One ball, cut on the side", func(t *testing.T) {
+		tnl := Tunnel{
+			Sphere{NewVec3([]float64{0, 0, 0}), 3},
+		}
+		minDisk, _ := tnl.GetMinimalDisk(NewVec3([]float64{1, 0, 0}), NewVec3([]float64{1, 0, 0}))
+		checkMinDisk(t, minDisk, NewVec3([]float64{1, 0, 0}), 2.828427)
 	})
 	t.Run("Two balls, cut in the middle", func(t *testing.T) {
 		tnl := Tunnel{
 			Sphere{NewVec3([]float64{0, 0, 0}), 3},
 			Sphere{NewVec3([]float64{2, 0, 0}), 3},
 		}
-		minDisk := tnl.GetMinimalDisk(NewVec3([]float64{1, 0, 0}), NewVec3([]float64{1, 0, 0}))
+		minDisk, _ := tnl.GetMinimalDisk(NewVec3([]float64{1, 0, 0}), NewVec3([]float64{1, 0, 0}))
 		checkMinDisk(t, minDisk, NewVec3([]float64{1, 0, 0}), 2.828427)
 	})
 }

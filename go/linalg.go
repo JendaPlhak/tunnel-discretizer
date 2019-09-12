@@ -107,3 +107,23 @@ func computeOrthogonalBasis(baseVector Vec3) [3]Vec3 {
 	complement := computeOrthogonalComplement(baseVector)
 	return [3]Vec3{baseVector.Normalized(), complement[0], complement[1]}
 }
+
+func isBasis3D(u, v, w Vec3) bool {
+	A := mat.NewDense(3, 3, nil)
+	A.RowView(0) = u.VecDense
+}
+
+// Return the rotation matrix associated with counterclockwise rotation around
+// the given axis by theta radians.
+func computeRotationMatrix(axis Vec3, theta float64) *mat.Dense {
+	a := math.Cos(theta / 2.0)
+	v := axis.Normalized().Scaled(-math.Sin(theta / 2.0))
+	b, c, d := v.AtVec(0), v.AtVec(1), v.AtVec(2)
+	aa, bb, cc, dd := a*a, b*b, c*c, d*d
+	bc, ad, ac, ab, bd, cd := b*c, a*d, a*c, a*b, b*d, c*d
+	return mat.NewDense(3, 3, []float64{
+		aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac),
+		2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab),
+		2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc,
+	})
+}

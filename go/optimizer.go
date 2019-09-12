@@ -15,7 +15,7 @@ type DiskForce struct {
 
 func optimizeDisks(tunnel Tunnel, disks []Disk) {
 	totalEnergy := getTotalEnergy(tunnel, disks)
-	for round := 0; round < 50; round++ {
+	for round := 0; round < 500; round++ {
 		fmt.Printf("Beginning round %d, Total energy: %f\n", round, totalEnergy)
 
 		for i := 1; i < len(disks)-1; i++ {
@@ -23,7 +23,7 @@ func optimizeDisks(tunnel Tunnel, disks []Disk) {
 			disks[i] = optimizeDiskLocally(tunnel, left, middle, right)
 		}
 		newTotalEnergy := getTotalEnergy(tunnel, disks)
-		if totalEnergy-newTotalEnergy < 0.1 {
+		if totalEnergy-newTotalEnergy < 0.0001 {
 			fmt.Printf("Energy stabilized at %f, ending optimization\n", newTotalEnergy)
 			break
 		}
@@ -41,22 +41,25 @@ func getTotalEnergy(tunnel Tunnel, disks []Disk) float64 {
 }
 
 func optimizeDiskLocally(tunnel Tunnel, left, middle, right Disk) Disk {
-	minDisk := tunnel.GetMinimalDisk(middle.center, middle.normal)
+	movedToMin := middle
+	minDisk, ok := tunnel.GetMinimalDisk(middle.center, middle.normal)
+	if ok {
+		movedToMin = moveTowardsByEps(middle, minDisk)
+	}
 
-	movedLeft := moveTowardsByEps(middle, left)
-	movedToMin := moveTowardsByEps(middle, minDisk)
-	movedRight := moveTowardsByEps(middle, right)
-
-	energyToTheLeft := evaluateEnergy(tunnel, left, movedLeft, right)
-	energyToTheMin := evaluateEnergy(tunnel, left, movedToMin, right)
-	energyToTheRight := evaluateEnergy(tunnel, left, movedRight, right)
-	energyDoNothing := evaluateEnergy(tunnel, left, middle, right)
-
-	energies := []DiskWithEnergy{
-		DiskWithEnergy{energyDoNothing, middle},
-		DiskWithEnergy{energyToTheLeft, movedLeft},
-		DiskWithEnergy{energyToTheMin, movedToMin},
-		DiskWithEnergy{energyToTheRight, movedRight},
+	alternativePositions := []Disk{
+		middle,
+		movedToMin,
+		moveTowardsByEps(middle, left),
+		moveTowardsByEps(middle, right),
+		doRandomRotation(tunnel, left, middle, right),
+	}
+	energies := []DiskWithEnergy{}
+	for _, disk := range alternativePositions {
+		energies = append(energies, DiskWithEnergy{
+			energy: evaluateEnergy(tunnel, left, disk, right),
+			disk:   disk,
+		})
 	}
 	return getMinEnergyDisk(energies)
 }
@@ -83,7 +86,8 @@ func moveTowardsByEps(source, target Disk) Disk {
 	if l == 0. {
 		return source
 	}
-	alpha := math.Min(Eps, l) / l
+	eps := RandFloat64(0, 3*Eps)
+	alpha := math.Min(eps, l) / l
 	return disksLinearCombination(source, 1-alpha, target, alpha)
 }
 
@@ -95,11 +99,13 @@ func evaluateEnergy(tunnel Tunnel, left, middle, right Disk) float64 {
 }
 
 func evalEnergyTowardsMindisk(tunnel Tunnel, middle Disk) float64 {
-	if tunnel.isEnclosingDisk(middle) {
+	if !tunnel.isEnclosingDisk(middle) {
 		return 999.
 	}
-	minDisk := tunnel.GetMinimalDisk(middle.center, middle.normal)
-	if middle.radius-minDisk.radius < Delta*0.5 {
+	minDisk, ok := tunnel.GetMinimalDisk(middle.center, middle.normal)
+	if !ok { // This means that the disk is completelly out-of-proportion or misplaced.
+		return 999
+	} else if middle.radius-minDisk.radius < Delta*0.5 {
 		return 0
 	} else {
 		return math.Pow(middle.radius-minDisk.radius, 1.2)
@@ -117,4 +123,16 @@ func evalDistanceEnergy(d1, d2 float64) float64 {
 		}
 	}
 	return eval(d1) + eval(d2)
+}
+
+func doRandomRotation(tunnel Tunnel, left, middle, right Disk) Disk {
+	phi := RandFloat64(0, 2*math.Phi)
+	maxTheta := math.Phi / 3
+	theta := RandFloat64(0, maxTheta)
+	rotated := middle.getRotatedDisk(theta, phi)
+	minRot, ok := tunnel.GetMinimalDisk(rotated.center, rotated.normal)
+	if ok {
+		return minRot
+	}
+	return middle
 }
