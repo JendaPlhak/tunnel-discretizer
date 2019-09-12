@@ -129,6 +129,10 @@ type Line struct {
 	dir   Vec3
 }
 
+func (l Line) getLinePoint(t float64) Vec3 {
+	return AddVec3(l.point, l.dir.Scaled(t))
+}
+
 type Circle struct {
 	center Vec2
 	radius float64
@@ -250,4 +254,15 @@ func (p *Plane) intersectionWithLine(line Line) (Vec3, bool) {
 	if !isBasis3D(v1, v2, line.dir) {
 		return NewVec3(nil), false
 	}
+
+	A := mat.NewDense(3, 3, nil)
+	A.SetRow(0, v1.RawVector())
+	A.SetRow(1, v2.RawVector())
+	A.SetRow(2, line.dir.Scaled(-1).RawVector())
+	b := SubVec3(line.point, p.point)
+
+	s := NewVec3(nil)
+	s.SolveVec(A, b)
+
+	return line.getLinePoint(s.AtVec(2)), true
 }

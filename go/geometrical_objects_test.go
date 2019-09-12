@@ -26,6 +26,24 @@ func TestPlane(t *testing.T) {
 			t.Errorf("Expected vector to be %v, got %v", expU.RawVector(), u.RawVector())
 		}
 	}
+	t.Run("getBaseVectors", func(t *testing.T) {
+		t.Run("zero center, normal [0,0,1]", func(t *testing.T) {
+			p := MakePlane(
+				NewVec3([]float64{0, 0, 0}),
+				NewVec3([]float64{0, 0, 1}),
+			)
+			v1, v2 := p.getBaseVectors()
+			if math.IsNaN(v1.Length()) {
+				t.Fatal("The base vector is not supposed to contain NaNs")
+			} else if math.IsNaN(v2.Length()) {
+				t.Fatal("The base vector is not supposed to contain NaNs")
+			} else if math.Abs(v1.Length()-1) > fError {
+				t.Fatal("The base vector is supposed to be normalized.")
+			} else if math.Abs(v2.Length()-1) > fError {
+				t.Fatal("The base vector is supposed to be normalized.")
+			}
+		})
+	})
 	t.Run("intersectionWithSphere", func(t *testing.T) {
 		t.Run("center at [0,0,0]", func(t *testing.T) {
 			s := Sphere{NewVec3([]float64{0, 0, 0}), 3}
@@ -58,6 +76,20 @@ func TestPlane(t *testing.T) {
 			}
 			center3D := p.transformPointTo3D(circle.center)
 			checkVecEqual(t, center3D, NewVec3([]float64{1, 0, 0}))
+		})
+	})
+	t.Run("intersectionWithLine", func(t *testing.T) {
+		t.Run("orthogonal line, inter at [0,0,0]", func(t *testing.T) {
+			l := Line{point: NewVec3([]float64{0, 0, 0}), dir: NewVec3([]float64{0, 0, 1})}
+			p := MakePlane(
+				NewVec3([]float64{0, 0, 0}),
+				NewVec3([]float64{0, 0, 1}),
+			)
+			inter, ok := p.intersectionWithLine(l)
+			if !ok {
+				t.Fatal("The line and plane unexpectedly don't intersect.")
+			}
+			checkVecEqual(t, inter, NewVec3([]float64{0, 0, 0}))
 		})
 	})
 }

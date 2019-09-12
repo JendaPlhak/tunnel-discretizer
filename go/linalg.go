@@ -64,7 +64,7 @@ func (v Vec3) Normalized() Vec3 {
 // Normal returns an orthogonal vector.
 func (v Vec3) Normal() Vec3 {
 	n := CrossVec3(v, Unit3Z)
-	if n.IsZero() {
+	if n.Length() == 0 {
 		return Unit3X
 	}
 	return n.Normalized()
@@ -110,7 +110,10 @@ func computeOrthogonalBasis(baseVector Vec3) [3]Vec3 {
 
 func isBasis3D(u, v, w Vec3) bool {
 	A := mat.NewDense(3, 3, nil)
-	A.RowView(0) = u.VecDense
+	A.SetRow(0, u.RawVector())
+	A.SetRow(1, v.RawVector())
+	A.SetRow(2, w.RawVector())
+	return math.Abs(mat.Det(A)) > fError
 }
 
 // Return the rotation matrix associated with counterclockwise rotation around
