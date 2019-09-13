@@ -30,3 +30,13 @@ func RandFloat64(min, max float64) float64 {
 func LogWithBase(base, x float64) float64 {
 	return math.Log(x) / math.Log(base)
 }
+
+func SgnFloat64(a float64) int {
+	switch {
+	case a < 0:
+		return -1
+	case a > 0:
+		return +1
+	}
+	return 0
+}

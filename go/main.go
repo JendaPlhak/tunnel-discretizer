@@ -29,14 +29,14 @@ func main() {
 
 	tunnel := LoadTunnelFromPdbFile(tunnelsFilename)
 	disks := generateInitialDisks(tunnel)
-	// optimizeDisks(tunnel, disks)
+	optimizeDisks(tunnel, disks)
 
 	dumpResult(disks, tunnelsFilename+".disks")
 }
 
 func generateInitialDisks(tunnel Tunnel) []Disk {
 	centers := []Vec3{}
-	for _, sphere := range tunnel {
+	for _, sphere := range tunnel.Spheres {
 		centers = append(centers, sphere.center)
 	}
 	dirs := []Vec3{}

@@ -8,9 +8,25 @@ import (
 	"strconv"
 	"strings"
 	"tunnel-discretizer/go/minball"
+
+	"gonum.org/v1/gonum/mat"
 )
 
-type Tunnel []Sphere
+type Tunnel struct {
+	Spheres []Sphere
+	Curve   TunnelCurve
+}
+
+func MakeTunnel(spheres []Sphere) Tunnel {
+	centers := []Vec3{}
+	for _, s := range spheres {
+		centers = append(centers, s.center)
+	}
+	return Tunnel{
+		Spheres: spheres,
+		Curve:   TunnelCurve{centers: centers},
+	}
+}
 
 func LoadTunnelFromPdbFile(path string) Tunnel {
 	file, err := os.Open(path)
@@ -28,7 +44,7 @@ func LoadTunnelFromPdbFile(path string) Tunnel {
 		}
 	}
 
-	tunnel := Tunnel{}
+	spheres := []Sphere{}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		words := strings.Fields(scanner.Text())
@@ -45,13 +61,13 @@ func LoadTunnelFromPdbFile(path string) Tunnel {
 				parseFloat(words[8]),
 				parseFloat(words[9]),
 			)
-			tunnel = append(tunnel, Sphere{center, radius})
+			spheres = append(spheres, Sphere{center, radius})
 		}
 	}
 	if err := scanner.Err(); err != nil {
 		panicOnError(err)
 	}
-	return tunnel
+	return MakeTunnel(spheres)
 }
 
 func (t Tunnel) GetMinimalDisk(point Vec3, normal Vec3) (Disk, bool) {
@@ -83,7 +99,7 @@ func (t Tunnel) GetMinimalDisk(point Vec3, normal Vec3) (Disk, bool) {
 
 func (t Tunnel) getDiskCuts(diskPlane Plane, point Vec3) []Circle {
 	allCuts := []Circle{}
-	for _, sphere := range t {
+	for _, sphere := range t.Spheres {
 		diskCircle, ok := diskPlane.intersectionWithSphere(sphere)
 		if ok {
 			allCuts = append(allCuts, diskCircle)
@@ -160,4 +176,42 @@ func (t Tunnel) getOptimizedDisk(center Vec3, baseNormal Vec3) Disk {
 		}
 	}
 	return bestDisk
+}
+
+type TunnelCurve struct {
+	centers []Vec3
+}
+
+// Finds whether given `disk` is passed through by a given curve in topological sense.
+func (tc TunnelCurve) passesThroughDisk(disk Disk) bool {
+	firstPassSgn := 0
+	lastPassSgn := 0
+	var split *Vec3 = nil
+
+	for i := 0; i < len(tc.centers)-1; i++ {
+		seg := Segment{tc.centers[i], tc.centers[i+1]}
+		if _, ok := seg.intersectionWithDisk(disk); !ok {
+			continue
+		}
+		dir := SubVec3(seg.p2, seg.p1)
+		dirSgn := SgnFloat64(mat.Dot(disk.normal, dir))
+		if disk.containsPoint(tc.centers[i+1]) && split == nil {
+			split = &dir
+		} else if split != nil {
+			sgn := dirSgn * SgnFloat64(mat.Dot(disk.normal, *split))
+			if sgn > 0 {
+				if firstPassSgn == 0 {
+					firstPassSgn = dirSgn
+				}
+				lastPassSgn = dirSgn
+			}
+			split = nil
+		} else {
+			if firstPassSgn == 0 {
+				firstPassSgn = dirSgn
+			}
+			lastPassSgn = dirSgn
+		}
+	}
+	return firstPassSgn != 0 && firstPassSgn == lastPassSgn
 }

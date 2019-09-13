@@ -23,10 +23,10 @@ func optimizeDisks(tunnel Tunnel, disks []Disk) {
 			disks[i] = optimizeDiskLocally(tunnel, left, middle, right)
 		}
 		newTotalEnergy := getTotalEnergy(tunnel, disks)
-		if totalEnergy-newTotalEnergy < 0.0001 {
-			fmt.Printf("Energy stabilized at %f, ending optimization\n", newTotalEnergy)
-			break
-		}
+		// if totalEnergy-newTotalEnergy < 0.0001 {
+		// 	fmt.Printf("Energy stabilized at %f, ending optimization\n", newTotalEnergy)
+		// 	break
+		// }
 		totalEnergy = newTotalEnergy
 	}
 
@@ -100,11 +100,11 @@ func evaluateEnergy(tunnel Tunnel, left, middle, right Disk) float64 {
 
 func evalEnergyTowardsMindisk(tunnel Tunnel, middle Disk) float64 {
 	if !tunnel.isEnclosingDisk(middle) {
-		return 999.
+		return 70.
 	}
 	minDisk, ok := tunnel.GetMinimalDisk(middle.center, middle.normal)
 	if !ok { // This means that the disk is completelly out-of-proportion or misplaced.
-		return 999
+		return 70
 	} else if middle.radius-minDisk.radius < Delta*0.5 {
 		return 0
 	} else {
@@ -127,11 +127,11 @@ func evalDistanceEnergy(d1, d2 float64) float64 {
 
 func doRandomRotation(tunnel Tunnel, left, middle, right Disk) Disk {
 	phi := RandFloat64(0, 2*math.Phi)
-	maxTheta := math.Phi / 3
+	maxTheta := math.Phi / 2
 	theta := RandFloat64(0, maxTheta)
 	rotated := middle.getRotatedDisk(theta, phi)
 	minRot, ok := tunnel.GetMinimalDisk(rotated.center, rotated.normal)
-	if ok {
+	if ok && tunnel.Curve.passesThroughDisk(minRot) {
 		return minRot
 	}
 	return middle

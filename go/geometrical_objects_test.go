@@ -91,6 +91,18 @@ func TestPlane(t *testing.T) {
 			}
 			checkVecEqual(t, inter, NewVec3([]float64{0, 0, 0}))
 		})
+		t.Run("orthogonal line, inter at [1,0,0]", func(t *testing.T) {
+			l := Line{point: NewVec3([]float64{1, 0, 5}), dir: NewVec3([]float64{0, 0, 1})}
+			p := MakePlane(
+				NewVec3([]float64{0, 0, 0}),
+				NewVec3([]float64{0, 0, 1}),
+			)
+			inter, ok := p.intersectionWithLine(l)
+			if !ok {
+				t.Fatal("The line and plane unexpectedly don't intersect.")
+			}
+			checkVecEqual(t, inter, NewVec3([]float64{1, 0, 0}))
+		})
 	})
 }
 

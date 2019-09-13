@@ -12,7 +12,7 @@ type Disk struct {
 	radius float64
 }
 
-func (d Disk) Contains(p Vec3) bool {
+func (d Disk) containsPoint(p Vec3) bool {
 	v := NewVec3(nil)
 	v.SubVec(p, d.center)
 	if math.Abs(mat.Dot(v, d.normal)) < fError {
@@ -37,14 +37,18 @@ func (d Disk) getRotatedDisk(theta, phi float64) Disk {
 	}
 }
 
-func (d Disk) hasIntersectionWithLine(line Line) bool {
+func (d Disk) intersectionWithLine(line Line) (Vec3, bool) {
 	plane := MakePlane(d.center, d.normal)
 	P, ok := plane.intersectionWithLine(line)
-	if !ok {
-		return false
+	if ok && d.containsPoint(P) {
+		return P, true
 	}
-	return d.Contains(P)
+	return NewVec3(nil), false
+}
 
+func (d Disk) hasIntersectionWithLine(line Line) bool {
+	_, ok := d.intersectionWithLine(line)
+	return ok
 }
 
 func disksLinearCombination(d1 Disk, a1 float64, d2 Disk, a2 float64) Disk {
@@ -131,6 +135,27 @@ type Line struct {
 
 func (l Line) getLinePoint(t float64) Vec3 {
 	return AddVec3(l.point, l.dir.Scaled(t))
+}
+
+type Segment struct {
+	p1, p2 Vec3
+}
+
+func (s Segment) intersectionWithDisk(d Disk) (Vec3, bool) {
+	l := Line{point: s.p1, dir: SubVec3(s.p2, s.p1)}
+	intersection, ok := d.intersectionWithLine(l)
+	if ok && s.containsPoint(intersection) {
+		return intersection, true
+	}
+	return NewVec3(nil), false
+
+}
+
+func (s Segment) containsPoint(p Vec3) bool {
+	d1 := SubVec3(s.p1, p).Length()
+	d2 := SubVec3(s.p2, p).Length()
+	d3 := SubVec3(s.p1, s.p2).Length()
+	return math.Abs(d1+d2-d3) < fError
 }
 
 type Circle struct {
