@@ -2,8 +2,6 @@ package main
 
 import (
 	"math"
-
-	"gonum.org/v1/gonum/mat"
 )
 
 type Disk struct {
@@ -13,23 +11,21 @@ type Disk struct {
 }
 
 func (d Disk) containsPoint(p Vec3) bool {
-	v := NewVec3(nil)
-	v.SubVec(p, d.center)
-	if math.Abs(mat.Dot(v, d.normal)) < fError {
+	v := SubVec3(p, d.center)
+	if math.Abs(DotVec3(v, d.normal)) < fError {
 		return false
 	}
 	return v.Length() <= d.radius+fError
 }
 
 func (d Disk) isPointInDisksHalfPlane(P Vec3) bool {
-	return mat.Dot(d.normal, SubVec3(P, d.center)) >= 0
+	return DotVec3(d.normal, SubVec3(P, d.center)) >= 0
 }
 
 func (d Disk) getRotatedDisk(theta, phi float64) Disk {
 	axis := computeOrthogonalComplement(d.normal)
-	v := NewVec3(nil)
-	v.MulVec(computeRotationMatrix(axis[0], theta), d.normal)
-	v.MulVec(computeRotationMatrix(axis[1], phi), v)
+	v := computeRotationMatrix(axis[0], theta).MulVec(d.normal)
+	v = computeRotationMatrix(axis[1], phi).MulVec(v)
 	return Disk{
 		center: d.center,
 		normal: v.Normalized(),
@@ -43,7 +39,7 @@ func (d Disk) intersectionWithLine(line Line) (Vec3, bool) {
 	if ok && d.containsPoint(P) {
 		return P, true
 	}
-	return NewVec3(nil), false
+	return Vec3{}, false
 }
 
 func (d Disk) hasIntersectionWithLine(line Line) bool {
@@ -111,17 +107,17 @@ func (s Sphere) intersectionLine(l Line) []Vec3 {
 	r := s.radius
 	v := SubVec3(l.point, s.center)
 
-	discriminant := math.Pow(mat.Dot(lineDir, v), 2) - v.LengthSqr() + math.Pow(r, 2)
+	discriminant := math.Pow(DotVec3(lineDir, v), 2) - v.LengthSqr() + math.Pow(r, 2)
 	if discriminant < 0.0 {
 		return []Vec3{}
 	}
 
 	// d is the distance from line.point - line's reference point
-	d1 := -mat.Dot(lineDir, v) + math.Sqrt(discriminant)
+	d1 := -DotVec3(lineDir, v) + math.Sqrt(discriminant)
 	scaledDir1 := lineDir.Scaled(d1)
 	p1 := AddVec3(l.point, scaledDir1)
 
-	d2 := -mat.Dot(lineDir, v) - math.Sqrt(discriminant)
+	d2 := -DotVec3(lineDir, v) - math.Sqrt(discriminant)
 	scaledDir2 := lineDir.Scaled(d2)
 	p2 := AddVec3(l.point, scaledDir2)
 
@@ -147,7 +143,7 @@ func (s Segment) intersectionWithDisk(d Disk) (Vec3, bool) {
 	if ok && s.containsPoint(intersection) {
 		return intersection, true
 	}
-	return NewVec3(nil), false
+	return Vec3{}, false
 
 }
 
@@ -183,7 +179,7 @@ type Plane struct {
 	hasBaseVectors bool
 	baseVectors    [2]Vec3
 
-	BaseTransMatrix *mat.Dense
+	BaseTransMatrix *Mat3x3
 }
 
 func MakePlane(point, normal Vec3) Plane {
@@ -195,7 +191,7 @@ func MakePlane(point, normal Vec3) Plane {
 
 func (p Plane) containsPoint(point Vec3) bool {
 	v := SubVec3(point, p.point)
-	return math.Abs(mat.Dot(p.normal, v)) <= fError
+	return math.Abs(DotVec3(p.normal, v)) <= fError
 }
 
 func (p Plane) intersectsWithSphere(s Sphere) bool {
@@ -203,11 +199,11 @@ func (p Plane) intersectsWithSphere(s Sphere) bool {
 	return s.containsPoint(projectedCenter)
 }
 
-func (p Plane) orthogonalProjection(point Vec3) Vec3 {
+func (p *Plane) orthogonalProjection(point Vec3) Vec3 {
 	// The following code implements following formula:
 	// point - dot(point - p.point, p.normal) * p.normal
 	pointsDiff := SubVec3(point, p.point)
-	dot := mat.Dot(pointsDiff, p.normal)
+	dot := DotVec3(pointsDiff, p.normal)
 	scaledNormal := p.normal.Scaled(dot)
 
 	projPoint := SubVec3(point, scaledNormal)
@@ -219,21 +215,19 @@ func (p Plane) orthogonalProjection(point Vec3) Vec3 {
 
 func (p *Plane) orthogonalProjectionParametrized(point Vec3) Vec2 {
 	v := SubVec3(point, p.point)
-	projVec := NewVec3(nil)
-	projVec.MulVec(p.getBaseTransMatrix(), v)
-	return NewVec2([]float64{
-		projVec.AtVec(0), projVec.AtVec(1),
-	})
+	projVec := p.getBaseTransMatrix().MulVec(v)
+	return Vec2{
+		projVec.x, projVec.y,
+	}
 }
 
-func (p Plane) transformPointTo3D(point Vec2) Vec3 {
+func (p *Plane) transformPointTo3D(point Vec2) Vec3 {
 	v1, v2 := p.getBaseVectors()
-	w := NewVec3(nil)
-	w.AddVec(v1.Scaled(point.AtVec(0)), v2.Scaled(point.AtVec(1)))
+	w := AddVec3(v1.Scaled(point.x), v2.Scaled(point.y))
 	return AddVec3(w, p.point)
 }
 
-func (p Plane) intersectionWithSphere(s Sphere) (Circle, bool) {
+func (p *Plane) intersectionWithSphere(s Sphere) (Circle, bool) {
 	projectedCenter := p.orthogonalProjection(s.center)
 	if !s.containsPoint(projectedCenter) {
 		return Circle{}, false
@@ -259,35 +253,31 @@ func (p *Plane) getBaseVectors() (Vec3, Vec3) {
 	return p.baseVectors[0], p.baseVectors[1]
 }
 
-func (p *Plane) getBaseTransMatrix() *mat.Dense {
+func (p *Plane) getBaseTransMatrix() Mat3x3 {
 	if p.BaseTransMatrix == nil {
 		v1, v2 := p.getBaseVectors()
-		data := []float64{
-			v1.AtVec(0), v1.AtVec(1), v1.AtVec(2),
-			v2.AtVec(0), v2.AtVec(1), v2.AtVec(2),
-			p.normal.AtVec(0), p.normal.AtVec(1), p.normal.AtVec(2),
-		}
-		baseMatrix := mat.NewDense(3, 3, data)
-		p.BaseTransMatrix = mat.NewDense(3, 3, nil)
-		p.BaseTransMatrix.Inverse(baseMatrix)
+		baseMatrix := Mat3x3{}
+		baseMatrix.SetRow(0, v1)
+		baseMatrix.SetRow(1, v2)
+		baseMatrix.SetRow(2, p.normal)
+		inversed := baseMatrix.Inversed()
+		p.BaseTransMatrix = &inversed
 	}
-	return p.BaseTransMatrix
+	return *p.BaseTransMatrix
 }
 
 func (p *Plane) intersectionWithLine(line Line) (Vec3, bool) {
 	v1, v2 := p.getBaseVectors()
 	if !isBasis3D(v1, v2, line.dir) {
-		return NewVec3(nil), false
+		return Vec3{}, false
 	}
 
-	A := mat.NewDense(3, 3, nil)
-	A.SetRow(0, v1.RawVector())
-	A.SetRow(1, v2.RawVector())
-	A.SetRow(2, line.dir.Scaled(-1).RawVector())
+	A := Mat3x3{}
+	A.SetRow(0, v1)
+	A.SetRow(1, v2)
+	A.SetRow(2, line.dir.Scaled(-1))
+
 	b := SubVec3(line.point, p.point)
-
-	s := NewVec3(nil)
-	s.SolveVec(A, b)
-
-	return line.getLinePoint(s.AtVec(2)), true
+	s := A.Inversed().MulVec(b)
+	return line.getLinePoint(s.z), true
 }

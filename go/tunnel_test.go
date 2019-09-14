@@ -12,29 +12,29 @@ func TestGetMinimalDisk(t *testing.T) {
 		}
 		if SubVec3(d.center, expCenter).Length() > fError {
 			t.Errorf("Expected the min disk to have center %v, got %v",
-				expCenter.RawVector(), d.center.RawVector())
+				expCenter, d.center)
 		}
 	}
 	t.Run("One ball", func(t *testing.T) {
-		tnl := Tunnel{
-			Sphere{NewVec3([]float64{0, 0, 0}), 3},
-		}
-		minDisk, _ := tnl.GetMinimalDisk(NewVec3([]float64{0, 0, 0}), NewVec3([]float64{1, 0, 0}))
-		checkMinDisk(t, minDisk, NewVec3([]float64{0, 0, 0}), 3)
+		tnl := MakeTunnel([]Sphere{
+			Sphere{Vec3{0, 0, 0}, 3},
+		})
+		minDisk, _ := tnl.GetMinimalDisk(Vec3{0, 0, 0}, Vec3{1, 0, 0})
+		checkMinDisk(t, minDisk, Vec3{0, 0, 0}, 3)
 	})
 	t.Run("One ball, cut on the side", func(t *testing.T) {
-		tnl := Tunnel{
-			Sphere{NewVec3([]float64{0, 0, 0}), 3},
-		}
-		minDisk, _ := tnl.GetMinimalDisk(NewVec3([]float64{1, 0, 0}), NewVec3([]float64{1, 0, 0}))
-		checkMinDisk(t, minDisk, NewVec3([]float64{1, 0, 0}), 2.828427)
+		tnl := MakeTunnel([]Sphere{
+			Sphere{Vec3{0, 0, 0}, 3},
+		})
+		minDisk, _ := tnl.GetMinimalDisk(Vec3{1, 0, 0}, Vec3{1, 0, 0})
+		checkMinDisk(t, minDisk, Vec3{1, 0, 0}, 2.828427)
 	})
 	t.Run("Two balls, cut in the middle", func(t *testing.T) {
-		tnl := Tunnel{
-			Sphere{NewVec3([]float64{0, 0, 0}), 3},
-			Sphere{NewVec3([]float64{2, 0, 0}), 3},
-		}
-		minDisk, _ := tnl.GetMinimalDisk(NewVec3([]float64{1, 0, 0}), NewVec3([]float64{1, 0, 0}))
-		checkMinDisk(t, minDisk, NewVec3([]float64{1, 0, 0}), 2.828427)
+		tnl := MakeTunnel([]Sphere{
+			Sphere{Vec3{0, 0, 0}, 3},
+			Sphere{Vec3{2, 0, 0}, 3},
+		})
+		minDisk, _ := tnl.GetMinimalDisk(Vec3{1, 0, 0}, Vec3{1, 0, 0})
+		checkMinDisk(t, minDisk, Vec3{1, 0, 0}, 2.828427)
 	})
 }

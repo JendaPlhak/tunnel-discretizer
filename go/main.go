@@ -4,8 +4,12 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"strconv"
+	"sync"
 )
 
 const Delta = 0.5
@@ -18,6 +22,10 @@ func panicOnError(err error) {
 }
 
 func main() {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	var tunnelsFilename string
 	flag.StringVar(&tunnelsFilename, "tunnel-path", "", "Path to the discretized tunnel (Required)")
 	flag.Parse()
@@ -57,6 +65,32 @@ func generateInitialDisks(tunnel Tunnel) []Disk {
 		return AddVec3(n1.Scaled(w), n2.Scaled(1-w)).Normalized()
 	}
 
+	type Job struct {
+		idx                int
+		center, baseNormal Vec3
+		result             *Disk
+	}
+
+	tasksCh := make(chan Job)
+	finishedJobsCh := make(chan Job, 10000)
+
+	wg := new(sync.WaitGroup)
+	for i := 1; i < 8; i++ {
+		wg.Add(1)
+		go func() {
+			for job := range tasksCh {
+				minDisk := tunnel.getMinimalDisk(job.center, job.baseNormal)
+				job.result = &minDisk
+				finishedJobsCh <- job
+			}
+			wg.Done()
+		}()
+	}
+	go func() {
+		wg.Wait()
+		close(finishedJobsCh)
+	}()
+
 	disks := []Disk{}
 	l := 0.
 	for cIdx := 0; cIdx < len(centers)-1; cIdx++ {
@@ -69,11 +103,19 @@ func generateInitialDisks(tunnel Tunnel) []Disk {
 		for l < dst {
 			center := AddVec3(c1, nDir.Scaled(l))
 			normal := getNormal(cIdx, l)
-			minDisk := tunnel.getOptimizedDisk(center, normal)
-			disks = append(disks, minDisk)
+			tasksCh <- Job{
+				idx:        len(disks),
+				center:     center,
+				baseNormal: normal,
+			}
+			disks = append(disks, Disk{})
 			l += Delta
 		}
 		l = l - dst
+	}
+	close(tasksCh)
+	for job := range finishedJobsCh {
+		disks[job.idx] = *job.result
 	}
 	return disks
 }
@@ -92,12 +134,12 @@ func dumpResult(disks []Disk, filePath string) {
 
 	for _, disk := range disks {
 		err := writer.Write([]string{
-			floatToString(disk.center.AtVec(0)),
-			floatToString(disk.center.AtVec(1)),
-			floatToString(disk.center.AtVec(2)),
-			floatToString(disk.normal.AtVec(0)),
-			floatToString(disk.normal.AtVec(1)),
-			floatToString(disk.normal.AtVec(2)),
+			floatToString(disk.center.x),
+			floatToString(disk.center.y),
+			floatToString(disk.center.z),
+			floatToString(disk.normal.x),
+			floatToString(disk.normal.y),
+			floatToString(disk.normal.z),
 			floatToString(disk.radius),
 		})
 		panicOnError(err)

@@ -38,5 +38,5 @@ func SgnFloat64(a float64) int {
 	case a > 0:
 		return +1
 	}
-	return 0
+	return +1
 }

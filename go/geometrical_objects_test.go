@@ -8,29 +8,29 @@ import (
 func TestSphere(t *testing.T) {
 	checkVecEqual := func(t *testing.T, u, v Vec3) {
 		if math.Abs(SubVec3(u, v).Length()) > fError {
-			t.Errorf("Expected vectors to be the same, %v vs %v", u.RawVector(), v.RawVector())
+			t.Errorf("Expected vectors to be the same, %v vs %v", u, v)
 		}
 	}
 	t.Run("intersectionLine", func(t *testing.T) {
-		s := Sphere{NewVec3([]float64{0, 0, 0}), 3}
-		l := Line{point: NewVec3([]float64{0, 0, 0}), dir: NewVec3([]float64{0, 1, 0})}
+		s := Sphere{Vec3{0, 0, 0}, 3}
+		l := Line{point: Vec3{0, 0, 0}, dir: Vec3{0, 1, 0}}
 		points := s.intersectionLine(l)
-		checkVecEqual(t, points[0], NewVec3([]float64{0, 3, 0}))
-		checkVecEqual(t, points[1], NewVec3([]float64{0, -3, 0}))
+		checkVecEqual(t, points[0], Vec3{0, 3, 0})
+		checkVecEqual(t, points[1], Vec3{0, -3, 0})
 	})
 }
 
 func TestPlane(t *testing.T) {
 	checkVecEqual := func(t *testing.T, u, expU Vec3) {
 		if math.Abs(SubVec3(u, expU).Length()) > fError {
-			t.Errorf("Expected vector to be %v, got %v", expU.RawVector(), u.RawVector())
+			t.Errorf("Expected vector to be %v, got %v", expU, u)
 		}
 	}
 	t.Run("getBaseVectors", func(t *testing.T) {
 		t.Run("zero center, normal [0,0,1]", func(t *testing.T) {
 			p := MakePlane(
-				NewVec3([]float64{0, 0, 0}),
-				NewVec3([]float64{0, 0, 1}),
+				Vec3{0, 0, 0},
+				Vec3{0, 0, 1},
 			)
 			v1, v2 := p.getBaseVectors()
 			if math.IsNaN(v1.Length()) {
@@ -46,10 +46,10 @@ func TestPlane(t *testing.T) {
 	})
 	t.Run("intersectionWithSphere", func(t *testing.T) {
 		t.Run("center at [0,0,0]", func(t *testing.T) {
-			s := Sphere{NewVec3([]float64{0, 0, 0}), 3}
+			s := Sphere{Vec3{0, 0, 0}, 3}
 			p := MakePlane(
-				NewVec3([]float64{0, 0, 0}),
-				NewVec3([]float64{1, 0, 0}),
+				Vec3{0, 0, 0},
+				Vec3{1, 0, 0},
 			)
 			circle, ok := p.intersectionWithSphere(s)
 			if !ok {
@@ -59,13 +59,13 @@ func TestPlane(t *testing.T) {
 				t.Errorf("Expected cut radius 3 got %f", circle.radius)
 			}
 			center3D := p.transformPointTo3D(circle.center)
-			checkVecEqual(t, center3D, NewVec3([]float64{0, 0, 0}))
+			checkVecEqual(t, center3D, Vec3{0, 0, 0})
 		})
 		t.Run("center at [1,0,0]", func(t *testing.T) {
-			s := Sphere{NewVec3([]float64{0, 0, 0}), 3}
+			s := Sphere{Vec3{0, 0, 0}, 3}
 			p := MakePlane(
-				NewVec3([]float64{1, 0, 0}),
-				NewVec3([]float64{1, 0, 0}),
+				Vec3{1, 0, 0},
+				Vec3{1, 0, 0},
 			)
 			circle, ok := p.intersectionWithSphere(s)
 			if !ok {
@@ -75,33 +75,33 @@ func TestPlane(t *testing.T) {
 				t.Errorf("Expected cut radius 2.828427 got %f", circle.radius)
 			}
 			center3D := p.transformPointTo3D(circle.center)
-			checkVecEqual(t, center3D, NewVec3([]float64{1, 0, 0}))
+			checkVecEqual(t, center3D, Vec3{1, 0, 0})
 		})
 	})
 	t.Run("intersectionWithLine", func(t *testing.T) {
 		t.Run("orthogonal line, inter at [0,0,0]", func(t *testing.T) {
-			l := Line{point: NewVec3([]float64{0, 0, 0}), dir: NewVec3([]float64{0, 0, 1})}
+			l := Line{point: Vec3{0, 0, 0}, dir: Vec3{0, 0, 1}}
 			p := MakePlane(
-				NewVec3([]float64{0, 0, 0}),
-				NewVec3([]float64{0, 0, 1}),
+				Vec3{0, 0, 0},
+				Vec3{0, 0, 1},
 			)
 			inter, ok := p.intersectionWithLine(l)
 			if !ok {
 				t.Fatal("The line and plane unexpectedly don't intersect.")
 			}
-			checkVecEqual(t, inter, NewVec3([]float64{0, 0, 0}))
+			checkVecEqual(t, inter, Vec3{0, 0, 0})
 		})
 		t.Run("orthogonal line, inter at [1,0,0]", func(t *testing.T) {
-			l := Line{point: NewVec3([]float64{1, 0, 5}), dir: NewVec3([]float64{0, 0, 1})}
+			l := Line{point: Vec3{1, 0, 5}, dir: Vec3{0, 0, 1}}
 			p := MakePlane(
-				NewVec3([]float64{0, 0, 0}),
-				NewVec3([]float64{0, 0, 1}),
+				Vec3{0, 0, 0},
+				Vec3{0, 0, 1},
 			)
 			inter, ok := p.intersectionWithLine(l)
 			if !ok {
 				t.Fatal("The line and plane unexpectedly don't intersect.")
 			}
-			checkVecEqual(t, inter, NewVec3([]float64{1, 0, 0}))
+			checkVecEqual(t, inter, Vec3{1, 0, 0})
 		})
 	})
 }
@@ -118,29 +118,29 @@ func TestGetDisksDistances(t *testing.T) {
 
 	t.Run("two parallel disks", func(t *testing.T) {
 		t.Run("same radius", func(t *testing.T) {
-			d1 := Disk{NewVec3([]float64{0, 0, 0}), NewVec3([]float64{1, 0, 0}), 3}
-			d2 := Disk{NewVec3([]float64{2, 0, 0}), NewVec3([]float64{1, 0, 0}), 3}
+			d1 := Disk{Vec3{0, 0, 0}, Vec3{1, 0, 0}, 3}
+			d2 := Disk{Vec3{2, 0, 0}, Vec3{1, 0, 0}, 3}
 
 			l1, l2 := GetDisksDistances(d1, d2)
 			checkDistances(t, l1, l2, 2, 2)
 		})
 		t.Run("different radius", func(t *testing.T) {
-			d1 := Disk{NewVec3([]float64{0, 0, 0}), NewVec3([]float64{1, 0, 0}), 1}
-			d2 := Disk{NewVec3([]float64{3, 0, 0}), NewVec3([]float64{1, 0, 0}), 5}
+			d1 := Disk{Vec3{0, 0, 0}, Vec3{1, 0, 0}, 1}
+			d2 := Disk{Vec3{3, 0, 0}, Vec3{1, 0, 0}, 5}
 
 			l1, l2 := GetDisksDistances(d1, d2)
 			checkDistances(t, l1, l2, 5, 5)
 		})
 		t.Run("negative distance", func(t *testing.T) {
-			d1 := Disk{NewVec3([]float64{1, 0, 0}), NewVec3([]float64{1, 0, 0}), 2}
-			d2 := Disk{NewVec3([]float64{0, 0, 0}), NewVec3([]float64{1, 0, 0}), 2}
+			d1 := Disk{Vec3{1, 0, 0}, Vec3{1, 0, 0}, 2}
+			d2 := Disk{Vec3{0, 0, 0}, Vec3{1, 0, 0}, 2}
 
 			l1, l2 := GetDisksDistances(d1, d2)
 			checkDistances(t, l1, l2, -1, -1)
 		})
 		t.Run("different radius, negative distance", func(t *testing.T) {
-			d1 := Disk{NewVec3([]float64{3, 0, 0}), NewVec3([]float64{1, 0, 0}), 1}
-			d2 := Disk{NewVec3([]float64{0, 0, 0}), NewVec3([]float64{1, 0, 0}), 5}
+			d1 := Disk{Vec3{3, 0, 0}, Vec3{1, 0, 0}, 1}
+			d2 := Disk{Vec3{0, 0, 0}, Vec3{1, 0, 0}, 5}
 
 			l1, l2 := GetDisksDistances(d1, d2)
 			checkDistances(t, l1, l2, -5, -5)
@@ -148,15 +148,15 @@ func TestGetDisksDistances(t *testing.T) {
 	})
 	t.Run("two non-parallel disks", func(t *testing.T) {
 		t.Run("right triangle", func(t *testing.T) {
-			d1 := Disk{NewVec3([]float64{0, 0, 0}), NewVec3([]float64{1, 0, 0}), 3}
-			d2 := Disk{NewVec3([]float64{4, 0, 0}), NewVec3([]float64{3, 4, 0}).Normalized(), 5}
+			d1 := Disk{Vec3{0, 0, 0}, Vec3{1, 0, 0}, 3}
+			d2 := Disk{Vec3{4, 0, 0}, Vec3{3, 4, 0}.Normalized(), 5}
 
 			l1, l2 := GetDisksDistances(d1, d2)
 			checkDistances(t, l1, l2, 0, 8)
 		})
 		t.Run("right triangle. negative distance", func(t *testing.T) {
-			d1 := Disk{NewVec3([]float64{0, 0, 0}), NewVec3([]float64{1, 0, 0}), 3}
-			d2 := Disk{NewVec3([]float64{4, 0, 0}), NewVec3([]float64{3, 4, 0}).Normalized(), 5}
+			d1 := Disk{Vec3{0, 0, 0}, Vec3{1, 0, 0}, 3}
+			d2 := Disk{Vec3{4, 0, 0}, Vec3{3, 4, 0}.Normalized(), 5}
 
 			l1, l2 := GetDisksDistances(d2, d1)
 			checkDistances(t, l1, l2, -8, 0)

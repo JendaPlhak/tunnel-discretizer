@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"strings"
 	"tunnel-discretizer/go/minball"
-
-	"gonum.org/v1/gonum/mat"
 )
 
 type Tunnel struct {
@@ -49,11 +47,11 @@ func LoadTunnelFromPdbFile(path string) Tunnel {
 	for scanner.Scan() {
 		words := strings.Fields(scanner.Text())
 		if len(words) > 0 && words[0] == "ATOM" {
-			center := NewVec3([]float64{
+			center := Vec3{
 				parseFloat(words[6]),
 				parseFloat(words[7]),
 				parseFloat(words[8]),
-			})
+			}
 			radius := parseFloat(words[9])
 			fmt.Printf("(%f, %f, %f), %f\n",
 				parseFloat(words[6]),
@@ -80,13 +78,13 @@ func (t Tunnel) GetMinimalDisk(point Vec3, normal Vec3) (Disk, bool) {
 	balls := make([]minball.Ball2D, 0, len(cuts))
 	for _, cut := range cuts {
 		balls = append(balls, minball.Ball2D{
-			Center: [2]float64{cut.center.AtVec(0), cut.center.AtVec(1)},
+			Center: [2]float64{cut.center.x, cut.center.y},
 			Radius: cut.radius,
 		})
 	}
 	minball := minball.ComputeMinball2D(balls)
 	minCut := Circle{
-		center: NewVec2(minball.Center[:]),
+		center: Vec2{minball.Center[0], minball.Center[1]},
 		radius: minball.Radius,
 	}
 
@@ -178,6 +176,36 @@ func (t Tunnel) getOptimizedDisk(center Vec3, baseNormal Vec3) Disk {
 	return bestDisk
 }
 
+func (t Tunnel) getMinimalDisk(pivot Vec3, initialNormal Vec3) Disk {
+	bestDisk := t.getOptimizedDisk(pivot, initialNormal)
+	initialRadius := bestDisk.radius
+	x := 0
+	for i := 0; i < 5; i++ {
+		theta := (math.Phi / 3) / math.Pow(4, float64(i))
+
+		for foundBetter := true; foundBetter; {
+			foundBetter = false
+			for phi := 0.; phi < 2*math.Phi; phi += 0.1 {
+				x++
+				rotDisk := bestDisk.getRotatedDisk(theta, phi)
+				disk := t.getOptimizedDisk(rotDisk.center, rotDisk.normal)
+				if disk.radius < bestDisk.radius && t.Curve.passesThroughDisk(disk) {
+					bestDisk = disk
+					sgn := float64(SgnFloat64(DotVec3(bestDisk.normal, initialNormal)))
+					bestDisk.normal.Scale(sgn)
+					foundBetter = true
+				}
+			}
+		}
+	}
+	fmt.Println(x)
+	fmt.Printf("Initial radius: %f, Optimized: %f\n", initialRadius, bestDisk.radius)
+	if DotVec3(bestDisk.normal, initialNormal) <= 0. {
+		panic("Minimal disk optimization yilded unexpected disk.")
+	}
+	return bestDisk
+}
+
 type TunnelCurve struct {
 	centers []Vec3
 }
@@ -186,7 +214,7 @@ type TunnelCurve struct {
 func (tc TunnelCurve) passesThroughDisk(disk Disk) bool {
 	firstPassSgn := 0
 	lastPassSgn := 0
-	var split *Vec3 = nil
+	var split *Vec3
 
 	for i := 0; i < len(tc.centers)-1; i++ {
 		seg := Segment{tc.centers[i], tc.centers[i+1]}
@@ -194,11 +222,11 @@ func (tc TunnelCurve) passesThroughDisk(disk Disk) bool {
 			continue
 		}
 		dir := SubVec3(seg.p2, seg.p1)
-		dirSgn := SgnFloat64(mat.Dot(disk.normal, dir))
+		dirSgn := SgnFloat64(DotVec3(disk.normal, dir))
 		if disk.containsPoint(tc.centers[i+1]) && split == nil {
 			split = &dir
 		} else if split != nil {
-			sgn := dirSgn * SgnFloat64(mat.Dot(disk.normal, *split))
+			sgn := dirSgn * SgnFloat64(DotVec3(disk.normal, *split))
 			if sgn > 0 {
 				if firstPassSgn == 0 {
 					firstPassSgn = dirSgn
