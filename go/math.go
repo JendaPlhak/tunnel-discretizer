@@ -5,7 +5,7 @@ import (
 	"math/rand"
 )
 
-const fError = 0.001
+const fError = 0.000001
 
 func MaxInt(x, y int) int {
 	if x < y {

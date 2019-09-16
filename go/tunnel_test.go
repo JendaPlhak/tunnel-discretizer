@@ -37,4 +37,16 @@ func TestGetMinimalDisk(t *testing.T) {
 		minDisk, _ := tnl.GetMinimalDisk(Vec3{1, 0, 0}, Vec3{1, 0, 0})
 		checkMinDisk(t, minDisk, Vec3{1, 0, 0}, 2.828427)
 	})
+	t.Run("Three balls, sharp turn", func(t *testing.T) {
+		tnl := MakeTunnel([]Sphere{
+			Sphere{Vec3{0, 0, 0}, 1},
+			Sphere{Vec3{1, 0, 0}, 1},
+		})
+		minDisk, _ := tnl.GetMinimalDisk(Vec3{1, 0, 0}, Vec3{1, 1, 0})
+
+		r := (1 + math.Sqrt(2)) / 2
+		x := r / math.Sqrt(2)
+		y := 1 - x
+		checkMinDisk(t, minDisk, Vec3{x, y, 0}, r)
+	})
 }

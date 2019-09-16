@@ -15,7 +15,9 @@ type Vec3 struct {
 }
 
 func (v Vec3) IsLinearCombinationOf(u Vec3) bool {
-	return SubVec3(v.Normalized(), u.Normalized()).Length() < fError
+	v.Normalize()
+	u.Normalize()
+	return SubVec3(v, u).Length() < fError || SubVec3(v.Scaled(-1), u).Length() < fError
 }
 func (v Vec3) Length() float64 {
 	return math.Sqrt(DotVec3(v, v))
@@ -149,6 +151,13 @@ func (m Mat3x3) Inversed() Mat3x3 {
 	A.a22 = m.a00*m.a11 - m.a10*m.a01
 	A.Scale(1 / m.Det())
 	return A
+}
+func (m Mat3x3) Transponsed() Mat3x3 {
+	return Mat3x3{
+		m.a00, m.a10, m.a20,
+		m.a01, m.a11, m.a21,
+		m.a02, m.a12, m.a22,
+	}
 }
 
 func (m *Mat3x3) SetRow(i int, u Vec3) {

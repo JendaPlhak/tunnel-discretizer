@@ -53,12 +53,12 @@ func LoadTunnelFromPdbFile(path string) Tunnel {
 				parseFloat(words[8]),
 			}
 			radius := parseFloat(words[9])
-			fmt.Printf("(%f, %f, %f), %f\n",
-				parseFloat(words[6]),
-				parseFloat(words[7]),
-				parseFloat(words[8]),
-				parseFloat(words[9]),
-			)
+			// fmt.Printf("(%f, %f, %f), %f\n",
+			// 	parseFloat(words[6]),
+			// 	parseFloat(words[7]),
+			// 	parseFloat(words[8]),
+			// 	parseFloat(words[9]),
+			// )
 			spheres = append(spheres, Sphere{center, radius})
 		}
 	}
@@ -87,12 +87,16 @@ func (t Tunnel) GetMinimalDisk(point Vec3, normal Vec3) (Disk, bool) {
 		center: Vec2{minball.Center[0], minball.Center[1]},
 		radius: minball.Radius,
 	}
-
-	return Disk{
+	minDisk := Disk{
 		center: diskPlane.transformPointTo3D(minCut.center),
-		normal: normal,
+		normal: normal.Normalized(),
 		radius: minCut.radius,
-	}, true
+	}
+	if !t.isEnclosingDisk(minDisk) {
+		return Disk{}, false
+	}
+
+	return minDisk, true
 }
 
 func (t Tunnel) getDiskCuts(diskPlane Plane, point Vec3) []Circle {
@@ -122,14 +126,15 @@ func (t Tunnel) getDiskCuts(diskPlane Plane, point Vec3) []Circle {
 	for len(toBeAdded) != 0 {
 		i := toBeAdded[len(toBeAdded)-1]
 		toBeAdded = toBeAdded[:len(toBeAdded)-1]
-		c := allCuts[i]
+		if !added[i] {
+			c := allCuts[i]
+			cuts = append(cuts, c)
+			added[i] = true
 
-		cuts = append(cuts, c)
-		added[i] = true
-
-		for j, c2 := range allCuts {
-			if !added[j] && c.intersectsWithCircle(c2) {
-				toBeAdded = append(toBeAdded, j)
+			for j, c2 := range allCuts {
+				if !added[j] && c.intersectsWithCircle(c2) {
+					toBeAdded = append(toBeAdded, j)
+				}
 			}
 		}
 	}
@@ -156,28 +161,12 @@ func (t Tunnel) isEnclosingDisk(disk Disk) bool {
 	return true
 }
 
-func (t Tunnel) getOptimizedDisk(center Vec3, baseNormal Vec3) Disk {
-	bestDisk, ok := t.GetMinimalDisk(center, baseNormal)
+func (t Tunnel) getOptimizedDisk(pivot Vec3, initialNormal Vec3) Disk {
+	bestDisk, ok := t.GetMinimalDisk(pivot, initialNormal)
 	if !ok {
-		panic("TODO: Better get optimized disk logic!")
+		panic("Failed to get the minimal disk from initial position. The tunnel is likely heavily malformed.")
 	}
-	for prevRadius := -1.0; math.Abs(prevRadius-bestDisk.radius) > 0.1; {
-		prevRadius = bestDisk.radius
-		for i := 0; i < 1000; i++ {
-			phi := RandFloat64(0, 2*math.Phi)
-			theta := RandFloat64(0, math.Phi/3)
-			rotated := bestDisk.getRotatedDisk(theta, phi)
-			rotDisk, ok := t.GetMinimalDisk(rotated.center, rotated.normal)
-			if ok && rotDisk.radius < bestDisk.radius {
-				bestDisk = rotDisk
-			}
-		}
-	}
-	return bestDisk
-}
 
-func (t Tunnel) getMinimalDisk(pivot Vec3, initialNormal Vec3) Disk {
-	bestDisk := t.getOptimizedDisk(pivot, initialNormal)
 	initialRadius := bestDisk.radius
 	x := 0
 	for i := 0; i < 5; i++ {
@@ -188,8 +177,8 @@ func (t Tunnel) getMinimalDisk(pivot Vec3, initialNormal Vec3) Disk {
 			for phi := 0.; phi < 2*math.Phi; phi += 0.1 {
 				x++
 				rotDisk := bestDisk.getRotatedDisk(theta, phi)
-				disk := t.getOptimizedDisk(rotDisk.center, rotDisk.normal)
-				if disk.radius < bestDisk.radius && t.Curve.passesThroughDisk(disk) {
+				disk, ok := t.GetMinimalDisk(rotDisk.center, rotDisk.normal)
+				if ok && disk.radius < bestDisk.radius && t.Curve.passesThroughDisk(disk) {
 					bestDisk = disk
 					sgn := float64(SgnFloat64(DotVec3(bestDisk.normal, initialNormal)))
 					bestDisk.normal.Scale(sgn)
@@ -198,7 +187,6 @@ func (t Tunnel) getMinimalDisk(pivot Vec3, initialNormal Vec3) Disk {
 			}
 		}
 	}
-	fmt.Println(x)
 	fmt.Printf("Initial radius: %f, Optimized: %f\n", initialRadius, bestDisk.radius)
 	if DotVec3(bestDisk.normal, initialNormal) <= 0. {
 		panic("Minimal disk optimization yilded unexpected disk.")

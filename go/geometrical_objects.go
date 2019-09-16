@@ -73,12 +73,12 @@ func GetDisksDistances(d1, d2 Disk) (float64, float64) {
 	A1, A2 := AddVec3(d1.center, dir1), AddVec3(d1.center, dir1.Scaled(-1))
 	B1, B2 := AddVec3(d2.center, dir2), AddVec3(d2.center, dir2.Scaled(-1))
 
-	sumDistances := func(A1, A2, B1, B2 Vec3) float64 {
-		return SubVec3(A1, B1).Length() + SubVec3(A2, B2).Length()
-	}
-	if sumDistances(A1, A2, B1, B2) > sumDistances(A2, A1, B1, B2) {
-		A1, A2 = A2, A1
-	}
+	// sumDistances := func(A1, A2, B1, B2 Vec3) float64 {
+	// 	return SubVec3(A1, B1).Length() + SubVec3(A2, B2).Length()
+	// }
+	// if sumDistances(A1, A2, B1, B2) > sumDistances(A2, A1, B1, B2) {
+	// 	A1, A2 = A2, A1
+	// }
 
 	l1, l2 := SubVec3(A1, B1).Length(), SubVec3(A2, B2).Length()
 	if !d1.isPointInDisksHalfPlane(B1) {
@@ -224,7 +224,11 @@ func (p *Plane) orthogonalProjectionParametrized(point Vec3) Vec2 {
 func (p *Plane) transformPointTo3D(point Vec2) Vec3 {
 	v1, v2 := p.getBaseVectors()
 	w := AddVec3(v1.Scaled(point.x), v2.Scaled(point.y))
-	return AddVec3(w, p.point)
+	P := AddVec3(w, p.point)
+	if !p.containsPoint(P) {
+		panic("transformed point isn't contained in the original plane.")
+	}
+	return P
 }
 
 func (p *Plane) intersectionWithSphere(s Sphere) (Circle, bool) {
@@ -260,8 +264,8 @@ func (p *Plane) getBaseTransMatrix() Mat3x3 {
 		baseMatrix.SetRow(0, v1)
 		baseMatrix.SetRow(1, v2)
 		baseMatrix.SetRow(2, p.normal)
-		inversed := baseMatrix.Inversed()
-		p.BaseTransMatrix = &inversed
+		transMatrix := baseMatrix.Inversed().Transponsed()
+		p.BaseTransMatrix = &transMatrix
 	}
 	return *p.BaseTransMatrix
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/csv"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -36,8 +35,9 @@ func main() {
 	}
 
 	tunnel := LoadTunnelFromPdbFile(tunnelsFilename)
+	tunnel.Spheres = tunnel.Spheres[:]
 	disks := generateInitialDisks(tunnel)
-	optimizeDisks(tunnel, disks)
+	OptimizeDisks(tunnel, disks)
 
 	dumpResult(disks, tunnelsFilename+".disks")
 }
@@ -72,6 +72,7 @@ func generateInitialDisks(tunnel Tunnel) []Disk {
 	}
 
 	tasksCh := make(chan Job)
+	// TODO: This is pure evil.
 	finishedJobsCh := make(chan Job, 10000)
 
 	wg := new(sync.WaitGroup)
@@ -79,7 +80,7 @@ func generateInitialDisks(tunnel Tunnel) []Disk {
 		wg.Add(1)
 		go func() {
 			for job := range tasksCh {
-				minDisk := tunnel.getMinimalDisk(job.center, job.baseNormal)
+				minDisk := tunnel.getOptimizedDisk(job.center, job.baseNormal)
 				job.result = &minDisk
 				finishedJobsCh <- job
 			}
@@ -94,7 +95,6 @@ func generateInitialDisks(tunnel Tunnel) []Disk {
 	disks := []Disk{}
 	l := 0.
 	for cIdx := 0; cIdx < len(centers)-1; cIdx++ {
-		fmt.Println(cIdx)
 		c1, c2 := centers[cIdx], centers[cIdx+1]
 		v := SubVec3(c2, c1)
 		dst := v.Length()
@@ -109,7 +109,7 @@ func generateInitialDisks(tunnel Tunnel) []Disk {
 				baseNormal: normal,
 			}
 			disks = append(disks, Disk{})
-			l += Delta
+			l += Delta / 2
 		}
 		l = l - dst
 	}

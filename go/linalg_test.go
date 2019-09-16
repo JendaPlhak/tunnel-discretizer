@@ -17,6 +17,23 @@ func TestVec3(t *testing.T) {
 			checkNaNs(t, n)
 		})
 	})
+	t.Run("IsLinearCombinationOf()", func(t *testing.T) {
+		t.Run("(2, 0, 0) and (4, 0, 0)", func(t *testing.T) {
+			if !(Vec3{2, 0, 0}.IsLinearCombinationOf(Vec3{4, 0, 0})) {
+				t.Fatal("The vectors should be evaluated as linearly dependent")
+			}
+		})
+		t.Run("(2, 0, 0) and (4, 0, 0)", func(t *testing.T) {
+			if !(Vec3{-2, 0, 0}.IsLinearCombinationOf(Vec3{4, 0, 0})) {
+				t.Fatal("The vectors should be evaluated as linearly dependent")
+			}
+		})
+		t.Run("(2, 0, 0) and (4, 0, 0)", func(t *testing.T) {
+			if (Vec3{2, 0, 0}.IsLinearCombinationOf(Vec3{4, 0, 1})) {
+				t.Fatal("The vectors should be evaluated as linearly independent")
+			}
+		})
+	})
 }
 
 func TestMat3x3(t *testing.T) {

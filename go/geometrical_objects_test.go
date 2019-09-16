@@ -26,6 +26,12 @@ func TestPlane(t *testing.T) {
 			t.Errorf("Expected vector to be %v, got %v", expU, u)
 		}
 	}
+	checkVec2Equal := func(t *testing.T, u, expU Vec2) {
+		if math.Abs(SubVec2(u, expU).Length()) > fError {
+			t.Errorf("Expected vector to be %v, got %v", expU, u)
+		}
+	}
+
 	t.Run("getBaseVectors", func(t *testing.T) {
 		t.Run("zero center, normal [0,0,1]", func(t *testing.T) {
 			p := MakePlane(
@@ -104,15 +110,35 @@ func TestPlane(t *testing.T) {
 			checkVecEqual(t, inter, Vec3{1, 0, 0})
 		})
 	})
+	t.Run("orthogonalProjectionParametrized", func(t *testing.T) {
+		p := Plane{
+			point:          Vec3{1, 0, 0},
+			normal:         Vec3{1, 1, 0},
+			hasBaseVectors: true,
+			baseVectors: [2]Vec3{
+				Vec3{1, -1, 0}, Vec3{0, 0, 1},
+			},
+		}
+		P1 := p.orthogonalProjectionParametrized(Vec3{1, 0, 0})
+		checkVec2Equal(t, P1, Vec2{0, 0})
+		P2 := p.orthogonalProjectionParametrized(Vec3{0, 0, 0})
+		checkVec2Equal(t, P2, Vec2{-0.5, 0})
+	})
 }
 
 func TestGetDisksDistances(t *testing.T) {
 	checkDistances := func(t *testing.T, l1, l2, exp1, exp2 float64) {
-		if math.Abs(l1-exp1) > fError {
-			t.Errorf("Expected the first distance to be %f, got %f", exp1, l1)
-		}
-		if math.Abs(l2-exp2) > fError {
-			t.Errorf("Expected the second distance to be %f, got %f", exp2, l2)
+		if math.IsNaN(l1) {
+			t.Error("The first distance is Nan")
+		} else if math.IsNaN(l2) {
+			t.Error("The second distance is Nan")
+		} else {
+			if math.Abs(l1-exp1) > fError {
+				t.Errorf("Expected the first distance to be %f, got %f", exp1, l1)
+			}
+			if math.Abs(l2-exp2) > fError {
+				t.Errorf("Expected the second distance to be %f, got %f", exp2, l2)
+			}
 		}
 	}
 
@@ -144,6 +170,20 @@ func TestGetDisksDistances(t *testing.T) {
 
 			l1, l2 := GetDisksDistances(d1, d2)
 			checkDistances(t, l1, l2, -5, -5)
+		})
+		t.Run("same radius, oposite normals, positive distance", func(t *testing.T) {
+			d1 := Disk{Vec3{0, 0, 0}, Vec3{1, 0, 0}, 0.5}
+			d2 := Disk{Vec3{1, 0, 0}, Vec3{-1, 0, 0}, 0.5}
+
+			l1, l2 := GetDisksDistances(d1, d2)
+			checkDistances(t, l1, l2, math.Sqrt(2), math.Sqrt(2))
+		})
+		t.Run("same radius, oposite normals, negative distance", func(t *testing.T) {
+			d1 := Disk{Vec3{0, 0, 0}, Vec3{-1, 0, 0}, 0.5}
+			d2 := Disk{Vec3{1, 0, 0}, Vec3{1, 0, 0}, 0.5}
+
+			l1, l2 := GetDisksDistances(d1, d2)
+			checkDistances(t, l1, l2, -math.Sqrt(2), -math.Sqrt(2))
 		})
 	})
 	t.Run("two non-parallel disks", func(t *testing.T) {
