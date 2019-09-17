@@ -37,3 +37,25 @@ func TestOptimizerElementaryCases(t *testing.T) {
 		}
 	})
 }
+
+func TestOrientedDisk(t *testing.T) {
+	t.Run("Test directions", func(t *testing.T) {
+		testEqual := func(exp, v Vec3) {
+			if SubVec3(v, exp).Length() > fError {
+				t.Errorf("Expected vector %v, got %v", exp, v)
+			}
+		}
+		disk := OrientedDisk{
+			Disk: Disk{
+				center: Vec3{0, 0, 0},
+				normal: Vec3{1, 0, 0},
+				radius: 1,
+			},
+			up: Vec3{0, 1, 0},
+		}
+		testEqual(Vec3{0, 1, 0}, disk.getUp())
+		testEqual(Vec3{0, -1, 0}, disk.getDown())
+		testEqual(Vec3{0, 0, 1}, disk.getRight())
+		testEqual(Vec3{0, 0, -1}, disk.getLeft())
+	})
+}

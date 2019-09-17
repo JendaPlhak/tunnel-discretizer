@@ -90,6 +90,19 @@ func GetDisksDistances(d1, d2 Disk) (float64, float64) {
 	return l1, l2
 }
 
+// ProjectPointOntoDisk finds the closest point to the point on the disk's circumference.
+func ProjectPointOntoDisk(point Vec3, disk Disk) Vec3 {
+	plane := MakePlane(disk.center, disk.normal)
+	projPoint := plane.orthogonalProjection(point)
+	if diff := SubVec3(projPoint, disk.center); diff.Length() != 0 {
+		return AddVec3(diff.Normalized().Scaled(disk.radius), disk.center)
+	}
+	// If the point is projected exactly on top of the center, chose a point at random.
+	v := disk.normal.Normal()
+	return AddVec3(v, disk.center)
+
+}
+
 type Sphere struct {
 	center Vec3
 	radius float64

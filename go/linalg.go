@@ -52,7 +52,7 @@ func DotVec3(u, v Vec3) float64 {
 	return u.x*v.x + u.y*v.y + u.z*v.z
 }
 
-// Normal returns an orthogonal vector.
+// Normal returns a normalized orthogonal vector.
 func (v Vec3) Normal() Vec3 {
 	n := CrossVec3(v, Unit3Z)
 	if n.Length() == 0 {
