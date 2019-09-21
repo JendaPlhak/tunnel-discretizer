@@ -126,6 +126,20 @@ func TestPlane(t *testing.T) {
 	})
 }
 
+func TestSegment(t *testing.T) {
+	t.Run("orthoProjPoint", func(t *testing.T) {
+		s := Segment{
+			Vec3{0, 1, 0},
+			Vec3{0, 0, 1},
+		}
+		if Q, ok := s.orthoProjPoint(Vec3{0, 1, 0}); !ok {
+			t.Error("the projected point should be in on the segment")
+		} else if !Q.Equals(Vec3{0, 1, 0}) {
+			t.Errorf("the projected point should be (0, 1, 0), got %v", Q)
+		}
+	})
+}
+
 func TestGetDisksDistances(t *testing.T) {
 	checkDistances := func(t *testing.T, l1, l2, exp1, exp2 float64) {
 		if math.IsNaN(l1) {

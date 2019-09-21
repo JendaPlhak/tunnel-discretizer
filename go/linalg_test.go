@@ -128,3 +128,22 @@ func TestIsBasis3D(t *testing.T) {
 		}
 	})
 }
+
+func TestRotAngle3(t *testing.T) {
+	checkAngle := func(t *testing.T, exp, alpha float64) {
+		if math.Abs(exp-alpha) > fError {
+			t.Errorf("Expected the rotation angle to be %f, got %f", exp, alpha)
+		}
+	}
+	t.Run("OC to vector (0, 0, 1)", func(t *testing.T) {
+		axis := Vec3{1, 0, 0}
+		v1 := Vec3{0, 1, 0}
+		checkAngle(t, math.Pi/4, RotAngle3(axis, v1, Vec3{0, 0.5, 0.5}))
+		checkAngle(t, math.Pi/2, RotAngle3(axis, v1, Vec3{0, 0, 1}))
+		checkAngle(t, 3/4.*math.Pi, RotAngle3(axis, v1, Vec3{0, -0.5, 0.5}))
+		checkAngle(t, math.Pi, RotAngle3(axis, v1, Vec3{0, -1, 0}))
+		checkAngle(t, 5/4.*math.Pi, RotAngle3(axis, v1, Vec3{0, -0.5, -0.5}))
+		checkAngle(t, 3/2.*math.Pi, RotAngle3(axis, v1, Vec3{0, 0, -1}))
+		checkAngle(t, 7/4.*math.Pi, RotAngle3(axis, v1, Vec3{0, 0.5, -0.5}))
+	})
+}

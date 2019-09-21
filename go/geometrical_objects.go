@@ -12,7 +12,7 @@ type Disk struct {
 
 func (d Disk) containsPoint(p Vec3) bool {
 	v := SubVec3(p, d.center)
-	if math.Abs(DotVec3(v, d.normal)) < fError {
+	if math.Abs(DotVec3(v, d.normal)) > fError {
 		return false
 	}
 	return v.Length() <= d.radius+fError
@@ -55,10 +55,29 @@ func disksLinearCombination(d1 Disk, a1 float64, d2 Disk, a2 float64) Disk {
 	}
 }
 
-// GetDisksDistance calculates the segment vertex distances of disks d1 and d2 in projection plane
-// given by their normal vectors. The distances can be both positive and negative depending
-// on whether the segment vertex of disk d2 is before or after disk d1 with respect to its normal.
+// GetDisksDistances calculates the segment vertex distances of disks d1 and d2
+// in projection plane given by their normal vectors. The distances can be both
+// positive and negative depending on whether the segment vertex of disk d2 is
+// before or after disk d1 with respect to its normal.
 func GetDisksDistances(d1, d2 Disk) (float64, float64) {
+	s1, s2 := GetDisksSegments(d1, d2)
+	A1, A2 := s1.p1, s1.p2
+	B1, B2 := s2.p1, s2.p2
+
+	l1, l2 := SubVec3(A1, B1).Length(), SubVec3(A2, B2).Length()
+	if !d1.isPointInDisksHalfPlane(B1) {
+		l1 = -l1
+	}
+	if !d1.isPointInDisksHalfPlane(B2) {
+		l2 = -l2
+	}
+	return l1, l2
+}
+
+// GetDisksSegments calculates two segments, that we get by
+// intersecting a pair of disks by a plane that is perpendicular to both of
+// them.
+func GetDisksSegments(d1, d2 Disk) (Segment, Segment) {
 	var n Vec3
 	if d1.normal.IsLinearCombinationOf(d2.normal) {
 		n = d1.normal.Normal()
@@ -72,22 +91,7 @@ func GetDisksDistances(d1, d2 Disk) (float64, float64) {
 
 	A1, A2 := AddVec3(d1.center, dir1), AddVec3(d1.center, dir1.Scaled(-1))
 	B1, B2 := AddVec3(d2.center, dir2), AddVec3(d2.center, dir2.Scaled(-1))
-
-	// sumDistances := func(A1, A2, B1, B2 Vec3) float64 {
-	// 	return SubVec3(A1, B1).Length() + SubVec3(A2, B2).Length()
-	// }
-	// if sumDistances(A1, A2, B1, B2) > sumDistances(A2, A1, B1, B2) {
-	// 	A1, A2 = A2, A1
-	// }
-
-	l1, l2 := SubVec3(A1, B1).Length(), SubVec3(A2, B2).Length()
-	if !d1.isPointInDisksHalfPlane(B1) {
-		l1 = -l1
-	}
-	if !d1.isPointInDisksHalfPlane(B2) {
-		l2 = -l2
-	}
-	return l1, l2
+	return Segment{A1, A2}, Segment{B1, B2}
 }
 
 // ProjectPointOntoDisk finds the closest point to the point on the disk's circumference.
@@ -146,6 +150,15 @@ func (l Line) getLinePoint(t float64) Vec3 {
 	return AddVec3(l.point, l.dir.Scaled(t))
 }
 
+func (l Line) orthoProjPoint(P Vec3) Vec3 {
+	if l.dir.Length() < fError {
+		panic("Line's dir vector can not be zero")
+	}
+	v := SubVec3(P, l.point)
+	w := l.dir.Scaled(DotVec3(v, l.dir) / DotVec3(l.dir, l.dir))
+	return AddVec3(l.point, w)
+}
+
 type Segment struct {
 	p1, p2 Vec3
 }
@@ -157,7 +170,6 @@ func (s Segment) intersectionWithDisk(d Disk) (Vec3, bool) {
 		return intersection, true
 	}
 	return Vec3{}, false
-
 }
 
 func (s Segment) containsPoint(p Vec3) bool {
@@ -165,6 +177,16 @@ func (s Segment) containsPoint(p Vec3) bool {
 	d2 := SubVec3(s.p2, p).Length()
 	d3 := SubVec3(s.p1, s.p2).Length()
 	return math.Abs(d1+d2-d3) < fError
+}
+
+func (s Segment) orthoProjPoint(P Vec3) (Vec3, bool) {
+	l := Line{s.p1, SubVec3(s.p2, s.p1)}
+	Q := l.orthoProjPoint(P)
+	return Q, s.containsPoint(Q)
+}
+
+func (s Segment) length() float64 {
+	return SubVec3(s.p1, s.p2).Length()
 }
 
 type Circle struct {

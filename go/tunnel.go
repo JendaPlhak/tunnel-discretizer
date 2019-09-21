@@ -170,11 +170,11 @@ func (t Tunnel) getOptimizedDisk(pivot Vec3, initialNormal Vec3) Disk {
 	initialRadius := bestDisk.radius
 	x := 0
 	for i := 0; i < 5; i++ {
-		theta := (math.Phi / 3) / math.Pow(4, float64(i))
+		theta := (math.Pi / 3) / math.Pow(4, float64(i))
 
 		for foundBetter := true; foundBetter; {
 			foundBetter = false
-			for phi := 0.; phi < 2*math.Phi; phi += 0.1 {
+			for phi := 0.; phi < 2*math.Pi; phi += 0.1 {
 				x++
 				rotDisk := bestDisk.getRotatedDisk(theta, phi)
 				disk, ok := t.GetMinimalDisk(rotDisk.center, rotDisk.normal)

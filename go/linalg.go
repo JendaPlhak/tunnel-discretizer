@@ -25,6 +25,9 @@ func (v Vec3) Length() float64 {
 func (v Vec3) LengthSqr() float64 {
 	return DotVec3(v, v)
 }
+func (v Vec3) Equals(u Vec3) bool {
+	return SubVec3(v, u).Length() < fError
+}
 
 func (v *Vec3) Normalize() {
 	v.Scale(1 / v.Length())
@@ -79,6 +82,11 @@ func CrossVec3(a, b Vec3) Vec3 {
 	}
 }
 
+// Cross returns the cross product of two vectors.
+func DstVec3(a, b Vec3) float64 {
+	return SubVec3(a, b).Length()
+}
+
 type Vec2 struct {
 	x, y float64
 }
@@ -112,6 +120,17 @@ func computeOrthogonalComplement(baseVector Vec3) [2]Vec3 {
 func computeOrthogonalBasis(baseVector Vec3) [3]Vec3 {
 	complement := computeOrthogonalComplement(baseVector)
 	return [3]Vec3{baseVector.Normalized(), complement[0], complement[1]}
+}
+
+// RotAngle3 computes the angle from v1 to v2 with orientation given by the axis.
+// The angle is given in interval (0, 2*Pi).
+func RotAngle3(axis, v1, v2 Vec3) float64 {
+	axis.Normalize()
+	alpha := math.Atan2(DotVec3(axis, CrossVec3(v1, v2)), DotVec3(v1, v2))
+	if alpha >= 0 {
+		return alpha
+	}
+	return 2*math.Pi + alpha
 }
 
 type Mat3x3 struct {
